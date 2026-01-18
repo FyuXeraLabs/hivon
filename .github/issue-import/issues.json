@@ -1,0 +1,501 @@
+{
+  "issues": [
+    {
+      "title": "Requirements & Analysis",
+      "body": "Translate business needs into a clear, prioritized product backlog that can be executed incrementally.",
+      "labels": ["Architecture & Designarea:requirements", "planning", "analysis"],
+      "children": [
+        {
+          "title": "Define functional workflows",
+          "body": "Identify functional workflows for Master Data, Movements, Inventory, and Reports. Document user roles and access levels for each workflow. Establish clear acceptance criteria for each feature."
+        },
+        {
+          "title": "Define user roles and access levels",
+          "body": "Create role-based permission model for different user types. Define access levels for admin, warehouse staff, and managers. Establish security protocols for data protection."
+        },
+        {
+          "title": "Capture non-functional requirements",
+          "body": "Document performance requirements for inventory transactions. Define security standards for data protection and user authentication. Establish audit trail requirements for compliance."
+        },
+        {
+          "title": "Create acceptance criteria for features",
+          "body": "Establish measurable criteria for feature completion. Define testing requirements for each functional module. Document success metrics for system validation."
+        }
+      ]
+    },
+    {
+      "title": "Architecture & Design",
+      "body": "Create a stable technical foundation that supports parallel development and future scaling.",
+      "labels": ["area:architecture", "design", "architecture"],
+      "children": [
+        {
+          "title": "Finalize application architecture design",
+          "body": "Design desktop application with layered, service-based architecture. Establish module boundaries between Master Data, Movements, and Inventory. Define data flow patterns between system components."
+        },
+        {
+          "title": "Define module boundaries and interfaces",
+          "body": "Establish clear interfaces between different system modules. Define data transfer objects for inter-module communication. Document API contracts for external system integration."
+        },
+        {
+          "title": "Database and integration design",
+          "body": "Design MySQL database schema for warehouse operations. Create PHP API endpoints for external system integration. Establish data synchronization protocols."
+        },
+        {
+          "title": "UI/UX structure and navigation design",
+          "body": "Design main navigation flow between system modules. Create consistent form layout patterns. Establish responsive table designs for data presentation."
+        },
+        {
+          "title": "Security and authorization design",
+          "body": "Implement JWT-based authentication for system access. Design role-based permission system. Establish audit logging for security compliance."
+        }
+      ]
+    },
+    {
+      "title": "Development Phase 1 - Core System Functionality",
+      "body": "Build the functional backbone of the system so that core warehouse operations are executable end-to-end.",
+      "labels": ["area:development-core", "development", "phase1", "core"],
+      "children": [
+        {
+          "title": "Infrastructure & Core Forms Development",
+          "body": "Complete infrastructure, database, PHP API. Develop ALL Master Data Forms (materials, vendors, customers, bins, zones, users). Build Core Movement Forms (GR Purchase Order, GI Sales Order, Putaway TO, Picking TO). Implement Inventory Service for movement support.",
+          "labels": ["developer:1", "infrastructure"],
+          "children": [
+            {
+              "title": "Database & PHP API Foundation",
+              "body": "Complete database schema design and implementation. Develop all PHP API endpoints (Material, Vendor, Customer, PurchaseOrder, SalesOrder). Implement authentication and security protocols.",
+              "labels": ["developer:1"],
+              "children": [
+                {
+                  "title": "DATABASE & PHP API Implementation",
+                  "body": "Design normalized database schema for warehouse operations. Create RESTful API endpoints for all core entities. Implement token-based authentication system.",
+                  "labels": ["developer:1"]
+                },
+                {
+                  "title": "JAVA CORE APPLICATION Development",
+                  "body": "Develop Main.java as application entry point. Build MainFrame.java for basic application structure. Create LoginDialog.java for authentication UI. Implement DatabaseConfig.java and DBConnection.java for database connectivity.",
+                  "labels": ["developer:1"]
+                }
+              ]
+            },
+            {
+              "title": "Infrastructure & Master Data Forms Development",
+              "body": "Complete MainFrame.java with menu system. Develop MenuBuilder.java and DashboardPanel.java. Create MaterialMasterForm.java and VendorForm.java. Implement utility classes for date, number, validation, and alerts.",
+              "labels": ["developer:1"],
+              "children": [
+                {
+                  "title": "JAVA INFRASTRUCTURE Development",
+                  "body": "Complete MainFrame.java with menu system and navigation. Develop MenuBuilder.java for dynamic menu creation. Create DashboardPanel.java for system overview. Implement utility classes for common operations.",
+                  "labels": ["developer:1"]
+                },
+                {
+                  "title": "MASTER DATA FORMS Implementation",
+                  "body": "Develop MaterialMasterForm.java for material management. Create VendorForm.java for vendor data management. Implement CRUD operations with validation. Add search and filtering capabilities.",
+                  "labels": ["developer:1"]
+                }
+              ]
+            },
+            {
+              "title": "Inventory Service & Query Form Development",
+              "body": "Implement InventoryService.java with core inventory logic. Develop increaseInventory(), decreaseInventory(), transferInventory() methods. Create validateAvailability() and FIFO logic. Build InventoryQueryForm.java for basic inventory visibility.",
+              "labels": ["developer:1"],
+              "children": [
+                {
+                  "title": "INVENTORY SERVICE Implementation",
+                  "body": "Develop InventoryService.java with core business logic. Implement increaseInventory() for goods receipt operations. Create decreaseInventory() for goods issue transactions. Build transferInventory() for internal movements.",
+                  "labels": ["developer:1"]
+                },
+                {
+                  "title": "INVENTORY QUERY FORM Development",
+                  "body": "Create InventoryQueryForm.java for stock level queries. Implement filtering by material, batch, or location. Display real-time inventory data. Support basic reporting functions.",
+                  "labels": ["developer:1"]
+                }
+              ]
+            },
+            {
+              "title": "Phase 1 Demo Preparation & Testing",
+              "body": "Execute end-to-end workflow testing. Verify demo data accuracy. Perform performance tuning. Fix integration bugs. Prepare demonstration scenarios.",
+              "labels": ["developer:1"]
+            }
+          ]
+        },
+        {
+          "title": "Master Data Forms Development",
+          "body": "Develop Material.java, Vendor.java, Customer.java models with DTOs and DAOs. Create CustomerForm.java and UOMForm.java. Build BatchManagementForm.java with search panels and filtering. Implement data validation rules.",
+          "labels": ["developer:2", "master-data"],
+          "children": [
+            {
+              "title": "Core Models & Initial Forms Development",
+              "body": "Create Material.java, MaterialDTO.java, MaterialDAO.java models. Develop Vendor.java, VendorDTO.java, VendorDAO.java. Build Customer.java, CustomerDTO.java, CustomerDAO.java. Implement CustomerForm.java and UOMForm.java.",
+              "labels": ["developer:2"],
+              "children": [
+                {
+                  "title": "DATA MODELS & DAOS Implementation",
+                  "body": "Develop Material.java model with material attributes. Create MaterialDTO.java for data transfer. Build MaterialDAO.java for database operations. Implement similar structures for Vendor and Customer.",
+                  "labels": ["developer:2"]
+                },
+                {
+                  "title": "MasterR DATA FORMS Development (core)",
+                  "body": "Create CustomerForm.java for customer management. Develop UOMForm.java for unit of measure definition. Implement validation and duplicate checking. Add search and filter functionality.",
+                  "labels": ["developer:2"]
+                }
+              ]
+            },
+            {
+              "title": "Batch Management System Development",
+              "body": "Develop MaterialBatch.java model for batch tracking. Create BatchManagementForm.java for batch operations. Implement batch search and filtering. Add data validation for batch information.",
+              "labels": ["developer:2"]
+            },
+            {
+              "title": "Master Data Integration Testing & Enhancement",
+              "body": "Fix bugs found during integration testing. Improve UI/UX based on user feedback. Create seed data for demonstration scenarios. Test integration with other developers' modules.",
+              "labels": ["developer:2"]
+            },
+            {
+              "title": "Master Data Demo Preparation",
+              "body": "Create demonstration materials, vendors, and customers. Show batch tracking setup and configuration. Test data consistency across all master tables. Prepare demo scenarios for client review.",
+              "labels": ["developer:2"]
+            }
+          ]
+        },
+        {
+          "title": "Warehouse Structure Development",
+          "body": "Develop Warehouse.java, StorageBin.java, Zone.java models with DTOs and DAOs. Create BinManagementForm.java and ZoneManagementForm.java. Implement MovementService.java basic structure. Support InventoryService integration with GR and GI movements.",
+          "labels": ["developer:3", "warehouse"],
+          "children": [
+            {
+              "title": "Warehouse Models & Bin Management Development",
+              "body": "Create Warehouse.java, WarehouseDTO.java, WarehouseDAO.java. Develop StorageBin.java, BinDTO.java, StorageBinDAO.java. Build Zone.java, ZoneDTO.java, ZoneDAO.java. Implement BinManagementForm.java for bin operations.",
+              "labels": ["developer:3"],
+              "children": [
+                {
+                  "title": "WAREHOUSE MODELS Implementation",
+                  "body": "Develop Warehouse.java model with warehouse attributes. Create WarehouseDTO.java for data transfer. Build WarehouseDAO.java for database operations. Implement similar structures for StorageBin and Zone.",
+                  "labels": ["developer:3"]
+                },
+                {
+                  "title": "BIN MANAGEMENT FORM Development",
+                  "body": "Create BinManagementForm.java for storage location management. Implement bin creation, editing, and deletion. Add capacity tracking and status monitoring. Support bulk operations for multiple bins.",
+                  "labels": ["developer:3"]
+                }
+              ]
+            },
+            {
+              "title": "Zone Management System Development",
+              "body": "Develop ZoneManagementForm.java for zone operations. Implement zone creation and assignment logic. Add zone-specific validation rules. Support zone-based reporting.",
+              "labels": ["developer:3"]
+            },
+            {
+              "title": "Movement Service Support Implementation",
+              "body": "Create MovementService.java basic structure. Ensure InventoryService integration with GR movements. Support InventoryService integration with GI movements. Implement bin validation for movement operations.",
+              "labels": ["developer:3"]
+            },
+            {
+              "title": "Warehouse Setup Demo Preparation",
+              "body": "Create main warehouse structure with multiple zones. Set up all required bin types for operations. Test warehouse operations with sample data. Demonstrate zone-based storage strategies.",
+              "labels": ["developer:3"]
+            }
+          ]
+        },
+        {
+          "title": "Inbound Movements Development",
+          "body": "Develop PurchaseOrder.java, POItem.java models (read-only). Create PurchaseOrderDAO.java for reading from PHP database. Build GRPurchaseOrderDTO.java for data transfer. Implement GRPurchaseOrderForm.java (IN11) and GRCustomerReturnsForm.java (IN12).",
+          "labels": ["developer:4", "inbound", "movements"],
+          "children": [
+            {
+              "title": "Purchase Order Foundation & IN11 Form Development",
+              "body": "Create PurchaseOrder.java and POItem.java models. Develop PurchaseOrderDAO.java for database operations. Build GRPurchaseOrderDTO.java for goods receipt data. Implement GRPurchaseOrderForm.java (IN11) for purchase order receipt.",
+              "labels": ["developer:4"],
+              "children": [
+                {
+                  "title": "PURCHASE ORDER MODELS Implementation",
+                  "body": "Develop PurchaseOrder.java model with purchase order details. Create POItem.java for line item information. Build PurchaseOrderDAO.java for database access. Implement GRPurchaseOrderDTO.java for goods receipt data.",
+                  "labels": ["developer:4"]
+                },
+                {
+                  "title": "IN11 GR Purchase Order FORM Development",
+                  "body": "Create GRPurchaseOrderForm.java for goods receipt against purchase orders. Implement validation of purchase order details. Support partial receipt quantities. Integrate with InventoryService for stock updates.",
+                  "labels": ["developer:4"]
+                }
+              ]
+            },
+            {
+              "title": "IN11 Enhancements & Integration",
+              "body": "Implement better validation messages for user feedback. Add batch number format validation. Develop expiry date logic validation. Improve integration with inventory updates.",
+              "labels": ["developer:4"]
+            },
+            {
+              "title": "IN12 Customer Returns Form Development",
+              "body": "Create GRCustomerReturnsForm.java (IN12) for customer returns processing. Implement return authorization validation. Support inspection and disposition workflows. Integrate with inventory adjustment logic.",
+              "labels": ["developer:4"]
+            },
+            {
+              "title": "Inbound Movements Demo Preparation",
+              "body": "Show purchase order in PHP system interface. Load purchase order in Java GR form for processing. Demonstrate partial quantity receipt. Post GR with batch details and show inventory updates.",
+              "labels": ["developer:4"]
+            }
+          ]
+        },
+        {
+          "title": "Outbound Movements Development",
+          "body": "Develop MovementHeader.java, MovementItem.java, MovementType.java models. Create MovementDTO.java, MovementDAO.java, MovementTypeDAO.java. Implement GISalesOrderForm.java (OUT14) and ReturnToVendorForm.java (OUT15). Enhance MovementService.java with createGRMovement(), createGIMovement() methods.",
+          "labels": ["developer:5", "outbound", "movements"],
+          "children": [
+            {
+              "title": "Movement Foundation & OUT14 Form Development",
+              "body": "Create MovementHeader.java, MovementItem.java, MovementType.java models. Develop MovementDTO.java, MovementDAO.java, MovementTypeDAO.java. Implement GISalesOrderForm.java (OUT14) for sales order processing.",
+              "labels": ["developer:5"],
+              "children": [
+                {
+                  "title": "MOVEMENT MODELS Implementation",
+                  "body": "Develop MovementHeader.java for movement transaction headers. Create MovementItem.java for line item details. Build MovementType.java for movement type definitions. Implement DAO classes for database operations.",
+                  "labels": ["developer:5"]
+                },
+                {
+                  "title": "OUT14 GI Sales Order FORM Development",
+                  "body": "Create GISalesOrderForm.java for goods issue against sales orders. Implement sales order validation. Support FIFO batch selection. Integrate with InventoryService for stock reduction.",
+                  "labels": ["developer:5"]
+                }
+              ]
+            },
+            {
+              "title": "Movement Service Enhancement",
+              "body": "Enhance MovementService.java with createGRMovement() method. Implement createGIMovement() for goods issue operations. Develop validateMovement() for transaction validation. Create validateStockAvailability() for inventory checks.",
+              "labels": ["developer:5"]
+            },
+            {
+              "title": "OUT15 Return to Vendor Form Development",
+              "body": "Create ReturnToVendorForm.java (OUT15) for vendor returns processing. Implement vendor return authorization validation. Support documentation and approval workflows. Integrate with inventory adjustment processes.",
+              "labels": ["developer:5"]
+            },
+            {
+              "title": "Outbound Movements Demo Preparation",
+              "body": "Show sales order in PHP system interface. Load sales order in Java GI form for processing. Demonstrate system bin suggestions using FIFO logic. Post GI movement and show inventory decrease.",
+              "labels": ["developer:5"]
+            }
+          ]
+        },
+        {
+          "title": "Transfer Orders Development",
+          "body": "Develop TransferOrder.java, TransferOrderItem.java models. Create TransferOrderDTO.java, TransferOrderDAO.java. Implement PutawayTOForm.java (TR22) and PickingTOForm.java (TR23). Build ValidationService.java with basic validation methods.",
+          "labels": ["developer:6", "transfer", "movements"],
+          "children": [
+            {
+              "title": "Transfer Foundation & TR22 Form Development",
+              "body": "Create TransferOrder.java and TransferOrderItem.java models. Develop TransferOrderDTO.java and TransferOrderDAO.java. Build PutawayTODTO.java for putaway data. Implement PutawayTOForm.java (TR22) for putaway operations.",
+              "labels": ["developer:6"],
+              "children": [
+                {
+                  "title": "TRANSFER MODELS Implementation",
+                  "body": "Develop TransferOrder.java model for transfer transaction headers. Create TransferOrderItem.java for line item details. Build TransferOrderDTO.java for data transfer. Implement TransferOrderDAO.java for database operations.",
+                  "labels": ["developer:6"]
+                },
+                {
+                  "title": "TR22 Putaway TO FORM Development",
+                  "body": "Create PutawayTOForm.java for transfer from receiving to storage. Implement bin validation and compatibility checks. Support batch tracking during transfers. Integrate with InventoryService for stock movement.",
+                  "labels": ["developer:6"]
+                }
+              ]
+            },
+            {
+              "title": "TR23 Picking TO Form Development",
+              "body": "Create PickingTOForm.java (TR23) for picking operations. Implement picking list generation. Support route optimization for picking efficiency. Integrate with staging area preparation.",
+              "labels": ["developer:6"]
+            },
+            {
+              "title": "Validation Service Implementation",
+              "body": "Develop ValidationService.java with validateBinExists() method. Implement validateBinActive() for bin status checks. Create validateMaterialExists() for material validation. Build validateQuantityPositive() for quantity validation.",
+              "labels": ["developer:6"]
+            },
+            {
+              "title": "Transfer Orders Demo Preparation",
+              "body": "Connect PutawayTO with GR (from Developer 4). Connect PickingTO with GI (from Developer 5). Test complete flow: GR → PutawayTO → PickingTO → GI. Demonstrate inventory tracking through all transfer stages.",
+              "labels": ["developer:6"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Development Phase 2 - Completion & Enhancements",
+      "body": "Complete the remaining 50% of functional scope while stabilizing and preparing the system for real-world usage.",
+      "labels": ["area:development-completion", "development", "phase2", "completion"],
+      "children": [
+        {
+          "title": "First Round - Remaining Forms Development",
+          "body": "Develop remaining warehouse movements including returns, transfers, adjustments, cycle count, and scrap. Create ALL Inventory Query & Monitoring Forms. Build ALL Reports Forms. Implement system polish and optimization.",
+          "labels": ["forms-development"],
+          "children": [
+            {
+              "title": "Infrastructure Developer Forms Round 1",
+              "body": "Create DailyActivityForm.java for daily activity reports. Develop GRTransferInForm.java (IN13) for transfer receipt movements.",
+              "labels": ["developer:1"]
+            },
+            {
+              "title": "Master Data Developer Forms Round 1",
+              "body": "Build UserManagementForm.java for user administration. Create StockAgingForm.java for aging stock reports.",
+              "labels": ["developer:2"]
+            },
+            {
+              "title": "Warehouse Developer Forms Round 1",
+              "body": "Develop StockOverviewForm.java for comprehensive stock views. Create BatchTrackingForm.java for detailed batch monitoring.",
+              "labels": ["developer:3"]
+            },
+            {
+              "title": "Inbound Developer Forms Round 1",
+              "body": "Build GIInternalConsumptionForm.java (OUT16) for internal consumption. Create BinToBinTransferForm.java (INT17) for internal transfers.",
+              "labels": ["developer:4"]
+            },
+            {
+              "title": "Outbound Developer Forms Round 1",
+              "body": "Develop CycleCountForm.java (INT19) for inventory counting. Create InventoryAdjustmentForm.java (ADJ20) for stock adjustments.",
+              "labels": ["developer:5"]
+            },
+            {
+              "title": "Transfer Developer Forms Round 1",
+              "body": "Build ReplenishmentTOForm.java (TR24) for stock replenishment. Create SplittingPackBreakForm.java (INT18) for material splitting.",
+              "labels": ["developer:6"]
+            }
+          ]
+        },
+        {
+          "title": "Second Round - Final Forms & Reports",
+          "body": "Complete remaining reports and analytics modules. Implement functional enhancements and refinements. Perform system polish and optimization.",
+          "labels": ["forms-development"],
+          "children": [
+            {
+              "title": "Infrastructure Developer Forms Round 2",
+              "body": "Create InventoryValuationForm.java for financial valuation reports. Develop ScrapWriteoffForm.java (ADJ21) for scrap management.",
+              "labels": ["developer:1"]
+            },
+            {
+              "title": "Master Data Developer Forms Round 2",
+              "body": "Build PerformanceReportForm.java for system performance analytics. Create StockLevelForm.java for inventory level monitoring.",
+              "labels": ["developer:2"]
+            },
+            {
+              "title": "Warehouse Developer Forms Round 2",
+              "body": "Develop ExpiryMonitorForm.java for expiry date tracking. Create InventoryAlertsForm.java for threshold-based alerts.",
+              "labels": ["developer:3"]
+            },
+            {
+              "title": "Inbound Developer Final Forms",
+              "body": "Create UtilizationReportForm.java for warehouse utilization analysis.",
+              "labels": ["developer:4"]
+            },
+            {
+              "title": "Outbound Developer Final Forms",
+              "body": "Build FinancialReportForm.java for financial analysis and cost reporting.",
+              "labels": ["developer:5"]
+            },
+            {
+              "title": "System Polish & Bug Fixes Phase",
+              "body": "Perform system-wide validation enhancements. Fix remaining bugs across all modules. Optimize performance and user experience.",
+              "labels": ["developer:6"]
+            }
+          ]
+        },
+        {
+          "title": "System Integration & Optimization Phase",
+          "body": "Execute cross-module integration testing. Perform performance optimization. Implement UI/UX improvements. Complete bug fixing and user acceptance testing.",
+          "labels": ["integration", "optimization"],
+          "children": [
+            {
+              "title": "Cross-Module Integration Testing",
+              "body": "Test integration between Master Data and Movement modules. Validate inventory updates across all transaction types. Verify reporting accuracy with live data."
+            },
+            {
+              "title": "Performance Optimization Implementation",
+              "body": "Optimize database queries for faster response times. Improve service layer performance. Enhance UI responsiveness for large datasets."
+            },
+            {
+              "title": "Team Focus Areas Finalization",
+              "body": "Refine movement services for better performance. Optimize data quality and reporting accuracy. Enhance workflow automation for operational efficiency."
+            }
+          ]
+        },
+        {
+          "title": "Final Polish & Documentation Phase",
+          "body": "Prepare system for deployment and handover. Create complete documentation set. Conduct knowledge transfer sessions.",
+          "labels": ["documentation", "deployment-prep"],
+          "children": [
+            {
+              "title": "Infrastructure Documentation Creation",
+              "body": "Prepare system deployment documentation. Complete security audit documentation. Create infrastructure architecture documentation.",
+              "labels": ["developer:1"]
+            },
+            {
+              "title": "Master Data Documentation Creation",
+              "body": "Create master data management guides. Develop user training materials. Document data import/export procedures.",
+              "labels": ["developer:2"]
+            },
+            {
+              "title": "Inventory Documentation Creation",
+              "body": "Document inventory system operations. Create warehouse setup guides. Develop stock management procedures.",
+              "labels": ["developer:3"]
+            },
+            {
+              "title": "Inbound Processes Documentation",
+              "body": "Document inbound receiving processes. Create receiving workflow guides. Develop quality inspection procedures.",
+              "labels": ["developer:4"]
+            },
+            {
+              "title": "Outbound Processes Documentation",
+              "body": "Document outbound shipping processes. Create movement system architecture documentation. Develop shipping and dispatch procedures.",
+              "labels": ["developer:5"]
+            },
+            {
+              "title": "Transfer Operations Documentation",
+              "body": "Document transfer operations procedures. Create validation rules documentation. Develop internal movement guidelines.",
+              "labels": ["developer:6"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Testing & Quality Assurance",
+      "body": "Ensure quality is built into development, not treated as a late-stage activity, while still reserving time for final system-level QA after development completion.",
+      "labels": ["area:quality-assurance", "testing", "quality"],
+      "children": [
+        {
+          "title": "Embedded Testing During Development Phase",
+          "body": "Execute unit testing during feature development. Perform integration testing across modules. Validate business workflows per sprint. Conduct early defect detection and fixes."
+        },
+        {
+          "title": "Final System Testing Phase",
+          "body": "Execute end-to-end system testing. Perform regression testing across all modules. Validate performance and security requirements. Support user acceptance testing procedures."
+        }
+      ]
+    },
+    {
+      "title": "Release Phase",
+      "body": "Prepare the system for real-world usage.",
+      "labels": ["area:release", "deployment", "release"],
+      "children": [
+        {
+          "title": "System Hardening & Optimization",
+          "body": "Execute system hardening and optimization. Complete final bug fixes. Perform performance tuning and stress testing."
+        },
+        {
+          "title": "Release Preparation & Deployment",
+          "body": "Release, create release notes and versioning information. Develop installation instructions and rollback procedures. Document known issues and workarounds."
+        }
+      ]
+    },
+    {
+      "title": "Documentation, Training & Handover Phase",
+      "body": "Ensure smooth adoption and long-term maintainability.",
+      "labels": ["area:documentation", "documentation", "training"],
+      "children": [
+        {
+          "title": "User Manuals Creation",
+          "body": "Create comprehensive user manuals. Develop quick reference guides. Prepare troubleshooting documentation."
+        },
+        {
+          "title": "Technical Documentation Creation",
+          "body": "Create administrator guides and technical documentation."
+        }
+      ]
+    }
+  ]
+}
