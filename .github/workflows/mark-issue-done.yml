@@ -1,0 +1,164 @@
+name: mark issue done from commit
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  update-done-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Generate GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: FyuXeraLabs
+          repositories: hivon
+
+      - name: Update project status to Done
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            /*
+             * config
+             */
+            const PROJECT_ID = 'PVT_kwDODyJWeM4BM0Ih';
+            const STATUS_FIELD_ID = 'PVTSSF_lADODyJWeM4BM0Ihzg7_ZZ8';
+            const DONE_OPTION_ID = '98236657';
+
+            /*
+             * get commits
+             */
+            let commits = [];
+            
+            if (context.eventName === 'push') {
+              // For push events, use commits from payload
+              commits = context.payload.commits || [];
+              console.log(`Push event: ${commits.length} commits in payload`);
+            } else {
+              // For manual trigger, fetch recent commits from Git
+              const { execSync } = require('child_process');
+              const commitLog = execSync('git log -20 --pretty=format:"%s"').toString();
+              commits = commitLog.split('\n').map(msg => ({ message: msg }));
+              console.log(`Manual trigger: fetched ${commits.length} recent commits`);
+            }
+
+            /*
+             * parse commits
+             */
+            // Match: #done [#94], #done (#94), #done #94, #Done, #DONE (case insensitive)
+            const issueRegex = /#done\s+(?:\[#?(\d+)\]|\(#?(\d+)\)|#(\d+))/gi;
+            const issues = new Set();
+
+            for (const commit of commits) {
+              const message = commit.message || '';
+              console.log('Checking commit:', message.substring(0, 80));
+              
+              let match;
+              issueRegex.lastIndex = 0; // Reset regex
+              while ((match = issueRegex.exec(message)) !== null) {
+                const issueNumber = match[1] || match[2] || match[3];
+                if (issueNumber) {
+                  console.log(`  ✓ Found #done with issue #${issueNumber}`);
+                  issues.add(issueNumber);
+                }
+              }
+            }
+
+            console.log(`\nTotal unique issues to mark done: ${Array.from(issues).join(', ')}`);
+
+            if (issues.size === 0) {
+              console.log('No #done issues found in commits');
+              return;
+            }
+
+            /*
+             * load project items
+             */
+            console.log('\nFetching project items...');
+            const projectItems = await github.graphql(`
+              query ($project: ID!) {
+                node(id: $project) {
+                  ... on ProjectV2 {
+                    items(first: 100) {
+                      nodes {
+                        id
+                        content {
+                          ... on Issue { id number }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `, { project: PROJECT_ID });
+
+            const items = projectItems.node.items.nodes;
+            console.log(`Found ${items.length} items in project`);
+
+            /*
+             * update status
+             */
+            for (const issueNumber of issues) {
+              try {
+                console.log(`\nProcessing issue #${issueNumber}...`);
+                
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber
+                });
+
+                const issueId = issue.data.node_id;
+
+                const item = items.find(i => i.content?.id === issueId);
+                if (!item) {
+                  console.log(`Issue #${issueNumber} not found in project`);
+                  continue;
+                }
+
+                await github.graphql(`
+                  mutation (
+                    $project: ID!,
+                    $item: ID!,
+                    $field: ID!,
+                    $option: String!
+                  ) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $field
+                      value: { singleSelectOptionId: $option }
+                    }) {
+                      projectV2Item { id }
+                    }
+                  }
+                `, {
+                  project: PROJECT_ID,
+                  item: item.id,
+                  field: STATUS_FIELD_ID,
+                  option: DONE_OPTION_ID
+                });
+
+                console.log(`Issue #${issueNumber} marked as Done`);
+              } catch (error) {
+                console.log(`Error processing issue #${issueNumber}:`, error.message);
+              }
+            }
+
+            console.log('\nWorkflow complete');
