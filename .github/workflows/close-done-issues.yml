@@ -1,0 +1,117 @@
+name: close done issues
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # sunday 00:00 utc
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  close-done-issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: FyuXeraLabs
+          repositories: hivon
+
+      - name: Close issues with Done status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            // PROJECT CONFIG
+            const PROJECT_ID = '${{ secrets.PROJECT_ID }}';
+            const STATUS_FIELD_ID = '${{ secrets.STATUS_FIELD_ID }}';
+            const DONE_OPTION_ID = '${{ secrets.DONE_OPTION_ID }}';
+
+            // FETCH ALL PROJECT ITEMS WITH STATUS
+            console.log('Fetching project items...');
+            const projectItems = await github.graphql(`
+              query ($project: ID!) {
+                node(id: $project) {
+                  ... on ProjectV2 {
+                    items(first: 100) {
+                      nodes {
+                        id
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              field {
+                                ... on ProjectV2SingleSelectField {
+                                  id
+                                  name
+                                }
+                              }
+                              optionId
+                            }
+                          }
+                        }
+                        content {
+                          ... on Issue {
+                            id
+                            number
+                            state
+                            title
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `, { project: PROJECT_ID });
+
+            const items = projectItems.node.items.nodes;
+            console.log(`Found ${items.length} items in project`);
+
+            // FILTER ITEMS WITH STATUS = DONE
+            const doneIssues = items.filter(item => {
+              if (!item.content || item.content.state === 'closed') return false;
+              
+              const statusField = item.fieldValues.nodes.find(
+                field => field.field?.id === STATUS_FIELD_ID
+              );
+              
+              return statusField?.optionId === DONE_OPTION_ID;
+            });
+
+            console.log(`Found ${doneIssues.length} open issues with Done status`);
+
+            if (doneIssues.length === 0) {
+              console.log('No issues to close');
+              return;
+            }
+
+            // CLOSE EACH ISSUE
+            let closedCount = 0;
+            for (const item of doneIssues) {
+              const issue = item.content;
+              try {
+                console.log(`\nClosing issue #${issue.number}: ${issue.title}`);
+                
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed'
+                });
+
+                closedCount++;
+                console.log(`Issue #${issue.number} closed`);
+              } catch (error) {
+                console.log(`Error closing issue #${issue.number}:`, error.message);
+              }
+            }
+
+            console.log(`\nWorkflow complete: ${closedCount}/${doneIssues.length} issues closed`);

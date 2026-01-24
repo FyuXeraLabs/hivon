@@ -1,0 +1,98 @@
+name: auto-assign issue from commit
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Generate GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: FyuXeraLabs
+          repositories: hivon
+
+      - name: Auto-assign issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const commits = context.payload.commits || [];
+            
+            for (const commit of commits) {
+              const message = commit.message || '';
+              
+              // get username directly from commit author
+              const username = commit.author?.username;
+              
+              console.log(`Processing commit: ${message.substring(0, 100)}`);
+              console.log(`Commit author: ${username}`);
+              
+              // skip if no username found
+              if (!username) {
+                console.log('No author username found, skipping');
+                continue;
+              }
+              
+              // collect unique issue numbers
+              const issueNumbers = new Set();
+              
+              // find plain issue references like #123
+              const plainMatches = message.matchAll(/#(\d+)/g);
+              for (const match of plainMatches) {
+                issueNumbers.add(match[1]);
+              }
+              
+              // find markdown issue references like [#123](url)
+              const markdownMatches = message.matchAll(/\[#(\d+)\]\([^)]*\)/g);
+              for (const match of markdownMatches) {
+                issueNumbers.add(match[1]);
+              }
+              
+              console.log(`Found issues: ${Array.from(issueNumbers).join(', ')}`);
+              
+              for (const issueNumber of issueNumbers) {
+                try {
+                  // check if already assigned
+                  const issue = await github.rest.issues.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNumber
+                  });
+                  
+                  const currentAssignees = issue.data.assignees.map(a => a.login);
+                  
+                  // add assignee if not already assigned
+                  if (!currentAssignees.includes(username)) {
+                    await github.rest.issues.addAssignees({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: issueNumber,
+                      assignees: [username]
+                    });
+                    
+                    console.log(`Assigned ${username} to issue #${issueNumber}`);
+                  } else {
+                    console.log(`${username} already assigned to issue #${issueNumber}`);
+                  }
+                } catch (error) {
+                  console.log(`Error processing issue #${issueNumber}:`, error.message);
+                }
+              }
+            }
+            
+            console.log('Auto-assign complete');

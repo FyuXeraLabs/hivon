@@ -1,0 +1,806 @@
+{
+  "issues": [
+    {
+      "title": "Strategy & Alignment",
+      "body": "Ensure all stakeholders and the delivery team share a single understanding of goals, scope, and constraints before development begins.",
+      "labels": ["planning", "epic"],
+      "children": [
+        {
+          "title": "Define business objectives and success criteria",
+          "body": "Establish what success looks like for this project. Document measurable goals and key metrics.",
+          "labels": ["planning"]
+        },
+        {
+          "title": "Confirm in-scope and out-of-scope modules",
+          "body": "Agree on what is included and excluded from this project. Make sure everyone knows what modules will be built based on dropped draft items.",
+          "labels": ["planning"]
+        },
+        {
+          "title": "Agree on delivery timeline and release expectations",
+          "body": "Confirm the schedule, milestones, and what users expect to receive and when.",
+          "labels": ["planning"]
+        },
+        {
+          "title": "Identify and assess technical, resource, and dependency risks",
+          "body": "Identify potential technical, resource, and dependency risks. Create plans to reduce these risks.",
+          "labels": ["planning", "risk"]
+        },
+        {
+          "title": "Get stakeholder sign-off on scope and timeline",
+          "body": "Have all stakeholders review and approve the scope and plan.",
+          "labels": ["planning", "approval"]
+        }
+      ]
+    },
+    {
+      "title": "Requirements & Analysis",
+      "body": "Translate business needs into a clear, prioritized product backlog that can be executed incrementally.",
+      "labels": ["requirements", "epic"],
+      "children": [
+        {
+          "title": "Identify functional workflows (Master Data, Movements, Inventory, Reports)",
+          "body": "Document how materials move through the warehouse - from receiving goods to storing them to picking for orders. Include all the steps, decisions, and approvals needed.",
+          "labels": ["requirements", "analysis"]
+        },
+        {
+          "title": "Define user roles and access levels",
+          "body": "Create different user types (admin, warehouse staff, managers) and decide what each can do. Define security rules for protecting important data.",
+          "labels": ["requirements", "security"]
+        },
+        {
+          "title": "Capture non-functional requirements (performance, security, auditability)",
+          "body": "Write down what the system must handle - how many transactions per day, speed requirements, backup and recovery needs, and compliance rules.",
+          "labels": ["requirements", "non-functional"]
+        },
+        {
+          "title": "Identify dependencies between modules",
+          "body": "Map out how different parts of the system depend on each other. Know which work must happen first.",
+          "labels": ["requirements", "dependencies"]
+        },
+        {
+          "title": "Create acceptance criteria at feature level",
+          "body": "For each feature, define how to test if it works correctly. Write the success criteria.",
+          "labels": ["requirements", "testing"]
+        }
+      ]
+    },
+    {
+      "title": "Architecture & Design",
+      "body": "Create a stable technical foundation that supports parallel development and future scaling.",
+      "labels": ["architecture", "design", "epic"],
+      "children": [
+        {
+          "title": "Finalize application architecture (desktop, layered, service-based)",
+          "body": "Plan the overall system layout - what components exist, how they connect, and how they communicate. Make sure it can handle future growth.",
+          "labels": ["architecture"]
+        },
+        {
+          "title": "Define database and integration design (high level)",
+          "body": "Create the data model showing what information we need to store, what tables exist, and how they relate to each other.",
+          "labels": ["architecture", "database"]
+        },
+        {
+          "title": "Define module boundaries and data flow",
+          "body": "Establish clear interfaces between different system modules. Define how they talk to each other.",
+          "labels": ["architecture", "design"]
+        },
+        {
+          "title": "Design UI/UX structure and navigation flow",
+          "body": "Sketch out the screens, navigation flow, and how users will interact with the system. Make sure it's easy and consistent.",
+          "labels": ["design", "ui-ux"]
+        },
+        {
+          "title": "Design security and authorization model",
+          "body": "Design how users log in, how we verify who they are, what they're allowed to do, and how we keep the system secure.",
+          "labels": ["design", "security"]
+        }
+      ]
+    },
+    {
+      "title": "Development - Execution Phase",
+      "body": "Deliver the full system in two balanced development phases, each accounting for approximately 50% of total functionality. Development intentionally overlaps with planning, hardening, and release activities to reduce risk.",
+      "labels": ["development", "epic"],
+      "children": [
+        {
+          "title": "Phase 1 - Core Functionality",
+          "body": "Build the functional backbone of the system so that core warehouse operations are executable end-to-end. Build application infrastructure, all master data modules, core warehouse movements, and inventory services. By end of Phase 1: secure login, warehouse setup, material/vendor/customer configuration, and end-to-end goods receipt → putaway → picking → goods issue flow.",
+          "labels": ["phase:1", "development"],
+          "children": [
+            {
+              "title": "Sanod - System Infrastructure & Setup",
+              "body": "Build the foundation that everything else runs on. Set up the application, database, security, and user accounts. Sanod is responsible for the core infrastructure that all other developers depend on.",
+              "labels": ["developer:Sanod", "phase:1", "infrastructure"],
+              "children": [
+                {
+                  "title": "Create core application files (Hivon.java, MainFrame.java, LoginFrame.java)",
+                  "body": "Build entry point, main window, and login screen.",
+                  "labels": ["developer:Sanod", "phase:1", "infrastructure"]
+                },
+                {
+                  "title": "Create configuration and utility files (AppConfig.java, SystemParameters.java, MenuBuilder.java, DashboardPanel.java)",
+                  "body": "Build application configuration, system parameters, menu builder, and dashboard panel.",
+                  "labels": ["developer:Sanod", "phase:1", "infrastructure"]
+                },
+                {
+                  "title": "Set up database connection infrastructure (DatabaseConfig.java, DBConnection.java, DatabaseHelper.java)",
+                  "body": "Make sure the application connects to the database safely and reliably.",
+                  "labels": ["developer:Sanod", "phase:1", "database"]
+                },
+                {
+                  "title": "Build complete database schema design and PHP API implementation",
+                  "body": "Complete database schema design and implementation. Create all PHP API endpoints (Material, Vendor, Customer, PurchaseOrder, SalesOrder, etc.).",
+                  "labels": ["developer:Sanod", "phase:1", "database", "backend"]
+                },
+                {
+                  "title": "Create authentication and security system (UserSession.java, UserAuthentication.java, PermissionManager.java)",
+                  "body": "Let users log in safely and check what they're allowed to do.",
+                  "labels": ["developer:Sanod", "phase:1", "security"]
+                },
+                {
+                  "title": "Build User entity, DAO, and DTO (User.java, UserDAO.java, UserDTO.java)",
+                  "body": "Create data model for user management.",
+                  "labels": ["developer:Sanod", "phase:1", "models"]
+                },
+                {
+                  "title": "Create UserManagementForm.java and UserManagementController.java",
+                  "body": "Admin screen to create user accounts, set passwords, and assign roles.",
+                  "labels": ["developer:Sanod", "phase:1", "forms"]
+                },
+                {
+                  "title": "Build GRTransferInForm.java with GRTransferInController.java",
+                  "body": "Screen so materials from vendors can be received and recorded.",
+                  "labels": ["developer:Sanod", "phase:1", "forms", "movements"]
+                },
+                {
+                  "title": "Create InventoryService.java with core inventory logic",
+                  "body": "Core inventory logic used by all movement forms. Handles stock updates across the system.",
+                  "labels": ["developer:Sanod", "phase:1", "services"]
+                },
+                {
+                  "title": "Create system logging and utility files (ErrorLogger.java, TimestampFormatter.java)",
+                  "body": "Log errors and important events so we can debug problems later.",
+                  "labels": ["developer:Sanod", "phase:1", "utilities"]
+                },
+                {
+                  "title": "Perform database connection testing and API endpoint validation",
+                  "body": "Ensure database connectivity and API integration work correctly.",
+                  "labels": ["developer:Sanod", "phase:1", "testing", "integration"]
+                },
+                {
+                  "title": "Complete infrastructure integration testing and performance tuning",
+                  "body": "End-to-end testing and optimization of infrastructure components.",
+                  "labels": ["developer:Sanod", "phase:1", "testing", "integration"]
+                }
+              ]
+            },
+            {
+              "title": "Kasun - Master Data & Customer/Vendor Management",
+              "body": "Set up the master data for materials, customers, and vendors. Users need to manage these before doing any buying or selling.",
+              "labels": ["developer:Kasun", "phase:1", "master-data"],
+              "children": [
+                {
+                  "title": "Create Material entity, DAO, and DTO (Material.java, MaterialDAO.java, MaterialDTO.java)",
+                  "body": "Create data model and persistence for materials.",
+                  "labels": ["developer:Kasun", "phase:1", "models"]
+                },
+                {
+                  "title": "Create Customer entity, DAO, and DTO (Customer.java, CustomerDAO.java, CustomerDTO.java)",
+                  "body": "Create data model and persistence for customers.",
+                  "labels": ["developer:Kasun", "phase:1", "models"]
+                },
+                {
+                  "title": "Create Vendor entity, DAO, and DTO (Vendor.java, VendorDAO.java, VendorDTO.java)",
+                  "body": "Create data model and persistence for vendors.",
+                  "labels": ["developer:Kasun", "phase:1", "models"]
+                },
+                {
+                  "title": "Create MaterialMasterForm.java for managing materials",
+                  "body": "Screen where users can add, update, and search materials.",
+                  "labels": ["developer:Kasun", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create CustomerForm.java for managing customers",
+                  "body": "Screen for managing customer data.",
+                  "labels": ["developer:Kasun", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create VendorForm.java for managing vendors",
+                  "body": "Screen for managing vendor information.",
+                  "labels": ["developer:Kasun", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create controllers (MaterialController.java, CustomerController.java, VendorController.java)",
+                  "body": "Handle business logic for all master data screens.",
+                  "labels": ["developer:Kasun", "phase:1", "controllers"]
+                },
+                {
+                  "title": "Add search, filtering, and validation to master data forms",
+                  "body": "Make sure materials, customers, and vendors can be searched, filtered, and validated correctly. Prevent duplicate entries.",
+                  "labels": ["developer:Kasun", "phase:1", "testing", "validation"]
+                },
+                {
+                  "title": "Validate database schema and test API integration for master data",
+                  "body": "Ensure all master data modules integrate correctly with database and API.",
+                  "labels": ["developer:Kasun", "phase:1", "testing", "integration"]
+                }
+              ]
+            },
+            {
+              "title": "Thisula - Warehouse Setup & Structure",
+              "body": "Create the warehouse structure - zones, bins, and storage locations. This defines where materials are physically stored.",
+              "labels": ["developer:Thisula", "phase:1", "warehouse"],
+              "children": [
+                {
+                  "title": "Create Warehouse entity, DAO, and DTO (Warehouse.java, WarehouseDAO.java, WarehouseDTO.java)",
+                  "body": "Create data model for warehouse information.",
+                  "labels": ["developer:Thisula", "phase:1", "models"]
+                },
+                {
+                  "title": "Create Zone entity, DAO, and DTO (Zone.java, ZoneDAO.java, ZoneDTO.java)",
+                  "body": "Create data model for warehouse zones.",
+                  "labels": ["developer:Thisula", "phase:1", "models"]
+                },
+                {
+                  "title": "Create StorageBin entity, DAO, and DTO (StorageBin.java, BinDAO.java, BinDTO.java)",
+                  "body": "Create data model representing physical storage locations.",
+                  "labels": ["developer:Thisula", "phase:1", "models"]
+                },
+                {
+                  "title": "Create BinManagementForm.java with BinManagementController.java",
+                  "body": "Screen where users create bins, assign zones, set capacity, and mark bin types (receiving/storage/picking).",
+                  "labels": ["developer:Thisula", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create ZoneManagementForm.java with ZoneManagementController.java",
+                  "body": "Screen where users organize bins into zones.",
+                  "labels": ["developer:Thisula", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create WarehouseController.java and ValidationUtils.java",
+                  "body": "Handle warehouse operations and validate that bins don't exceed capacity.",
+                  "labels": ["developer:Thisula", "phase:1", "controllers", "utilities"]
+                },
+                {
+                  "title": "Create sample warehouse with zones and bins for testing",
+                  "body": "Set up test warehouse structure to validate warehouse setup and operations.",
+                  "labels": ["developer:Thisula", "phase:1", "testing"]
+                },
+                {
+                  "title": "Perform comprehensive warehouse operations and integration testing",
+                  "body": "Test all warehouse setup functionality and integration with other modules.",
+                  "labels": ["developer:Thisula", "phase:1", "testing", "integration"]
+                }
+              ]
+            },
+            {
+              "title": "Piyumi - Inbound Movements & Batch Management",
+              "body": "Build screens for receiving materials from vendors via purchase orders. Handle batch tracking, quality checks, and inventory updates.",
+              "labels": ["developer:Piyumi", "phase:1", "inbound"],
+              "children": [
+                {
+                  "title": "Create PurchaseOrder entity, DAO, and DTO (PurchaseOrder.java, POItem.java, PurchaseOrderDAO.java, GRPurchaseOrderDTO.java)",
+                  "body": "Create data model representing purchase orders.",
+                  "labels": ["developer:Piyumi", "phase:1", "models"]
+                },
+                {
+                  "title": "Create GRPurchaseOrderForm.java with GRPurchaseOrderController.java",
+                  "body": "Screen where users receive goods, assign batch numbers and expiry dates, and record quality.",
+                  "labels": ["developer:Piyumi", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create TransferOrder entity, DAO, and DTO (TransferOrder.java, TransferOrderDAO.java, TransferOrderDTO.java, PutawayTODTO.java)",
+                  "body": "Create data model to organize how received goods move from receiving to storage.",
+                  "labels": ["developer:Piyumi", "phase:1", "models"]
+                },
+                {
+                  "title": "Create PutawayTOForm.java with PutawayTOController.java",
+                  "body": "Screen where users place goods into storage bins after receiving them.",
+                  "labels": ["developer:Piyumi", "phase:1", "forms"]
+                },
+                {
+                  "title": "Perform receiving and putaway workflow testing",
+                  "body": "Test the complete flow: look up PO, receive goods, assign batch/expiry, place in receiving bin, create putaway transfer, move to storage bin.",
+                  "labels": ["developer:Piyumi", "phase:1", "testing", "integration"]
+                }
+              ]
+            },
+            {
+              "title": "Navodya - Outbound Movements & Stock Management",
+              "body": "Build screens for sending goods to customers via sales orders. Handle picking, FIFO/FEFO batch selection, and inventory updates.",
+              "labels": ["developer:Navodya", "phase:1", "outbound"],
+              "children": [
+                {
+                  "title": "Create SalesOrder entity, DAO, and DTO (SalesOrder.java, SOItem.java, SalesOrderDAO.java, SalesOrderDTO.java)",
+                  "body": "Create data model representing customer orders.",
+                  "labels": ["developer:Navodya", "phase:1", "models"]
+                },
+                {
+                  "title": "Create MovementType entity and DAO (MovementType.java, MovementTypeDAO.java)",
+                  "body": "Create data model to categorize different types of warehouse movements.",
+                  "labels": ["developer:Navodya", "phase:1", "models"]
+                },
+                {
+                  "title": "Create GISalesOrderForm.java with GISalesOrderController.java",
+                  "body": "Screen where users ship goods to customers. System suggests bins by FIFO/FEFO.",
+                  "labels": ["developer:Navodya", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create PickingTOForm.java with PickingTOController.java",
+                  "body": "Screen where warehouse staff pick items for shipment.",
+                  "labels": ["developer:Navodya", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create ValidationService.java for movement validation",
+                  "body": "Check stock availability and ensure picking orders are correct.",
+                  "labels": ["developer:Navodya", "phase:1", "services"]
+                },
+                {
+                  "title": "Implement FIFO/FEFO batch selection logic in MovementService.java",
+                  "body": "Enhanced MovementService with createGRMovement(), createGIMovement(), validateMovement(), validateStockAvailability(), applyFIFO() functions.",
+                  "labels": ["developer:Navodya", "phase:1", "services"]
+                },
+                {
+                  "title": "Perform shipment and picking workflow testing",
+                  "body": "Test the complete flow: look up SO, generate picking list, pick items from storage, ship goods, update inventory.",
+                  "labels": ["developer:Navodya", "phase:1", "testing", "integration"]
+                }
+              ]
+            },
+            {
+              "title": "Ishani - Internal Movements & Batch Tracking",
+              "body": "Build screens for moving inventory within the warehouse. Track batch information and expiry dates.",
+              "labels": ["developer:Ishani", "phase:1", "internal"],
+              "children": [
+                {
+                  "title": "Create MaterialBatch entity, DAO, and DTO (MaterialBatch.java, MaterialBatchDAO.java, MaterialBatchDTO.java)",
+                  "body": "Create data model representing batches of materials with tracking information.",
+                  "labels": ["developer:Ishani", "phase:1", "models"]
+                },
+                {
+                  "title": "Create MovementItem entity and DAO (MovementItem.java, MovementItemDAO.java)",
+                  "body": "Create data model for individual items in warehouse movements.",
+                  "labels": ["developer:Ishani", "phase:1", "models"]
+                },
+                {
+                  "title": "Create BinToBinTransferForm.java with BinToBinTransferController.java",
+                  "body": "Screen for moving inventory between bins.",
+                  "labels": ["developer:Ishani", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create SplittingPackBreakForm.java with SplittingPackBreakController.java",
+                  "body": "Screen for splitting and breaking packages for flexible picking.",
+                  "labels": ["developer:Ishani", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create BatchTrackingForm.java with BatchTrackingController.java",
+                  "body": "Screen for tracking batch information during inventory movements.",
+                  "labels": ["developer:Ishani", "phase:1", "forms"]
+                },
+                {
+                  "title": "Create ExpiryMonitorForm.java with ExpiryMonitorController.java",
+                  "body": "Screen for monitoring expiring batches.",
+                  "labels": ["developer:Ishani", "phase:1", "forms"]
+                },
+                {
+                  "title": "Perform batch and bin-to-bin transfer testing",
+                  "body": "Test batch tracking, expiry monitoring, bin-to-bin transfers, and package splitting.",
+                  "labels": ["developer:Ishani", "phase:1", "testing", "integration"]
+                },
+                {
+                  "title": "Prepare Phase 1 demo with batch tracking features",
+                  "body": "Demonstrate all Phase 1 functionality to stakeholders.",
+                  "labels": ["developer:Ishani", "phase:1", "demo"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Phase 2 - Completion & Enhancements",
+          "body": "Complete the remaining 50% of functional scope while stabilizing and preparing the system for real-world usage. Includes remaining movements, all query/monitoring forms, all reports, and functional refinements.",
+          "labels": ["phase:2", "development"],
+          "children": [
+            {
+              "title": "Sanod - Monitoring & Reporting",
+              "body": "Build screens for daily activity monitoring and inventory alerts. Support deployment and security hardening.",
+              "labels": ["developer:Sanod", "phase:2", "reporting"],
+              "children": [
+                {
+                  "title": "Create DailyActivityForm.java with DailyActivityController.java",
+                  "body": "Screen showing all warehouse movements for the day and generate daily reports.",
+                  "labels": ["developer:Sanod", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create InventoryAlertsForm.java with InventoryAlertsController.java",
+                  "body": "Screen alerting users when stock is too low or bins are too full.",
+                  "labels": ["developer:Sanod", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create reporting support files (DailyActivityReport.java, ReportDAO.java, ReportDTO.java, SearchCriteriaDTO.java)",
+                  "body": "Create supporting models and data access objects for reporting.",
+                  "labels": ["developer:Sanod", "phase:2", "models"]
+                },
+                {
+                  "title": "Create ReversalService.java and PrintUtils.java",
+                  "body": "Create reversal service and printing utilities.",
+                  "labels": ["developer:Sanod", "phase:2", "utilities"]
+                },
+                {
+                  "title": "Prepare system for deployment and perform security audit",
+                  "body": "Perform infrastructure documentation, security audit, and deployment preparation.",
+                  "labels": ["developer:Sanod", "phase:2", "deployment", "security"]
+                },
+                {
+                  "title": "Optimize infrastructure performance and finalize deployment setup",
+                  "body": "Final performance tuning and infrastructure documentation.",
+                  "labels": ["developer:Sanod", "phase:2", "deployment", "optimization"]
+                }
+              ]
+            },
+            {
+              "title": "Kasun - Master Data Enhancements",
+              "body": "Build screens for managing units of measure and batch details. Support master data optimization.",
+              "labels": ["developer:Kasun", "phase:2", "master-data"],
+              "children": [
+                {
+                  "title": "Create UOMForm.java with UOMController.java",
+                  "body": "Screen for managing units of measure like kg, liter, piece, etc.",
+                  "labels": ["developer:Kasun", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create UOM entity, DAO, and DTO (UOM.java, UOMDAO.java, UOMDTO.java)",
+                  "body": "Create data model for units of measure.",
+                  "labels": ["developer:Kasun", "phase:2", "models"]
+                },
+                {
+                  "title": "Create BatchManagementForm.java with BatchController.java",
+                  "body": "Screen where users manage batch information and expiry tracking.",
+                  "labels": ["developer:Kasun", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create BatchDAO.java for batch data persistence",
+                  "body": "Create batch data access object.",
+                  "labels": ["developer:Kasun", "phase:2", "models"]
+                },
+                {
+                  "title": "Create StockLevelForm.java with StockLevelController.java",
+                  "body": "Screen showing current stock levels for each material.",
+                  "labels": ["developer:Kasun", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create utility files (DateUtils.java, NumberUtils.java)",
+                  "body": "Create date and number utility classes.",
+                  "labels": ["developer:Kasun", "phase:2", "utilities"]
+                },
+                {
+                  "title": "Perform master data documentation and optimization",
+                  "body": "Create user training materials for data management. Optimize data quality.",
+                  "labels": ["developer:Kasun", "phase:2", "documentation", "testing"]
+                }
+              ]
+            },
+            {
+              "title": "Thisula - Inventory Adjustments",
+              "body": "Build screens for adjusting inventory when stock counts don't match or items are damaged.",
+              "labels": ["developer:Thisula", "phase:2", "adjustments"],
+              "children": [
+                {
+                  "title": "Create InventoryAdjustmentForm.java with InventoryAdjustmentController.java",
+                  "body": "Screen where users record adjustments when stock counts change.",
+                  "labels": ["developer:Thisula", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create ScrapWriteoffForm.java with ScrapWriteoffController.java",
+                  "body": "Screen where users record damaged or unusable materials being removed.",
+                  "labels": ["developer:Thisula", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create MovementHeader entity (MovementHeader.java)",
+                  "body": "Create data model for movement headers.",
+                  "labels": ["developer:Thisula", "phase:2", "models"]
+                },
+                {
+                  "title": "Create MovementDAO.java and ScrapDAO.java",
+                  "body": "Create data access objects to track adjustments and scrap.",
+                  "labels": ["developer:Thisula", "phase:2", "models"]
+                },
+                {
+                  "title": "Perform inventory adjustment workflow optimization",
+                  "body": "Test adjustment processes and optimize UI/UX based on feedback.",
+                  "labels": ["developer:Thisula", "phase:2", "testing", "optimization"]
+                },
+                {
+                  "title": "Create warehouse and inventory system documentation",
+                  "body": "Document inventory system, warehouse setup guides, and adjustment process manuals.",
+                  "labels": ["developer:Thisula", "phase:2", "documentation"]
+                }
+              ]
+            },
+            {
+              "title": "Piyumi - Returns, Consumption & Cycle Counts",
+              "body": "Build screens for receiving returned goods, internal consumption, and counting inventory.",
+              "labels": ["developer:Piyumi", "phase:2", "movements"],
+              "children": [
+                {
+                  "title": "Create GRCustomerReturnsForm.java with GRCustomerReturnsController.java",
+                  "body": "Screen where users process goods returned by customers.",
+                  "labels": ["developer:Piyumi", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create GIInternalConsumptionForm.java with GIInternalConsumptionController.java",
+                  "body": "Screen where users record goods used internally.",
+                  "labels": ["developer:Piyumi", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create CycleCountForm.java with CycleCountController.java",
+                  "body": "Screen where users count inventory and verify it matches the system.",
+                  "labels": ["developer:Piyumi", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create CycleCount entity, DAO, and DTO (CycleCount.java, CycleCountItem.java, CycleCountDAO.java, CycleCountDTO.java)",
+                  "body": "Create data models for cycle counting.",
+                  "labels": ["developer:Piyumi", "phase:2", "models"]
+                },
+                {
+                  "title": "Create UtilizationReportForm.java and UtilizationReport.java",
+                  "body": "Screen showing warehouse space and capacity usage.",
+                  "labels": ["developer:Piyumi", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create MovementService.java with enhanced movement operations",
+                  "body": "Create core movement service with createGRMovement(), createGIMovement(), validateMovement() methods.",
+                  "labels": ["developer:Piyumi", "phase:2", "services"]
+                },
+                {
+                  "title": "Create MovementDTO.java for movement data transfer",
+                  "body": "Create data transfer object for movements.",
+                  "labels": ["developer:Piyumi", "phase:2", "models"]
+                },
+                {
+                  "title": "Perform inbound processes documentation and workflow optimization",
+                  "body": "Create receiving workflow guides and batch management procedures. Refine movement service.",
+                  "labels": ["developer:Piyumi", "phase:2", "documentation", "optimization"]
+                }
+              ]
+            },
+            {
+              "title": "Navodya - Outbound Operations & Analytics",
+              "body": "Build screens for vendor returns, replenishment, inventory queries, and reports.",
+              "labels": ["developer:Navodya", "phase:2", "outbound"],
+              "children": [
+                {
+                  "title": "Create ReturnToVendorForm.java with ReturnToVendorController.java",
+                  "body": "Screen where users process goods being returned to suppliers.",
+                  "labels": ["developer:Navodya", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create ReplenishmentTOForm.java with ReplenishmentTOController.java",
+                  "body": "Screen where users transfer stock from storage to picking areas.",
+                  "labels": ["developer:Navodya", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create InventoryQueryForm.java with InventoryQueryController.java",
+                  "body": "Screen where users search materials and see where they're stored.",
+                  "labels": ["developer:Navodya", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create StockOverviewController.java",
+                  "body": "Create controller for stock overview operations.",
+                  "labels": ["developer:Navodya", "phase:2", "controllers"]
+                },
+                {
+                  "title": "Create Inventory entity, DAO, and DTO (Inventory.java, InventoryDAO.java, InventoryDTO.java)",
+                  "body": "Create data models for inventory tracking.",
+                  "labels": ["developer:Navodya", "phase:2", "models"]
+                },
+                {
+                  "title": "Create AdjustmentReason entity and DAO (AdjustmentReason.java, AdjustmentDAO.java)",
+                  "body": "Create data models for adjustment reasons.",
+                  "labels": ["developer:Navodya", "phase:2", "models"]
+                },
+                {
+                  "title": "Create ScrapReason entity (ScrapReason.java)",
+                  "body": "Create data model for scrap reasons.",
+                  "labels": ["developer:Navodya", "phase:2", "models"]
+                },
+                {
+                  "title": "Create TransferOrderItem and TransferOrderDTO (TransferOrderItem.java, TransferOrderDTO.java)",
+                  "body": "Create data models for transfer order items.",
+                  "labels": ["developer:Navodya", "phase:2", "models"]
+                },
+                {
+                  "title": "Create AlertUtils.java",
+                  "body": "Create utility class for alert handling.",
+                  "labels": ["developer:Navodya", "phase:2", "utilities"]
+                },
+                {
+                  "title": "Create InventoryValuationForm.java and InventoryValuationReport.java",
+                  "body": "Screen and report calculating inventory value for accounting.",
+                  "labels": ["developer:Navodya", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create StockAgingForm.java and StockAgingReport.java",
+                  "body": "Screen and report showing how long materials have been in storage.",
+                  "labels": ["developer:Navodya", "phase:2", "forms"]
+                },
+                {
+                  "title": "Perform outbound processes documentation and reporting optimization",
+                  "body": "Create movement system architecture docs and stock management procedures. Refine reports.",
+                  "labels": ["developer:Navodya", "phase:2", "documentation", "optimization"]
+                }
+              ]
+            },
+            {
+              "title": "Ishani - Reports & Analytics",
+              "body": "Build screens for monitoring inventory value, aging, and overall system performance.",
+              "labels": ["developer:Ishani", "phase:2", "reporting"],
+              "children": [
+                {
+                  "title": "Create StockOverviewForm.java with StockOverviewController.java",
+                  "body": "Screen giving a quick view of all inventory.",
+                  "labels": ["developer:Ishani", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create StockLevelForm.java with StockLevelController.java",
+                  "body": "Screen showing current stock levels for all materials.",
+                  "labels": ["developer:Ishani", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create PerformanceReportForm.java and PerformanceReport.java",
+                  "body": "Screen and report analyzing warehouse efficiency and throughput.",
+                  "labels": ["developer:Ishani", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create FinancialReportForm.java and FinancialReport.java",
+                  "body": "Screen and report showing inventory value, costs, and financial impact.",
+                  "labels": ["developer:Ishani", "phase:2", "forms"]
+                },
+                {
+                  "title": "Create InventoryValuationReport.java",
+                  "body": "Create inventory valuation report class.",
+                  "labels": ["developer:Ishani", "phase:2", "models"]
+                },
+                {
+                  "title": "Create StockAgingReport.java",
+                  "body": "Create stock aging report class.",
+                  "labels": ["developer:Ishani", "phase:2", "models"]
+                },
+                {
+                  "title": "Create TransferOrderItem.java and TransferOrderDTO.java",
+                  "body": "Create data models for transfer order items.",
+                  "labels": ["developer:Ishani", "phase:2", "models"]
+                },
+                {
+                  "title": "Create InventoryDTO.java",
+                  "body": "Create inventory data transfer object.",
+                  "labels": ["developer:Ishani", "phase:2", "models"]
+                },
+                {
+                  "title": "Perform transfer operations and analytics documentation",
+                  "body": "Create validation rules documentation and monitoring system guides. Complete validation rule implementation.",
+                  "labels": ["developer:Ishani", "phase:2", "documentation", "optimization"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Testing & Quality Assurance",
+      "body": "Ensure quality is built into development. Testing happens continuously within both phases AND we reserve time for final system-level QA after Phase 2.",
+      "labels": ["testing", "epic"],
+      "children": [
+        {
+          "title": "Set up testing framework and test data",
+          "body": "Set up JUnit framework. Create test database with sample data. Build test data generation utilities.",
+          "labels": ["testing", "setup"]
+        },
+        {
+          "title": "Unit test all core infrastructure components",
+          "body": "Write unit tests for infrastructure, security, and core services. Test database connectivity and configuration.",
+          "labels": ["testing", "unit-tests"]
+        },
+        {
+          "title": "Unit test all master data modules",
+          "body": "Write unit tests for material, vendor, customer models. Test form validation and data persistence.",
+          "labels": ["testing", "unit-tests"]
+        },
+        {
+          "title": "Unit test all movement modules",
+          "body": "Write unit tests for inbound, outbound, and transfer movements. Test inventory update logic and FIFO implementation.",
+          "labels": ["testing", "unit-tests"]
+        },
+        {
+          "title": "Integration test complete end-to-end workflows",
+          "body": "Test end-to-end: GR → Putaway → Picking → GI flow. Validate data consistency across all modules.",
+          "labels": ["testing", "integration"]
+        },
+        {
+          "title": "Test with realistic sample data and user scenarios",
+          "body": "Create realistic test data and run through all system features. Make sure the system handles real warehouse scenarios.",
+          "labels": ["testing", "integration"]
+        },
+        {
+          "title": "Perform performance and load testing",
+          "body": "Test system performance under load. Validate database optimization. Test concurrent user access.",
+          "labels": ["testing", "performance"]
+        },
+        {
+          "title": "Perform security validation and compliance testing",
+          "body": "Test authentication and authorization. Validate data encryption. Test audit logging.",
+          "labels": ["testing", "security"]
+        },
+        {
+          "title": "Conduct user acceptance testing",
+          "body": "Have actual warehouse staff test the system and give feedback. Validate against business requirements.",
+          "labels": ["testing", "uat"]
+        }
+      ]
+    },
+    {
+      "title": "Hardening, Deployment & Release",
+      "body": "Prepare the system for real-world usage.",
+      "labels": ["deployment", "epic"],
+      "children": [
+        {
+          "title": "Perform system hardening and optimization",
+          "body": "Optimize database queries and services. Fix remaining bugs. Perform stress testing and tuning.",
+          "labels": ["deployment", "optimization"]
+        },
+        {
+          "title": "Create deployment packages and installation documentation",
+          "body": "Package the Java application. Include database scripts and configuration files. Create installation instructions.",
+          "labels": ["deployment"]
+        },
+        {
+          "title": "Perform final security audit and validation",
+          "body": "Review user permissions. Test backup and recovery. Verify security protocols.",
+          "labels": ["deployment", "security"]
+        },
+        {
+          "title": "Create release notes and deployment documentation",
+          "body": "Document new features, enhancements, known issues, and workarounds.",
+          "labels": ["deployment", "documentation"]
+        },
+        {
+          "title": "Execute production deployment and database migration",
+          "body": "Deploy system to production environment. Execute database migration. Configure production settings.",
+          "labels": ["deployment"]
+        }
+      ]
+    },
+    {
+      "title": "Documentation, Training & Handover",
+      "body": "Ensure smooth adoption and long-term maintainability.",
+      "labels": ["documentation", "epic"],
+      "children": [
+        {
+          "title": "Create comprehensive user manuals and guides",
+          "body": "Write step-by-step guides for users. Create quick reference guides. Prepare troubleshooting documentation.",
+          "labels": ["documentation", "user-guide"]
+        },
+        {
+          "title": "Create administrator and system guides",
+          "body": "Write system administration guides. Document backup and recovery procedures. Create performance tuning guides.",
+          "labels": ["documentation", "admin-guide"]
+        },
+        {
+          "title": "Create technical and developer documentation",
+          "body": "Document system architecture and design decisions. Create developer guides. Document data models and APIs.",
+          "labels": ["documentation", "technical"]
+        },
+        {
+          "title": "Conduct knowledge transfer and training sessions",
+          "body": "Train administrators on system management. Train warehouse staff on daily operations. Prepare support team for handover.",
+          "labels": ["training"]
+        },
+        {
+          "title": "Provide post-deployment support and optimization",
+          "body": "Support users during initial rollout. Fix any issues that arise. Optimize based on real-world usage.",
+          "labels": ["support"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+name: mark issue status from commit
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  update-issue-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Generate GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: FyuXeraLabs
+          repositories: hivon
+
+      - name: Update project status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            // project config
+            const PROJECT_ID = '${{ secrets.PROJECT_ID }}';
+            const STATUS_FIELD_ID = '${{ secrets.STATUS_FIELD_ID }}';
+            const IN_PROGRESS_OPTION_ID = '${{ secrets.IN_PROGRESS_OPTION_ID }}';
+            const DONE_OPTION_ID = '${{ secrets.DONE_OPTION_ID }}';
+
+            // get commits from push or manual trigger
+            let commits = [];
+            
+            if (context.eventName === 'push') {
+              commits = context.payload.commits || [];
+              console.log(`Push event: ${commits.length} commits in payload`);
+            } else {
+              const { execSync } = require('child_process');
+              const commitLog = execSync('git log -20 --pretty=format:"%s"').toString();
+              commits = commitLog.split('\n').map(msg => ({ message: msg }));
+              console.log(`Manual trigger: fetched ${commits.length} recent commits`);
+            }
+
+            // parse commit messages for issue references
+            const inProgressIssues = new Set();
+            const doneIssues = new Set();
+
+            for (const commit of commits) {
+              const message = commit.message || '';
+              console.log('Checking commit:', message.substring(0, 80));
+              
+              // check for #done markers
+              const doneRegex = /#done/gi;
+              let doneMatch;
+              
+              while ((doneMatch = doneRegex.exec(message)) !== null) {
+                const startPos = doneMatch.index + doneMatch[0].length;
+                const restOfLine = message.substring(startPos);
+                
+                const issueNumberRegex = /\[?#(\d+)\]?(?:\([^)]*\))?/g;
+                let issueMatch;
+                
+                while ((issueMatch = issueNumberRegex.exec(restOfLine)) !== null) {
+                  const issueNum = issueMatch[1];
+                  doneIssues.add(issueNum);
+                  console.log(`Found #done with issue #${issueNum}`);
+                  
+                  if (restOfLine.indexOf('\n', issueMatch.index) !== -1 && 
+                      restOfLine.indexOf('\n', issueMatch.index) < issueNumberRegex.lastIndex) {
+                    break;
+                  }
+                  if (restOfLine.indexOf('#done', issueMatch.index) !== -1 && 
+                      restOfLine.indexOf('#done', issueMatch.index) < issueNumberRegex.lastIndex) {
+                    break;
+                  }
+                }
+              }
+              
+              // check for plain issue references (not preceded by #done)
+              const plainIssueRegex = /(?<!#done\s*)(?<!#done.{0,100})\[?#(\d+)\]?/gi;
+              let plainMatch;
+              
+              // reset lastIndex for new regex
+              doneRegex.lastIndex = 0;
+              
+              while ((plainMatch = plainIssueRegex.exec(message)) !== null) {
+                const issueNum = plainMatch[1];
+                
+                // check if this issue number appears after any #done in the message
+                let isDone = false;
+                doneRegex.lastIndex = 0;
+                
+                while ((doneMatch = doneRegex.exec(message)) !== null) {
+                  const donePos = doneMatch.index;
+                  const issuePos = plainMatch.index;
+                  
+                  // if #done appears before this issue reference
+                  if (donePos < issuePos && (issuePos - donePos) < 200) {
+                    // check if there's another issue number between #done and this one
+                    const betweenText = message.substring(donePos, issuePos);
+                    const otherIssueRegex = /#(\d+)/g;
+                    const matches = betweenText.match(otherIssueRegex);
+                    
+                    if (!matches || matches.length === 0 || matches[matches.length - 1] === `#${issueNum}`) {
+                      isDone = true;
+                      break;
+                    }
+                  }
+                }
+                
+                if (!isDone && !doneIssues.has(issueNum)) {
+                  inProgressIssues.add(issueNum);
+                  console.log(`Found plain issue reference #${issueNum} (In Progress)`);
+                }
+              }
+            }
+
+            console.log(`\nIssues to mark "In Progress": ${Array.from(inProgressIssues).join(', ') || 'none'}`);
+            console.log(`Issues to mark "Done": ${Array.from(doneIssues).join(', ') || 'none'}`);
+
+            if (inProgressIssues.size === 0 && doneIssues.size === 0) {
+              console.log('No issues found in commits');
+              return;
+            }
+
+            // fetch project items
+            console.log('\nFetching project items...');
+            const projectItems = await github.graphql(`
+              query ($project: ID!) {
+                node(id: $project) {
+                  ... on ProjectV2 {
+                    items(first: 100) {
+                      nodes {
+                        id
+                        content {
+                          ... on Issue { id number }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `, { project: PROJECT_ID });
+
+            const items = projectItems.node.items.nodes;
+            console.log(`Found ${items.length} items in project`);
+
+            // helper function to update issue status
+            async function updateIssueStatus(issueNumber, statusOptionId, statusName) {
+              try {
+                console.log(`\nProcessing issue #${issueNumber} for "${statusName}"...`);
+                
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber
+                });
+
+                const issueId = issue.data.node_id;
+                let item = items.find(i => i.content?.id === issueId);
+                
+                if (!item) {
+                  console.log(`Issue #${issueNumber} not in project, adding it now...`);
+                  
+                  // add issue to project
+                  const addResult = await github.graphql(`
+                    mutation ($project: ID!, $contentId: ID!) {
+                      addProjectV2ItemById(input: {
+                        projectId: $project
+                        contentId: $contentId
+                      }) {
+                        item {
+                          id
+                        }
+                      }
+                    }
+                  `, {
+                    project: PROJECT_ID,
+                    contentId: issueId
+                  });
+                  
+                  item = addResult.addProjectV2ItemById.item;
+                  console.log(`Issue #${issueNumber} added to project`);
+                }
+
+                // update status
+                await github.graphql(`
+                  mutation (
+                    $project: ID!,
+                    $item: ID!,
+                    $field: ID!,
+                    $option: String!
+                  ) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $field
+                      value: { singleSelectOptionId: $option }
+                    }) {
+                      projectV2Item { id }
+                    }
+                  }
+                `, {
+                  project: PROJECT_ID,
+                  item: item.id,
+                  field: STATUS_FIELD_ID,
+                  option: statusOptionId
+                });
+
+                console.log(`Issue #${issueNumber} marked as "${statusName}"`);
+
+              } catch (error) {
+                console.log(`Error processing issue #${issueNumber}:`, error.message);
+              }
+            }
+
+            // update all "In Progress" issues
+            for (const issueNumber of inProgressIssues) {
+              await updateIssueStatus(issueNumber, IN_PROGRESS_OPTION_ID, 'In Progress');
+            }
+
+            // update all "Done" issues
+            for (const issueNumber of doneIssues) {
+              await updateIssueStatus(issueNumber, DONE_OPTION_ID, 'Done');
+            }
+
+            console.log('\nWorkflow complete');

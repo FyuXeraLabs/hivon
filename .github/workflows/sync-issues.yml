@@ -1,0 +1,303 @@
+name: sync issues to project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  sync-issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          installation-id: ${{ secrets.APP_INSTALLATION_ID }}
+
+      - name: Create or update issues hierarchy
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const fs = require('fs');
+
+            /* -------------------------
+             * project config
+             * ------------------------- */
+            const PROJECT_ID = '${{ secrets.PROJECT_ID }}';
+            const STATUS_FIELD_ID = '${{ secrets.STATUS_FIELD_ID }}';
+            const BACKLOG_OPTION_ID = '${{ secrets.BACKLOG_OPTION_ID }}';
+
+            const repo = context.repo;
+
+            /* -------------------------
+             * safe repo id lookup
+             * ------------------------- */
+            const repoQuery = await github.graphql(`
+              query ($owner: String!, $name: String!) {
+                repository(owner: $owner, name: $name) {
+                  id
+                }
+              }
+            `, {
+              owner: repo.owner,
+              name: repo.repo
+            });
+
+            const repoId = repoQuery.repository.id;
+
+            /* -------------------------
+             * load json
+             * ------------------------- */
+            const data = JSON.parse(
+              fs.readFileSync('.github/issue-import/issues.json', 'utf8')
+            );
+
+            /* -------------------------
+             * cache existing labels
+             * ------------------------- */
+            const existingLabels = new Set(
+              (await github.rest.issues.listLabelsForRepo({
+                owner: repo.owner,
+                repo: repo.repo,
+                per_page: 100
+              })).data.map(l => l.name)
+            );
+
+            /* -------------------------
+             * cache existing issues by title
+             * ------------------------- */
+            const existingIssuesByTitle = new Map();
+            let page = 1;
+
+            while (true) {
+              const issues = await github.rest.issues.listForRepo({
+                owner: repo.owner,
+                repo: repo.repo,
+                state: 'all',
+                per_page: 100,
+                page
+              });
+
+              if (issues.data.length === 0) break;
+
+              issues.data.forEach(issue => {
+                const issueData = {
+                  number: issue.number,
+                  id: issue.node_id,
+                  labels: issue.labels.map(l => l.name),
+                  body: issue.body || '',
+                  title: issue.title
+                };
+                existingIssuesByTitle.set(issue.title, issueData);
+              });
+
+              page++;
+            }
+
+            /* -------------------------
+             * ensure labels exist
+             * ------------------------- */
+            async function ensureLabels(labels = []) {
+              for (const label of labels) {
+                if (existingLabels.has(label)) continue;
+
+                await github.rest.issues.createLabel({
+                  owner: repo.owner,
+                  repo: repo.repo,
+                  name: label,
+                  color: Math.floor(Math.random() * 16777215)
+                    .toString(16)
+                    .padStart(6, '0')
+                });
+
+                existingLabels.add(label);
+              }
+            }
+
+            /* -------------------------
+             * add issues to project
+             * ------------------------- */
+            async function addToProject(issueId) {
+              try {
+                const addRes = await github.graphql(`
+                  mutation ($project: ID!, $content: ID!) {
+                    addProjectV2ItemById(input: {
+                      projectId: $project
+                      contentId: $content
+                    }) {
+                      item { id }
+                    }
+                  }
+                `, {
+                  project: PROJECT_ID,
+                  content: issueId
+                });
+
+                const itemId = addRes.addProjectV2ItemById.item.id;
+
+                await github.graphql(`
+                  mutation (
+                    $project: ID!,
+                    $item: ID!,
+                    $field: ID!,
+                    $option: String!
+                  ) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $field
+                      value: { singleSelectOptionId: $option }
+                    }) {
+                      projectV2Item { id }
+                    }
+                  }
+                `, {
+                  project: PROJECT_ID,
+                  item: itemId,
+                  field: STATUS_FIELD_ID,
+                  option: BACKLOG_OPTION_ID
+                });
+
+              } catch (error) {
+                if (error.message.includes('Content already exists in this project')) {
+                  console.log('Issue already in project, skipping');
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+            /* -------------------------
+             * create / update issues
+             * ------------------------- */
+            async function createOrUpdateIssue(node, parentId = null) {
+              const labels = node.labels || [];
+              await ensureLabels(labels);
+
+              // check if this is an existing issue via title
+              const existing = existingIssuesByTitle.get(node.title);
+
+              if (existing) {
+                console.log(`Found existing issue #${existing.number}: ${node.title}`);
+                
+                // update if title, body, or labels changed
+                const needsUpdate =
+                  existing.title !== node.title ||
+                  existing.body !== (node.body || '') ||
+                  JSON.stringify([...existing.labels].sort()) !==
+                  JSON.stringify([...labels].sort());
+
+                if (needsUpdate) {
+                  console.log(`Updating issue #${existing.number}`);
+                  
+                  await github.rest.issues.update({
+                    owner: repo.owner,
+                    repo: repo.repo,
+                    issue_number: existing.number,
+                    title: node.title,
+                    body: node.body || ''
+                  });
+
+                  // set all labels at once to avoid stale label ID issues
+                  if (JSON.stringify([...existing.labels].sort()) !== JSON.stringify([...labels].sort())) {
+                    try {
+                      await github.rest.issues.setLabels({
+                        owner: repo.owner,
+                        repo: repo.repo,
+                        issue_number: existing.number,
+                        labels: labels
+                      });
+                    } catch (error) {
+                      console.log(`Warning: Could not update labels for issue #${existing.number}: ${error.message}`);
+                    }
+                  }
+                } else {
+                  console.log(`Skipping issue #${existing.number} - no changes detected`);
+                }
+
+                // process children with this issue as parent
+                for (const child of node.children || []) {
+                  await createOrUpdateIssue(child, existing.id);
+                }
+
+                return existing.id;
+              }
+
+              /* ---------- CREATE NEW ISSUE ---------- */
+              console.log(`Creating new issue: ${node.title}`);
+              
+              const res = await github.graphql(`
+                mutation (
+                  $repo: ID!,
+                  $title: String!,
+                  $body: String,
+                  $parent: ID
+                ) {
+                  createIssue(input: {
+                    repositoryId: $repo
+                    title: $title
+                    body: $body
+                    parentIssueId: $parent
+                  }) {
+                    issue {
+                      id
+                      number
+                    }
+                  }
+                }
+              `, {
+                repo: repoId,
+                title: node.title,
+                body: node.body || '',
+                parent: parentId
+              });
+
+              const issueId = res.createIssue.issue.id;
+              const issueNumber = res.createIssue.issue.number;
+
+              console.log(`Created issue #${issueNumber}`);
+
+              if (labels.length > 0) {
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: repo.owner,
+                    repo: repo.repo,
+                    issue_number: issueNumber,
+                    labels
+                  });
+                } catch (error) {
+                  console.log(`Warning: Could not add labels to issue #${issueNumber}: ${error.message}`);
+                }
+              }
+
+              await addToProject(issueId);
+
+              // process children with this issue as parent
+              for (const child of node.children || []) {
+                await createOrUpdateIssue(child, issueId);
+              }
+
+              return issueId;
+            }
+
+            /* -------------------------
+             * entry point
+             * ------------------------- */
+            console.log('Starting issue sync...');
+            
+            for (const issue of data.issues) {
+              await createOrUpdateIssue(issue);
+            }
+            
+            console.log('Issue sync completed!');
