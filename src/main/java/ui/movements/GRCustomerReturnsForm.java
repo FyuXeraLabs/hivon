@@ -16,6 +16,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     public GRCustomerReturnsForm() {
         initComponents();
     }
+    hiii...
 
     /**
      * This method is called from within the constructor to initialize the form.
