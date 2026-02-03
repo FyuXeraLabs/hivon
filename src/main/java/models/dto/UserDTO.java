@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package models.entity;
+package models.dto;
 
 import java.time.LocalDateTime;
 
@@ -10,38 +10,32 @@ import java.time.LocalDateTime;
  *
  * @author Sanod
  */
-public class User {
+public class UserDTO {
 
     private Integer userId;
     private String username;
-    private String passwordHash;
     private String fullName;
     private String email;
-    private UserRole role;
+    private String role;
     private Integer warehouseId;
     private Boolean isActive;
     private LocalDateTime lastLogin;
     private LocalDateTime createdDate;
-    private LocalDateTime lastModified;
+    private LocalDateTime modifiedDate;
 
     // default constructor
-    public User() {
-
+    public UserDTO() {
+        
     }
 
-    // constructor with all fields
-    public User(Integer userId, String username, String passwordHash, String fullName, String email, UserRole role, Integer warehouseId, Boolean isActive, LocalDateTime lastLogin, LocalDateTime createdDate, LocalDateTime lastModified) {
-        this.userId = userId;
+    // constructor for creating new user
+    public UserDTO(String username, String fullName, String email, String role, Integer warehouseId) {
         this.username = username;
-        this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.email = email;
         this.role = role;
         this.warehouseId = warehouseId;
-        this.isActive = isActive;
-        this.lastLogin = lastLogin;
-        this.createdDate = createdDate;
-        this.lastModified = lastModified;
+        this.isActive = true;
     }
 
     // getters and setters
@@ -61,14 +55,6 @@ public class User {
         this.username = username;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
     public String getFullName() {
         return fullName;
     }
@@ -85,11 +71,11 @@ public class User {
         this.email = email;
     }
 
-    public UserRole getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
@@ -125,17 +111,12 @@ public class User {
         this.createdDate = createdDate;
     }
 
-    public LocalDateTime getLastModified() {
-        return lastModified;
+    public LocalDateTime getModifiedDate() {
+        return modifiedDate;
     }
 
-    public void setLastModified(LocalDateTime lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    // user role enum
-    public enum UserRole {
-        ADMIN, MANAGER, SUPERVISOR, OPERATOR
+    public void setModifiedDate(LocalDateTime modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
     // helper method to check if user is active
