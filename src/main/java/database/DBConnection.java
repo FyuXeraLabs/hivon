@@ -7,7 +7,7 @@ package database;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import core.config.DatabaseConfig;
-import core.logging.ErrorLogger;
+import core.logging.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -58,10 +58,8 @@ public class DBConnection {
                         // create datasource
                         dataSource = new HikariDataSource(config);
                         
-                        System.out.println("HikariCP connection pool initialized successfully");
-                        
                     } catch (Exception e) {
-                        ErrorLogger.logError(e.getMessage(), e);
+                        Logger.errlog(e.getMessage(), e);
                         throw new RuntimeException("failed to initialize connection pool: " + e.getMessage(), e);
                     }
                 }
@@ -85,8 +83,7 @@ public class DBConnection {
                     conn.close();
                 }
             } catch (SQLException e) {
-                ErrorLogger.logError(e.getMessage(), e);
-                System.err.println("error closing connection: " + e.getMessage());
+                Logger.errlog("error closing connection: " + e.getMessage(), e);
             }
         }
     }
@@ -95,7 +92,6 @@ public class DBConnection {
     public static void shutdown() {
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
-            System.out.println("Connection pool shut down successfully");
         }
     }
     
