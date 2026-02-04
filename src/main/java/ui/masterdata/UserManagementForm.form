@@ -246,7 +246,7 @@
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="btnPwdReset" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="140" max="-2" attributes="0"/>
-                  <Component id="jPanel5" pref="57" max="32767" attributes="0"/>
+                  <Component id="jPanel5" pref="50" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -317,7 +317,10 @@
         </Component>
         <Component class="javax.swing.JButton" name="btnActDeact">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Deactivate"/>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/btnicn/unlock-14.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="  Activate"/>
             <Property name="nextFocusableComponent" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
               <ComponentRef name="btnPwdReset"/>
             </Property>
@@ -460,7 +463,7 @@
                               </Group>
                           </Group>
                       </Group>
-                      <EmptySpace pref="550" max="32767" attributes="0"/>
+                      <EmptySpace pref="555" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -590,12 +593,12 @@
                               </Group>
                           </Group>
                       </Group>
-                      <EmptySpace pref="57" max="32767" attributes="0"/>
+                      <EmptySpace pref="60" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                           <Component id="jScrollPane3" min="-2" pref="275" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="274" max="32767" attributes="0"/>
+                      <EmptySpace pref="276" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

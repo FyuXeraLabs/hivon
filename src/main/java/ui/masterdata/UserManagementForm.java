@@ -198,9 +198,16 @@ public class UserManagementForm extends javax.swing.JFrame {
         // deactivate/activate: only when selected, toggle label
         btnActDeact.setEnabled(hasSelection && !isAddMode);
         if (hasSelection) {
-            btnActDeact.setText(isActive ? "Deactivate" : "Activate");
+            if (isActive) {
+                btnActDeact.setText("  Deactivate");
+                btnActDeact.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/lock-14.png")));
+            } else {
+                btnActDeact.setText("  Activate");
+                btnActDeact.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/unlock-14.png")));
+            }
         } else {
-            btnActDeact.setText("Deactivate");
+            btnActDeact.setText("  Activate");
+            btnActDeact.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/unlock-14.png")));
         }
 
         // reset password: only when a user is selected and active
@@ -764,7 +771,8 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
-        btnActDeact.setText("Deactivate");
+        btnActDeact.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/unlock-14.png"))); // NOI18N
+        btnActDeact.setText("  Activate");
         btnActDeact.setNextFocusableComponent(btnPwdReset);
         btnActDeact.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -838,7 +846,7 @@ public class UserManagementForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPwdReset)
                 .addGap(140, 140, 140)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -909,7 +917,7 @@ public class UserManagementForm extends javax.swing.JFrame {
                                 .addComponent(chkIsActive))
                             .addComponent(txtFullName)
                             .addComponent(txtEmail))))
-                .addContainerGap(550, Short.MAX_VALUE))
+                .addContainerGap(555, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -981,11 +989,11 @@ public class UserManagementForm extends javax.swing.JFrame {
                             .addComponent(btnAddPermission)
                             .addComponent(btnRemovePermission)
                             .addComponent(btnAssignDefault))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(274, Short.MAX_VALUE))
+                .addContainerGap(276, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

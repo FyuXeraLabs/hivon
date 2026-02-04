@@ -530,15 +530,26 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void btnConfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmActionPerformed
         // TODO add your handling code here:
-        Object selectedItem = cmbMovement.getSelectedItem();
-        
-        if (selectedItem == null) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a movement from the list!");
+        Object item = cmbMovement.getSelectedItem();
+        String value = null;
+
+        if (item != null) {
+            value = item.toString().trim();
+        }
+
+        if (value == null || value.isEmpty()) {
+            Object editorItem = cmbMovement.getEditor().getItem();
+            if (editorItem != null) {
+                value = editorItem.toString().trim();
+            }
+        }
+
+        if (value == null || value.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select or enter a movement!");
             cmbMovement.requestFocusInWindow();
             return;
         }
-        
-        String value = selectedItem.toString();
+
         handleMovementSelection(value);
     }//GEN-LAST:event_btnConfirmActionPerformed
 
