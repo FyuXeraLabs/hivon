@@ -4,17 +4,126 @@
  */
 package ui;
 
+import core.security.*;
+import core.workers.BackgroundTask;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.util.Set;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import models.entity.User;
+
 /**
  *
  * @author Sanod
  */
 public class LoginFrame extends javax.swing.JFrame {
 
+    private int loginAttempts = 0;
+    private char defaultEchoChar;
+
     /**
      * Creates new form LoginFrame
      */
     public LoginFrame() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        defaultEchoChar = pwdPassword.getEchoChar();
+        
+        setupTttFieldNavigation();
+        setupKeyBindings(); 
+    }
+
+    private void validateInputs() {
+        boolean hasError = false;
+
+        // light red color
+        Color errorColor = new Color(255, 200, 200);
+
+        // reset first (important)
+        txtUsername.setBackground(Color.WHITE);
+        pwdPassword.setBackground(Color.WHITE);
+
+        if (txtUsername.getText().trim().isEmpty()) {
+            txtUsername.setBackground(errorColor);
+            txtUsername.requestFocusInWindow();
+            hasError = true;
+        } else if (pwdPassword.getPassword().length == 0) {
+            pwdPassword.setBackground(errorColor);
+            pwdPassword.requestFocusInWindow();
+            hasError = true;
+        }
+
+        if (hasError) {
+            return; // stop further processing
+        }
+
+        // continue with login logic here
+    }
+    
+    private void clearFields() {
+        txtUsername.setText("");
+        pwdPassword.setText("");
+    }
+    
+    private void setupTttFieldNavigation() {
+        // array of txt fields
+        javax.swing.JTextField[] textFields = {txtUsername, pwdPassword};
+
+        for (int i = 0; i < textFields.length; i++) {
+            final int currentIndex = i;
+            textFields[i].addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent evt) {
+                    if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
+                        evt.consume();
+                        if (currentIndex < textFields.length - 1) {
+                            textFields[currentIndex + 1].requestFocus();
+                        }
+                    } else if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
+                        evt.consume();
+                        if (currentIndex > 0) {
+                            textFields[currentIndex - 1].requestFocus();
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    private void setupKeyBindings() {
+        // get the input map and action map for the content pane
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = getRootPane().getActionMap();
+
+        // create toggle password action
+        Action togglePasswordAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tglbtnShowPwd.doClick();
+            }
+        };
+
+        // create key stroke for Alt+S
+        KeyStroke altS = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK);
+
+        // bind key stroke to action
+        inputMap.put(altS, "togglePassword");
+        actionMap.put("togglePassword", togglePasswordAction);
+
+        // bind to password field for better ux
+        InputMap pwdInputMap = pwdPassword.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap pwdActionMap = pwdPassword.getActionMap();
+        pwdInputMap.put(altS, "togglePassword");
+        pwdActionMap.put("togglePassword", togglePasswordAction);
     }
 
     /**
@@ -26,21 +135,224 @@ public class LoginFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        txtUsername = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        pwdPassword = new javax.swing.JPasswordField();
+        btnLogin = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        tglbtnShowPwd = new javax.swing.JToggleButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setAlwaysOnTop(true);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+        setResizable(false);
+        setType(java.awt.Window.Type.POPUP);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
+
+        txtUsername.setNextFocusableComponent(pwdPassword);
+        txtUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtUsernameKeyPressed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        jLabel1.setText("Username");
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        jLabel2.setText("Password");
+
+        pwdPassword.setNextFocusableComponent(btnLogin);
+        pwdPassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                pwdPasswordKeyPressed(evt);
+            }
+        });
+
+        btnLogin.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/login-12.png"))); // NOI18N
+        btnLogin.setText("  Login");
+        btnLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoginActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/app-icon-mini.png"))); // NOI18N
+
+        tglbtnShowPwd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/view-14.png"))); // NOI18N
+        tglbtnShowPwd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tglbtnShowPwdActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(jLabel3)
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addGap(60, 60, 60))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(pwdPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(tglbtnShowPwd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtUsername, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addGap(55, 55, 55)
+                                        .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(37, 37, 37))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(51, 51, 51)
+                        .addComponent(jLabel3))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pwdPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(tglbtnShowPwd))
+                        .addGap(18, 18, 18)
+                        .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
+        // TODO add your handling code here:
+        // validate input fields
+        if (txtUsername.getText().trim().isEmpty() || pwdPassword.getPassword().length == 0) {
+            validateInputs();
+            return;
+        }
+
+        String username = txtUsername.getText().trim();
+        String password = new String(pwdPassword.getPassword());
+
+        BackgroundTask task = new BackgroundTask(this, "Authenticating User") {
+
+            private User user;
+            private Set<String> permissions;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+
+                updateProgress("Authenticating credentials...");
+
+                UserAuthentication auth = new UserAuthentication();
+                user = auth.authenticate(username, password);
+
+                if (user == null) {
+                    return false;
+                }
+
+                updateProgress("Loading permissions...");
+
+                PermissionManager pm = new PermissionManager();
+                permissions = pm.loadUserPermissions(user.getUserId());
+
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+
+                // initialize session
+                UserSession session = UserSession.getInstance();
+                session.initialize(user, permissions);
+
+                // transition UI
+                dispose();
+                new MainFrame().setVisible(true);
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+
+                loginAttempts++;
+
+                UserAuthentication auth = new UserAuthentication();
+
+                if (loginAttempts >= 5) {
+                    auth.lockAccount(username);
+                    JOptionPane.showMessageDialog(btnLogin, "Account locked. Try again after 30 minutes.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                JOptionPane.showMessageDialog(btnLogin, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+
+                clearFields();
+                txtUsername.requestFocus();
+            }
+        };
+
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        // TODO add your handling code here:
+        txtUsername.requestFocusInWindow();
+        getRootPane().setDefaultButton(btnLogin);
+    }//GEN-LAST:event_formWindowOpened
+
+    private void txtUsernameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsernameKeyPressed
+        // TODO add your handling code here:
+        txtUsername.setBackground(Color.WHITE);
+        
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnLoginActionPerformed(null);
+        }
+    }//GEN-LAST:event_txtUsernameKeyPressed
+
+    private void pwdPasswordKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pwdPasswordKeyPressed
+        // TODO add your handling code here:
+        pwdPassword.setBackground(Color.WHITE);
+        
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnLoginActionPerformed(null);
+        }
+    }//GEN-LAST:event_pwdPasswordKeyPressed
+
+    private void tglbtnShowPwdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tglbtnShowPwdActionPerformed
+        // TODO add your handling code here:
+        if (tglbtnShowPwd.isSelected()) {
+            // show pwd
+            pwdPassword.setEchoChar((char) 0);
+            tglbtnShowPwd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/hide-14.png")));
+        } else {
+            // hide pwd
+            pwdPassword.setEchoChar(defaultEchoChar);
+            tglbtnShowPwd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/view-14.png")));
+        }
+    }//GEN-LAST:event_tglbtnShowPwdActionPerformed
 
     /**
      * @param args the command line arguments
@@ -78,5 +390,12 @@ public class LoginFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnLogin;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPasswordField pwdPassword;
+    private javax.swing.JToggleButton tglbtnShowPwd;
+    private javax.swing.JTextField txtUsername;
     // End of variables declaration//GEN-END:variables
 }

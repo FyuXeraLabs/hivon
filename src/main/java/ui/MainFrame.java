@@ -4,17 +4,96 @@
  */
 package ui;
 
+import core.security.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Map;
+
+import ui.components.*;
+import ui.masterdata.*;
+import ui.movements.*;
+import ui.reports.*;
+import ui.inventory.*;
+
+import database.DBConnection;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import java.awt.event.InputEvent;
+import models.entity.User;
+
 /**
  *
  * @author Sanod
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    private final UserSession userSession;
+
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+
+        // init user session
+        userSession = UserSession.getInstance();
+        if (userSession.isValid()) {
+            User.UserRole userRole = userSession.getUserRole();
+
+            if (userRole == User.UserRole.ADMIN) {
+                btnUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/admin.png")));
+            } else if (userRole == User.UserRole.SUPERVISOR) {
+                btnUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/supervisor.png")));
+            } else if (userRole == User.UserRole.OPERATOR) {
+                btnUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/operator.png")));
+            } else if (userRole == User.UserRole.MANAGER) {
+                btnUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/manager.png")));
+            }
+
+            btnUser.setText("   " + userSession.getUsername());
+        }
+
+        setupKeyBindings();
+    }
+    
+    private void setupKeyBindings() {
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = getRootPane().getActionMap();
+
+        Action altSAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnConfirm.doClick();
+            }
+        };
+
+        Action f10Action = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnConfirm.doClick();
+            }
+        };
+
+        KeyStroke altS = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK);
+        KeyStroke f10 = KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0);
+
+        inputMap.put(altS, "altSConfirm");
+        actionMap.put("altSConfirm", altSAction);
+
+        inputMap.put(f10, "f10Confirm");
+        actionMap.put("f10Confirm", f10Action);
     }
 
     /**
@@ -26,21 +105,460 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        popupUserBtn = new javax.swing.JPopupMenu();
+        menuitemLogout = new javax.swing.JMenuItem();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        treeMovement = new javax.swing.JTree();
+        cmbMovement = new javax.swing.JComboBox<>();
+        btnConfirm = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+        btnUser = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        mitemLogout = new javax.swing.JMenuItem();
+
+        popupUserBtn.setPreferredSize(new java.awt.Dimension(140, 30));
+
+        menuitemLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/logout-14.png"))); // NOI18N
+        menuitemLogout.setText("  Logout");
+        menuitemLogout.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemLogout.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemLogout.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemLogoutActionPerformed(evt);
+            }
+        });
+        popupUserBtn.add(menuitemLogout);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+        setMinimumSize(new java.awt.Dimension(900, 600));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
+
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Warehouse Management System");
+        javax.swing.tree.DefaultMutableTreeNode treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Master Data");
+        javax.swing.tree.DefaultMutableTreeNode treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD31 - Material Master");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD32 - Batch Management");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD33 - Bin Management");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD34 - Zone Management");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD35 - Vendor");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD36 - Customer");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD37 - UOM");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MD38 - User Management");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Inbound");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("IN11 - GR Purchase Order");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("IN12 - GR Customer Returns");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("IN13 - GR Transfer In");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Outbound");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("OUT14 - GI Sales Order");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("OUT15 - Return to Vendor");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("OUT16 - GI Internal Consumption");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Internal");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INT17 - Bin-to-Bin Transfer");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INT18 - Splitting/Pack Break");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INT19 - Cycle Count");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Adjustments");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("ADJ20 - Inventory Adjustment");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("ADJ21 - Scrap Write-off");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Transfer");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("TR22 - Putaway TO");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("TR23 - Picking TO");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("TR24 - Replenishment TO");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Queries");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INV51 - Inventory Query");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INV52 - Stock Overview");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INV53 - Batch Tracking");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INV54 - Stock Level");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INV55 - Expiry Monitor");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("INV56 - Inventory Alerts");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Reports");
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP61 - Daily Activity");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP62 - Inventory Valuation");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP63 - Stock Aging");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP64 - Performance Report");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP65 - Utilization Report");
+        treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP66 - Financial Report");
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        treeMovement.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        treeMovement.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                treeMovementMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(treeMovement);
+
+        cmbMovement.setEditable(true);
+        cmbMovement.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "MD31 - Material Master", "MD32 - Batch Management", "MD33 - Bin Management", "MD34 - Zone Management", "MD35 - Vendor", "MD36 - Customer", "MD37 - UOM", "MD38 - User Management", "IN11 - GR Purchase Order", "IN12 - GR Customer Returns", "IN13 - GR Transfer In", "OUT14 - GI Sales Order", "OUT15 - Return to Vendor", "OUT16 - GI Internal Consumption", "INT17 - Bin-to-Bin Transfer", "INT18 - Splitting/Pack Break", "INT19 - Cycle Count", "ADJ20 - Inventory Adjustment", "ADJ21 - Scrap Write-off", "TR22 - Putaway TO", "TR23 - Picking TO", "TR24 - Replenishment TO", "INV51 - Inventory Query", "INV52 - Stock Overview", "INV53 - Batch Tracking", "INV54 - Stock Level", "INV55 - Expiry Monitor", "INV56 - Inventory Alerts", "REP61 - Daily Activity", "REP62 - Inventory Valuation", "REP63 - Stock Aging", "REP64 - Performance Report", "REP65 - Utilization Report", "REP66 - Financial Report" }));
+        cmbMovement.setSelectedIndex(-1);
+        cmbMovement.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                cmbMovementKeyPressed(evt);
+            }
+        });
+
+        btnConfirm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/black-done.png"))); // NOI18N
+        btnConfirm.setMnemonic('S');
+        btnConfirm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmActionPerformed(evt);
+            }
+        });
+
+        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/black-support.png"))); // NOI18N
+        jButton3.setText("Help & Support");
+
+        jPanel5.setMaximumSize(new java.awt.Dimension(200, 22));
+        jPanel5.setMinimumSize(new java.awt.Dimension(50, 22));
+        jPanel5.setPreferredSize(new java.awt.Dimension(47, 22));
+
+        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
+        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
+        );
+
+        btnUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/admin.png"))); // NOI18N
+        btnUser.setText("  Username");
+        btnUser.setMaximumSize(new java.awt.Dimension(140, 28));
+        btnUser.setMinimumSize(new java.awt.Dimension(140, 28));
+        btnUser.setPreferredSize(new java.awt.Dimension(140, 28));
+        btnUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserActionPerformed(evt);
+            }
+        });
+
+        jMenuBar1.setMinimumSize(new java.awt.Dimension(70, 28));
+        jMenuBar1.setPreferredSize(new java.awt.Dimension(70, 28));
+
+        jMenu1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/black-hamburger.png"))); // NOI18N
+
+        jMenu2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/help-14.png"))); // NOI18N
+        jMenu2.setText("   Help       ");
+
+        jMenuItem2.setText("User Manual");
+        jMenu2.add(jMenuItem2);
+
+        jMenuItem3.setText("Keyboard Shortcuts");
+        jMenu2.add(jMenuItem3);
+
+        jMenuItem4.setText("Contact Support");
+        jMenu2.add(jMenuItem4);
+
+        jMenuItem5.setText("About                                        ");
+        jMenu2.add(jMenuItem5);
+
+        jMenu1.add(jMenu2);
+
+        mitemLogout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        mitemLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/logout-16.png"))); // NOI18N
+        mitemLogout.setText("   Logout       ");
+        mitemLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitemLogoutActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mitemLogout);
+
+        jMenuBar1.add(jMenu1);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(cmbMovement, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(451, 451, 451)
+                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUser, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(8, 8, 8)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbMovement, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnUser, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void handleMovementSelection(String value) {
+
+        if (!userSession.isValid()) {
+            StatusMessageHandler.showError(txtStatus, "Session expired. Please login again!");
+            // JOptionPane.showMessageDialog(this, "Session expired. Please login again.", "Session Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn;
+        try {
+            conn = DBConnection.getConnection();
+            if (conn == null || conn.isClosed()) {
+                StatusMessageHandler.showError(txtStatus, "Database connection error. Please restart the application.");
+                return;
+            }
+        } catch (SQLException e) {
+            StatusMessageHandler.showError(txtStatus, "Failed to connect to database");
+            e.printStackTrace();
+            return;
+        }
+
+        // movement permission mapping
+        Map<String, String> movementToPermission = Map.ofEntries(
+                Map.entry("md31", "VIEW_MATERIALS"),
+                Map.entry("md32", "VIEW_MATERIALS"),
+                Map.entry("md33", "VIEW_BINS"),
+                Map.entry("md34", "VIEW_ZONES"),
+                Map.entry("md35", "VIEW_VENDORS"),
+                Map.entry("md36", "VIEW_CUSTOMERS"),
+                Map.entry("md37", "VIEW_MATERIALS"),
+                Map.entry("md38", "VIEW_USERS"),
+                Map.entry("in11", "PROCESS_GR"),
+                Map.entry("in12", "PROCESS_TRANSFER_IN"),
+                Map.entry("in13", "PROCESS_GR_RETURNS"),
+                Map.entry("out14", "PROCESS_GI"),
+                Map.entry("out15", "PROCESS_GI"),
+                Map.entry("out16", "PROCESS_GI_CONSUMPTION"),
+                Map.entry("int17", "PROCESS_TRANSFER"),
+                Map.entry("int18", "PROCESS_SPLITTING"),
+                Map.entry("int19", "PROCESS_CYCLE_COUNT"),
+                Map.entry("adj20", "PROCESS_ADJUSTMENT"),
+                Map.entry("adj21", "PROCESS_SCRAP"),
+                Map.entry("tr22", "PROCESS_PUTAWAY"),
+                Map.entry("tr23", "PROCESS_PICKING"),
+                Map.entry("tr24", "PROCESS_REPLENISHMENT"),
+                Map.entry("inv51", "QUERY_INVENTORY"),
+                Map.entry("inv52", "VIEW_STOCK_OVERVIEW"),
+                Map.entry("inv53", "VIEW_BATCH_TRACKING"),
+                Map.entry("inv54", "VIEW_STOCK_LEVEL"),
+                Map.entry("inv55", "VIEW_EXPIRY_MONITOR"),
+                Map.entry("inv56", "VIEW_INVENTORY_ALERTS"),
+                Map.entry("rep61", "VIEW_DAILY_ACTIVITY_REPORT"),
+                Map.entry("rep62", "VIEW_INVENTORY_VALUATION_REPORT"),
+                Map.entry("rep63", "VIEW_STOCK_AGING_REPORT"),
+                Map.entry("rep64", "VIEW_PERFORMANCE_REPORT"),
+                Map.entry("rep65", "VIEW_UTILIZATION_REPORT"),
+                Map.entry("rep66", "VIEW_FINANCIAL_REPORT")
+        );
+
+        // movement form mapping
+        Map<String, Runnable> forms;
+        forms = Map.ofEntries(
+                Map.entry("md31", () -> new MaterialMasterForm().setVisible(true)),
+                Map.entry("md32", () -> new BatchManagementForm().setVisible(true)),
+                Map.entry("md33", () -> new BinManagementForm().setVisible(true)),
+                Map.entry("md34", () -> new ZoneManagementForm().setVisible(true)),
+                Map.entry("md35", () -> new VendorForm().setVisible(true)),
+                Map.entry("md36", () -> new CustomerForm().setVisible(true)),
+                Map.entry("md37", () -> new UOMForm().setVisible(true)),
+                Map.entry("md38", () -> {
+                    new UserManagementForm(userSession.getCurrentUser()).setVisible(true);
+                }),
+                Map.entry("in11", () -> new GRPurchaseOrderForm().setVisible(true)),
+                Map.entry("in12", () -> new GRCustomerReturnsForm().setVisible(true)),
+                Map.entry("in13", () -> new GRTransferInForm().setVisible(true)),
+                Map.entry("out14", () -> new GISalesOrderForm().setVisible(true)),
+                Map.entry("out15", () -> new ReturnToVendorForm().setVisible(true)),
+                Map.entry("out16", () -> new GIInternalConsumptionForm().setVisible(true)),
+                Map.entry("int17", () -> new BinToBinTransferForm().setVisible(true)),
+                Map.entry("int18", () -> new SplittingPackBreakForm().setVisible(true)),
+                Map.entry("int19", () -> new CycleCountForm().setVisible(true)),
+                Map.entry("adj20", () -> new InventoryAdjustmentForm().setVisible(true)),
+                Map.entry("adj21", () -> new ScrapWriteoffForm().setVisible(true)),
+                Map.entry("tr22", () -> new PutawayTOForm().setVisible(true)),
+                Map.entry("tr23", () -> new PickingTOForm().setVisible(true)),
+                Map.entry("tr24", () -> new ReplenishmentTOForm().setVisible(true)),
+                Map.entry("inv51", () -> new InventoryQueryForm().setVisible(true)),
+                Map.entry("inv52", () -> new StockOverviewForm().setVisible(true)),
+                Map.entry("inv53", () -> new BatchTrackingForm().setVisible(true)),
+                Map.entry("inv54", () -> new StockLevelForm().setVisible(true)),
+                Map.entry("inv55", () -> new ExpiryMonitorForm().setVisible(true)),
+                Map.entry("inv56", () -> new InventoryAlertsForm().setVisible(true)),
+                Map.entry("rep61", () -> new DailyActivityForm().setVisible(true)),
+                Map.entry("rep62", () -> new InventoryValuationForm().setVisible(true)),
+                Map.entry("rep63", () -> new StockAgingForm().setVisible(true)),
+                Map.entry("rep64", () -> new PerformanceReportForm().setVisible(true)),
+                Map.entry("rep65", () -> new UtilizationReportForm().setVisible(true)),
+                Map.entry("rep66", () -> new FinancialReportForm().setVisible(true))
+        );
+
+        String code = value == null ? "" : value.trim().toLowerCase();
+
+        boolean found = false;
+
+        for (String key : forms.keySet()) {
+            if (code.contains(key)) {
+
+                String requiredPermission = movementToPermission.get(key);
+
+                if (requiredPermission != null && !userSession.hasPermission(requiredPermission)) {
+                    StatusMessageHandler.showWarning(txtStatus, "You do not have permission to access this feature!");
+                    // JOptionPane.showMessageDialog(this, "You do not have permission to access this feature.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                forms.get(key).run();
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            StatusMessageHandler.showWarning(txtStatus, "No movement is defined for the entered code!");
+            // JOptionPane.showMessageDialog(this, "No movement is defined for the entered code.\nPlease check and try again.", "Invalid Movement", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+
+    private void treeMovementMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_treeMovementMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount() == 2) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) treeMovement.getLastSelectedPathComponent();
+
+            if (node == null) {
+                return;
+            }
+
+            if (node.isLeaf()) {
+                String value = node.getUserObject().toString();
+                handleMovementSelection(value);
+            }
+
+        }
+    }//GEN-LAST:event_treeMovementMouseClicked
+
+    private void mitemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitemLogoutActionPerformed
+        // TODO add your handling code here:
+        LogoutManager.logout();
+    }//GEN-LAST:event_mitemLogoutActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        // TODO add your handling code here:
+        cmbMovement.requestFocusInWindow();
+        getRootPane().setDefaultButton(btnConfirm);
+    }//GEN-LAST:event_formWindowOpened
+
+    private void btnConfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmActionPerformed
+        // TODO add your handling code here:
+        Object selectedItem = cmbMovement.getSelectedItem();
+        
+        if (selectedItem == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a movement from the list!");
+            cmbMovement.requestFocusInWindow();
+            return;
+        }
+        
+        String value = selectedItem.toString();
+        handleMovementSelection(value);
+    }//GEN-LAST:event_btnConfirmActionPerformed
+
+    private void cmbMovementKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cmbMovementKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnConfirmActionPerformed(null);
+        }
+    }//GEN-LAST:event_cmbMovementKeyPressed
+
+    private void btnUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserActionPerformed
+        // TODO add your handling code here:
+        popupUserBtn.setSize(btnUser.getWidth(), btnUser.getHeight());
+        popupUserBtn.show(btnUser, 0, btnUser.getHeight());
+    }//GEN-LAST:event_btnUserActionPerformed
+
+    private void menuitemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemLogoutActionPerformed
+        // TODO add your handling code here:
+        LogoutManager.logout();
+    }//GEN-LAST:event_menuitemLogoutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -78,5 +596,23 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnConfirm;
+    private javax.swing.JButton btnUser;
+    private javax.swing.JComboBox<String> cmbMovement;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JMenuItem menuitemLogout;
+    private javax.swing.JMenuItem mitemLogout;
+    private javax.swing.JPopupMenu popupUserBtn;
+    private javax.swing.JTree treeMovement;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
