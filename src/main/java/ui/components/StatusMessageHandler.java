@@ -8,23 +8,29 @@ import java.awt.event.ActionListener;
 public class StatusMessageHandler {
 
     public enum MessageType {
-        SUCCESS(new Color(144, 238, 144)),
-        ERROR(new Color(255, 182, 193)),
-        WARNING(new Color(255, 255, 153)),
-        INFO(new Color(173, 216, 230));
+        SUCCESS(new Color(144, 238, 144), "/sounds/success.wav"),
+        ERROR(new Color(255, 182, 193), "/sounds/error.wav"),
+        WARNING(new Color(255, 255, 153), "/sounds/warning.wav"),
+        INFO(new Color(173, 216, 230), "/sounds/info.wav");
 
         private final Color color;
+        private final String sound;
 
-        MessageType(Color color) {
+        MessageType(Color color, String sound) {
             this.color = color;
+            this.sound = sound;
         }
 
         public Color getColor() {
             return color;
         }
+
+        public String getSound() {
+            return sound;
+        }
     }
 
-    private static Timer currentTimer = null;
+    private static Timer currentTimer;
 
     public static void showStatus(JLabel label, String message, MessageType type) {
 
@@ -36,7 +42,9 @@ public class StatusMessageHandler {
         label.setBackground(type.getColor());
         label.setOpaque(true);
 
-        currentTimer = new Timer(5000, new ActionListener() {
+        SoundPlayer.play(type.getSound());
+
+        currentTimer = new Timer(100, new ActionListener() {
             private float alpha = 1.0f;
             private final Color originalColor = type.getColor();
             private final Color defaultColor = UIManager.getColor("Label.background");
@@ -44,19 +52,18 @@ public class StatusMessageHandler {
             @Override
             public void actionPerformed(ActionEvent e) {
                 alpha -= 0.05f;
-                if (alpha <= 0) {
-                    alpha = 0;
-                    label.setBackground(defaultColor);
+
+                if (alpha <= 0f) {
                     label.setText("");
+                    label.setBackground(defaultColor);
                     ((Timer) e.getSource()).stop();
                 } else {
-
-                    Color blendedColor = blendColors(originalColor, defaultColor, alpha);
-                    label.setBackground(blendedColor);
+                    label.setBackground(blendColors(originalColor, defaultColor, alpha));
                 }
             }
         });
-        currentTimer.setDelay(100);
+
+        currentTimer.setInitialDelay(5000);
         currentTimer.start();
     }
 
@@ -76,19 +83,20 @@ public class StatusMessageHandler {
         showStatus(label, message, MessageType.INFO);
     }
 
-    private static Color blendColors(Color c1, Color c2, float alpha) {
-        float beta = 1 - alpha;
-        int red = (int) (c1.getRed() * alpha + c2.getRed() * beta);
-        int green = (int) (c1.getGreen() * alpha + c2.getGreen() * beta);
-        int blue = (int) (c1.getBlue() * alpha + c2.getBlue() * beta);
-        return new Color(red, green, blue);
-    }
-
     public static void clearStatus(JLabel label) {
-        if (currentTimer != null && currentTimer.isRunning()) {
+        if (currentTimer != null) {
             currentTimer.stop();
         }
         label.setText("");
         label.setBackground(UIManager.getColor("Label.background"));
+    }
+
+    private static Color blendColors(Color c1, Color c2, float alpha) {
+        float beta = 1f - alpha;
+        return new Color(
+                (int) (c1.getRed() * alpha + c2.getRed() * beta),
+                (int) (c1.getGreen() * alpha + c2.getGreen() * beta),
+                (int) (c1.getBlue() * alpha + c2.getBlue() * beta)
+        );
     }
 }
