@@ -4,17 +4,55 @@
  */
 package ui.masterdata;
 
+import java.util.List;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
+
+import masterdata.controllers.ZoneManagementController;
+import models.dto.ZoneDTO;
+import models.dto.WarehouseDTO;
+import core.api.dao.WarehouseDAO;
+import core.security.UserSession;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+
 /**
  *
- * @author Thisula
+ * @author Sanod
  */
 public class ZoneManagementForm extends javax.swing.JFrame {
+
+    private ZoneManagementController controller;
+    private ZoneDTO selectedZone;
+    private List<ZoneDTO> allZones = new ArrayList<>();
+    private List<WarehouseDTO> allWarehouses = new ArrayList<>();
 
     /**
      * Creates new form ZoneManagementForm
      */
     public ZoneManagementForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new ZoneManagementController();
+        setupTttFieldNavigation();
+        setupKeyBindings();
+        cmbWarehouse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadZones();
+            }
+        });
+        loadWarehouses();
     }
 
     /**
@@ -26,57 +64,703 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txtSearch = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        btnRefresh = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        cmbWarehouse = new ui.components.CheckedComboBox<>();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblZones = new javax.swing.JTable();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        txtCode = new javax.swing.JTextField();
+        txtName = new javax.swing.JTextField();
+        txtDescription = new javax.swing.JTextField();
+        lblTotalBins = new javax.swing.JLabel();
+        lblTotalCapacity = new javax.swing.JLabel();
+        lblUtilization = new javax.swing.JLabel();
+        cmbZoneType = new javax.swing.JComboBox<>();
+        jPanel2 = new javax.swing.JPanel();
+        btnAdd = new javax.swing.JButton();
+        btnUpdate = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnViewBins = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Zone Management");
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
+
+        jLabel1.setText("Zone Code/Name");
+
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearch.setText("  Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/refresh-2-14.png"))); // NOI18N
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setText("Warehouse");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRefresh)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSearch)
+                        .addComponent(jLabel8)
+                        .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Zone List"));
+
+        tblZones.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Zone Code", "Name", "Type", "Bin Count", "Capacity", "Utilization"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblZones.setShowGrid(false);
+        tblZones.getTableHeader().setReorderingAllowed(false);
+        tblZones.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblZonesMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblZones);
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Zone Details"));
+
+        jLabel2.setText("Zone Code *");
+
+        jLabel3.setText("Zone Name *");
+
+        jLabel4.setText("Zone Type");
+
+        jLabel5.setText("Description");
+
+        jLabel9.setText("Description");
+
+        jLabel10.setText("Total Capacity");
+
+        jLabel11.setText("Current Utilization");
+
+        lblTotalBins.setText("0");
+
+        lblTotalCapacity.setText("0.00");
+
+        lblUtilization.setText("0%");
+
+        cmbZoneType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "RECEIVING", "STORAGE", "PICKING", "SHIPPING", "SPECIAL" }));
+        cmbZoneType.setSelectedIndex(-1);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel9)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel11))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtName)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(30, 30, 30)
+                                .addComponent(jLabel5)
+                                .addGap(18, 18, 18)
+                                .addComponent(cmbZoneType, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(lblTotalBins)
+                            .addComponent(lblTotalCapacity)
+                            .addComponent(lblUtilization))))
+                .addContainerGap(555, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(cmbZoneType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(lblTotalBins))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(lblTotalCapacity))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(lblUtilization))
+                .addContainerGap(20, Short.MAX_VALUE))
+        );
+
+        btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAdd.setText("Add Zone");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdate.setText("  Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnDelete.setText("  Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
+        btnViewBins.setText("View Bins");
+        btnViewBins.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewBinsActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("  Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
+        btnSave.setText("  Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
+
+        jPanel5.setMaximumSize(new java.awt.Dimension(200, 22));
+        jPanel5.setMinimumSize(new java.awt.Dimension(50, 22));
+        jPanel5.setPreferredSize(new java.awt.Dimension(47, 22));
+
+        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
+        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(btnAdd)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSave)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addGap(37, 37, 37)
+                .addComponent(btnUpdate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDelete)
+                .addGap(37, 37, 37)
+                .addComponent(btnViewBins)
+                .addGap(200, 200, 200)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnAdd)
+                        .addComponent(btnUpdate)
+                        .addComponent(btnDelete)
+                        .addComponent(btnViewBins)
+                        .addComponent(btnClear)
+                        .addComponent(btnSave))
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        loadWarehouses();
+    }//GEN-LAST:event_formWindowOpened
+
+    private void tblZonesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblZonesMouseClicked
+        int selectedRow = tblZones.getSelectedRow();
+        if (selectedRow != -1) {
+            String code = (String) tblZones.getValueAt(selectedRow, 0);
+            selectedZone = findZoneByCode(code);
+            if (selectedZone != null) {
+                txtCode.setText(selectedZone.getZoneCode());
+                txtName.setText(selectedZone.getZoneName());
+                txtDescription.setText(selectedZone.getDescription());
+                if (selectedZone.getZoneType() != null) {
+                    cmbZoneType.setSelectedItem(selectedZone.getZoneType());
+                }
+                lblTotalBins.setText(String.valueOf(selectedZone.getTotalBins()));
+                lblTotalCapacity.setText(selectedZone.getTotalCapacity() != null ? selectedZone.getTotalCapacity().toString() : "0");
+                lblUtilization.setText(String.format("%.1f%%", selectedZone.getUtilizationPercent()));
+            }
+        }
+    }//GEN-LAST:event_tblZonesMouseClicked
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        StatusMessageHandler.showInfo(txtStatus, "Add/Edit zones through the Bin Management form");
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        StatusMessageHandler.showInfo(txtStatus, "Zones are managed through Bin Management");
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        clearForm();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        StatusMessageHandler.showInfo(txtStatus, "Zones are managed through Bin Management");
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        StatusMessageHandler.showInfo(txtStatus, "Zones are managed through Bin Management");
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        loadZones();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        loadZones();
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnViewBinsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewBinsActionPerformed
+        if (selectedZone != null) {
+            ui.dialogs.ZoneBinViewForm dialog = new ui.dialogs.ZoneBinViewForm(this, true, selectedZone);
+            dialog.setVisible(true);
+        } else {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a zone first!");
+        }
+    }//GEN-LAST:event_btnViewBinsActionPerformed
+
+    // loads warehouses and populates zone data
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = WarehouseDAO.getInstance().getWarehouses();
+                return warehouses != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                allWarehouses = warehouses;
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.setSelectAllLabel("All");
+                cmbWarehouse.addItem("All");
+                if (warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        cmbWarehouse.addItem(wh.toString());
+                    }
+                }
+
+                Integer userWhId = null;
+                try {
+                    if (UserSession.getInstance().getCurrentUser() != null) {
+                        userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
+                    }
+                } catch (Exception e) {
+                    Logger.errlog("Could not read warehouse ID from session", e);
+                }
+
+                if (userWhId != null && warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        if (wh.getWarehouseId().equals(userWhId)) {
+                            java.util.Set<String> selected = new java.util.HashSet<>();
+                            selected.add(wh.toString());
+                            cmbWarehouse.setSelectedItems(selected);
+                            break;
+                        }
+                    }
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ZoneManagementForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ZoneManagementForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ZoneManagementForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ZoneManagementForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ZoneManagementForm().setVisible(true);
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
             }
-        });
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadZones() {
+        java.util.Set<String> selectedWhSet = cmbWarehouse.getSelectedItems();
+        if (selectedWhSet.isEmpty()) {
+            DefaultTableModel model = (DefaultTableModel) tblZones.getModel();
+            model.setRowCount(0);
+            return;
+        }
+
+        String searchTerm = txtSearch.getText().trim();
+
+        BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
+            private List<ZoneDTO> allZonesResult = new ArrayList<>();
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching zones...");
+                java.util.Set<String> seenCodes = new java.util.HashSet<>();
+                for (String whStr : selectedWhSet) {
+                    WarehouseDTO wh = null;
+                    for (WarehouseDTO w : allWarehouses) {
+                        if (w.toString().equals(whStr)) {
+                            wh = w;
+                            break;
+                        }
+                    }
+                    if (wh == null) continue;
+                    int wid = wh.getWarehouseId();
+                    List<ZoneDTO> zones;
+                    if (!searchTerm.isEmpty()) {
+                        zones = controller.searchZonesByWarehouse(wid, searchTerm);
+                    } else {
+                        zones = controller.getZonesByWarehouse(wid);
+                    }
+                    if (zones != null) {
+                        for (ZoneDTO z : zones) {
+                            if (seenCodes.add(z.getZoneCode())) {
+                                allZonesResult.add(z);
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                populateZoneTable(allZonesResult);
+                if (!searchTerm.isEmpty()) {
+                    StatusMessageHandler.showInfo(txtStatus, "Found " + allZonesResult.size() + " zone(s) matching '" + searchTerm + "'");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load zones: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void setupTttFieldNavigation() {
+        javax.swing.JTextField[] textFields = {txtSearch, txtCode, txtName, txtDescription};
+
+        for (int i = 0; i < textFields.length; i++) {
+            final int currentIndex = i;
+            textFields[i].addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent evt) {
+                    if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
+                        evt.consume();
+                        if (currentIndex < textFields.length - 1) {
+                            textFields[currentIndex + 1].requestFocus();
+                        }
+                    } else if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
+                        evt.consume();
+                        if (currentIndex > 0) {
+                            textFields[currentIndex - 1].requestFocus();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void setupKeyBindings() {
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = getRootPane().getActionMap();
+
+        Action addAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnAdd.isEnabled()) btnAdd.doClick();
+            }
+        };
+
+        Action saveAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnSave.isEnabled()) btnSave.doClick();
+            }
+        };
+
+        Action clearAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnClear.isEnabled()) btnClear.doClick();
+            }
+        };
+
+        Action updateAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnUpdate.isEnabled()) btnUpdate.doClick();
+            }
+        };
+
+        Action deleteAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnDelete.isEnabled()) btnDelete.doClick();
+            }
+        };
+
+        Action refreshAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnRefresh.isEnabled()) btnRefresh.doClick();
+            }
+        };
+
+        Action searchAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnSearch.isEnabled()) btnSearch.doClick();
+            }
+        };
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), "add");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
+        actionMap.put("add", addAction);
+        actionMap.put("addF6", addAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK), "save");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), "saveF7");
+        actionMap.put("save", saveAction);
+        actionMap.put("saveF7", saveAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), "clear");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), "clearF8");
+        actionMap.put("clear", clearAction);
+        actionMap.put("clearF8", clearAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_DOWN_MASK), "update");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0), "updateF9");
+        actionMap.put("update", updateAction);
+        actionMap.put("updateF9", updateAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK), "delete");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0), "deleteF10");
+        actionMap.put("delete", deleteAction);
+        actionMap.put("deleteF10", deleteAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK), "refresh");
+        actionMap.put("refresh", refreshAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.ALT_DOWN_MASK), "search");
+        actionMap.put("search", searchAction);
+    }
+
+    private void populateZoneTable(List<ZoneDTO> zones) {
+        this.allZones = zones;
+        DefaultTableModel model = (DefaultTableModel) tblZones.getModel();
+        model.setRowCount(0);
+
+        if (zones != null) {
+            for (ZoneDTO z : zones) {
+                model.addRow(new Object[]{
+                    z.getZoneCode(),
+                    z.getZoneName(),
+                    z.getZoneType(),
+                    z.getTotalBins(),
+                    z.getTotalCapacity(),
+                    String.format("%.1f%%", z.getUtilizationPercent())
+                });
+            }
+        }
+    }
+
+    private ZoneDTO findZoneByCode(String code) {
+        if (code == null || allZones == null) return null;
+        for (ZoneDTO z : allZones) {
+            if (z.getZoneCode().equals(code)) return z;
+        }
+        return null;
+    }
+
+    private void clearForm() {
+        txtCode.setText("");
+        txtName.setText("");
+        txtDescription.setText("");
+        cmbZoneType.setSelectedIndex(-1);
+        lblTotalBins.setText("0");
+        lblTotalCapacity.setText("0.00");
+        lblUtilization.setText("0%");
+        selectedZone = null;
+        tblZones.clearSelection();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdate;
+    private javax.swing.JButton btnViewBins;
+    private ui.components.CheckedComboBox<String> cmbWarehouse;
+    private javax.swing.JComboBox<String> cmbZoneType;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblTotalBins;
+    private javax.swing.JLabel lblTotalCapacity;
+    private javax.swing.JLabel lblUtilization;
+    private javax.swing.JTable tblZones;
+    private javax.swing.JTextField txtCode;
+    private javax.swing.JTextField txtDescription;
+    private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
