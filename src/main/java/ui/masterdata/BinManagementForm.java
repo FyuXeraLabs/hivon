@@ -1,20 +1,110 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package ui.masterdata;
 
+import javax.swing.ImageIcon;
+import java.util.List;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
+
+import models.dto.StorageBinDTO;
+import models.dto.WarehouseDTO;
+import core.api.dao.WarehouseDAO;
+import masterdata.controllers.BinManagementController;
+import core.security.UserSession;
+import core.logging.Logger;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+
 /**
- *
- * @author Thisula
+ * Form for creating and managing storage locations (bins) within warehouses.
+ * 
+ * @author Sanod
  */
 public class BinManagementForm extends javax.swing.JFrame {
+
+    private final BinManagementController controller;
+    private java.util.Map<String, Object> generateParams;
+    private StorageBinDTO selectedBin;
+    private List<WarehouseDTO> allWarehouses = new ArrayList<>();
+    private List<StorageBinDTO> allBinsList = new ArrayList<>();
+    private boolean isAddMode = false;
 
     /**
      * Creates new form BinManagementForm
      */
     public BinManagementForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        
+        spinMaxCapacity.setModel(new javax.swing.SpinnerNumberModel(0, 0, 99999, 1));
+        spinBulkAisles.setModel(new javax.swing.SpinnerNumberModel(1, 1, 999, 1));
+        spinBulkRacks.setModel(new javax.swing.SpinnerNumberModel(1, 1, 999, 1));
+        spinBulkLevels.setModel(new javax.swing.SpinnerNumberModel(1, 1, 999, 1));
+        
+        this.controller = new BinManagementController();
+        this.generateParams = new java.util.HashMap<>();
+
+        setupTttFieldNavigation();
+        setupKeyBindings();
+        updateButtonStates();
+
+        cmbWarehouse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filterAndPopulateBinsTable();
+            }
+        });
+
+        cmbFilterZone.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filterAndPopulateBinsTable();
+            }
+        });
+        cmbFilterBinType.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filterAndPopulateBinsTable();
+            }
+        });
+        cmbFilterUtilization.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filterAndPopulateBinsTable();
+            }
+        });
+
+        cmbFilterBinType.setSelectAllLabel("All");
+        cmbFilterBinType.addItem("All");
+        cmbFilterBinType.addItem("RECEIVING");
+        cmbFilterBinType.addItem("STORAGE");
+        cmbFilterBinType.addItem("PICKING");
+        cmbFilterBinType.addItem("STAGING");
+        cmbFilterBinType.addItem("DAMAGE");
+        cmbFilterBinType.addItem("QUARANTINE");
+
+        cmbFilterUtilization.setSelectAllLabel("All");
+        cmbFilterUtilization.addItem("All");
+        cmbFilterUtilization.addItem("Empty (0%)");
+        cmbFilterUtilization.addItem("Low (<30%)");
+        cmbFilterUtilization.addItem("Medium (30%-80%)");
+        cmbFilterUtilization.addItem("High (80%-99%)");
+        cmbFilterUtilization.addItem("Full (100%)");
+
+        javax.swing.event.ChangeListener previewListener = new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent e) {
+                updateBulkPreview();
+            }
+        };
+        spinBulkAisles.addChangeListener(previewListener);
+        spinBulkRacks.addChangeListener(previewListener);
+        spinBulkLevels.addChangeListener(previewListener);
+        loadWarehouses();
     }
 
     /**
@@ -26,21 +116,1031 @@ public class BinManagementForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jPanel1 = new javax.swing.JPanel();
+        jLabelWarehouse = new javax.swing.JLabel();
+        cmbWarehouse = new ui.components.CheckedComboBox<>();
+        jLabelFilterZone = new javax.swing.JLabel();
+        cmbFilterZone = new ui.components.CheckedComboBox<>();
+        jLabelFilterType = new javax.swing.JLabel();
+        cmbFilterBinType = new ui.components.CheckedComboBox<>();
+        jLabelFilterUtil = new javax.swing.JLabel();
+        cmbFilterUtilization = new ui.components.CheckedComboBox<>();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblBins = new javax.swing.JTable();
+        jPanel3 = new javax.swing.JPanel();
+        jLabelBinCode = new javax.swing.JLabel();
+        jLabelAisle = new javax.swing.JLabel();
+        jLabelRack = new javax.swing.JLabel();
+        jLabelLevel = new javax.swing.JLabel();
+        jLabelCapacity = new javax.swing.JLabel();
+        jLabelBinType = new javax.swing.JLabel();
+        txtBinCode = new javax.swing.JTextField();
+        txtAisle = new javax.swing.JTextField();
+        txtRack = new javax.swing.JTextField();
+        txtLevelNumber = new javax.swing.JTextField();
+        spinMaxCapacity = new javax.swing.JSpinner();
+        cmbBinType = new javax.swing.JComboBox<>();
+        chkActive = new javax.swing.JCheckBox();
+        jPanelBulk = new javax.swing.JPanel();
+        jLabelBulkZone = new javax.swing.JLabel();
+        jLabelBulkAisles = new javax.swing.JLabel();
+        jLabelBulkRacks = new javax.swing.JLabel();
+        jLabelBulkLevels = new javax.swing.JLabel();
+        txtBulkZone = new javax.swing.JTextField();
+        spinBulkAisles = new javax.swing.JSpinner();
+        spinBulkRacks = new javax.swing.JSpinner();
+        spinBulkLevels = new javax.swing.JSpinner();
+        lblBulkPreview = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        btnAdd = new javax.swing.JButton();
+        btnUpdate = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnGenerate = new javax.swing.JButton();
+        btnViewStock = new javax.swing.JButton();
+        btnPrintLabel = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Bin Management");
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Warehouse Selection & Filters"));
+
+        jLabelWarehouse.setText("Warehouse *");
+
+        cmbWarehouse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- Select Warehouse --" }));
+
+        jLabelFilterZone.setText("Zone");
+
+        cmbFilterZone.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- All Zones --" }));
+
+        jLabelFilterType.setText("Bin Type");
+
+        cmbFilterBinType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- All Types --", "RECEIVING", "STORAGE", "PICKING", "STAGING", "DAMAGE", "QUARANTINE" }));
+
+        jLabelFilterUtil.setText("Utilization");
+
+        cmbFilterUtilization.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- All --", "Empty (0%)", "Low (<30%)", "Medium (30%-80%)", "High (80%-99%)", "Full (100%)" }));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabelWarehouse)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
+                .addComponent(jLabelFilterZone)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbFilterZone, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jLabelFilterType)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbFilterBinType, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jLabelFilterUtil)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbFilterUtilization, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelWarehouse)
+                    .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelFilterZone)
+                    .addComponent(cmbFilterZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelFilterType)
+                    .addComponent(cmbFilterBinType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelFilterUtil)
+                    .addComponent(cmbFilterUtilization, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Bin List"));
+
+        tblBins.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Capacity", "Current Stock", "Status"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblBins.setShowGrid(false);
+        tblBins.getTableHeader().setReorderingAllowed(false);
+        tblBins.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblBinsMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblBins);
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Bin Details"));
+
+        jLabelBinCode.setText("Bin Code *");
+
+        jLabelAisle.setText("Aisle");
+
+        jLabelRack.setText("Rack");
+
+        jLabelLevel.setText("Level Number");
+
+        jLabelCapacity.setText("Max Capacity");
+
+        jLabelBinType.setText("Bin Type");
+
+        cmbBinType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "RECEIVING", "STORAGE", "PICKING", "STAGING", "DAMAGE", "QUARANTINE" }));
+
+        chkActive.setSelected(true);
+        chkActive.setText("Is Active");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelBinCode)
+                            .addComponent(jLabelAisle)
+                            .addComponent(jLabelRack)
+                            .addComponent(jLabelLevel))
+                        .addGap(44, 44, 44)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtBinCode, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                            .addComponent(txtAisle, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                            .addComponent(txtRack, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                            .addComponent(txtLevelNumber, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelCapacity)
+                            .addComponent(jLabelBinType))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(spinMaxCapacity, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                            .addComponent(cmbBinType, 0, 250, Short.MAX_VALUE)
+                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE))))
+                .addContainerGap(136, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBinCode)
+                    .addComponent(txtBinCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelAisle)
+                    .addComponent(txtAisle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelRack)
+                    .addComponent(txtRack, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelLevel)
+                    .addComponent(txtLevelNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelCapacity)
+                    .addComponent(spinMaxCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBinType)
+                    .addComponent(cmbBinType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addComponent(chkActive)
+                .addGap(15, 15, Short.MAX_VALUE))
+        );
+
+        jPanelBulk.setBorder(javax.swing.BorderFactory.createTitledBorder("Bulk Operations (Generate Bins)"));
+
+        jLabelBulkZone.setText("Zone Code");
+
+        jLabelBulkAisles.setText("Number of Aisles");
+
+        jLabelBulkRacks.setText("Racks per Aisle");
+
+        jLabelBulkLevels.setText("Levels per Rack");
+
+        lblBulkPreview.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        lblBulkPreview.setText("Preview: 0 bins to create");
+
+        javax.swing.GroupLayout jPanelBulkLayout = new javax.swing.GroupLayout(jPanelBulk);
+        jPanelBulk.setLayout(jPanelBulkLayout);
+        jPanelBulkLayout.setHorizontalGroup(
+            jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelBulkLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelBulkLayout.createSequentialGroup()
+                        .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelBulkZone)
+                            .addComponent(jLabelBulkAisles)
+                            .addComponent(jLabelBulkRacks)
+                            .addComponent(jLabelBulkLevels))
+                        .addGap(30, 30, 30)
+                        .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtBulkZone, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                            .addComponent(spinBulkAisles, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                            .addComponent(spinBulkRacks, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                            .addComponent(spinBulkLevels, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)))
+                    .addComponent(lblBulkPreview))
+                .addContainerGap(120, Short.MAX_VALUE))
+        );
+        jPanelBulkLayout.setVerticalGroup(
+            jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelBulkLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBulkZone)
+                    .addComponent(txtBulkZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBulkAisles)
+                    .addComponent(spinBulkAisles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBulkRacks)
+                    .addComponent(spinBulkRacks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBulkLevels)
+                    .addComponent(spinBulkLevels, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(20, 20, 20)
+                .addComponent(lblBulkPreview)
+                .addContainerGap(75, Short.MAX_VALUE))
+        );
+
+        btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAdd.setText("Add Bin");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdate.setText("Update Bin");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnDelete.setText("Delete Bin");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
+        btnGenerate.setText("Generate Bins");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
+        btnViewStock.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/show-14.png"))); // NOI18N
+        btnViewStock.setText("View Stock");
+        btnViewStock.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewStockActionPerformed(evt);
+            }
+        });
+
+        btnPrintLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrintLabel.setText("Print Label");
+        btnPrintLabel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintLabelActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("  Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        jPanel5.setMaximumSize(new java.awt.Dimension(200, 22));
+        jPanel5.setMinimumSize(new java.awt.Dimension(50, 22));
+        jPanel5.setPreferredSize(new java.awt.Dimension(47, 22));
+
+        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
+        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(btnAdd)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnUpdate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDelete)
+                .addGap(25, 25, 25)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnViewStock)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrintLabel)
+                .addGap(25, 25, 25)
+                .addComponent(btnClear)
+                .addGap(150, 150, 150)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnAdd)
+                        .addComponent(btnUpdate)
+                        .addComponent(btnDelete)
+                        .addComponent(btnGenerate)
+                        .addComponent(btnViewStock)
+                        .addComponent(btnPrintLabel)
+                        .addComponent(btnClear))
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanelBulk, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanelBulk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void tblBinsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblBinsMouseClicked
+        int selectedRow = tblBins.getSelectedRow();
+        if (selectedRow != -1) {
+            String binCode = (String) tblBins.getValueAt(selectedRow, 0);
+            selectedBin = null;
+            for (StorageBinDTO bin : allBinsList) {
+                if (bin.getBinCode().equals(binCode)) {
+                    selectedBin = bin;
+                    break;
+                }
+            }
+
+            if (selectedBin != null) {
+                isAddMode = false;
+                txtBinCode.setText(selectedBin.getBinCode());
+                
+                String aisle = "";
+                String rack = "";
+                String level = "";
+                if (selectedBin.getBinCode() != null) {
+                    String[] parts = selectedBin.getBinCode().split("-");
+                    if (parts.length >= 4) {
+                        aisle = parts[1];
+                        rack = parts[2];
+                        level = parts[3];
+                    }
+                }
+                txtAisle.setText(aisle);
+                txtRack.setText(rack);
+                txtLevelNumber.setText(level);
+
+                spinMaxCapacity.setValue(selectedBin.getMaxCapacity() != null ? selectedBin.getMaxCapacity().intValue() : 0);
+                cmbBinType.setSelectedItem(selectedBin.getBinType());
+                chkActive.setSelected(selectedBin.getIsActive() != null ? selectedBin.getIsActive() : true);
+                
+                updateButtonStates();
+            }
+        }
+    }//GEN-LAST:event_tblBinsMouseClicked
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        if (!isAddMode) {
+            isAddMode = true;
+            clearForm();
+            updateButtonStates();
+            txtBinCode.requestFocusInWindow();
+            StatusMessageHandler.showInfo(txtStatus, "Enter bin details and click 'Save Bin' to commit.");
+        } else {
+            if (!validateForm()) {
+                StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse and enter a Bin Code!");
+                return;
+            }
+
+            java.util.Set<String> selectedWhSet = cmbWarehouse.getSelectedItems();
+            if (selectedWhSet.isEmpty()) {
+                StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse!");
+                return;
+            }
+            String firstWhStr = selectedWhSet.iterator().next();
+            WarehouseDTO wh = null;
+            for (WarehouseDTO w : allWarehouses) {
+                if (w.toString().equals(firstWhStr)) {
+                    wh = w;
+                    break;
+                }
+            }
+            if (wh == null) return;
+
+            StorageBinDTO bin = new StorageBinDTO();
+            String binCode = txtBinCode.getText().trim();
+            bin.setBinCode(binCode);
+            bin.setWarehouseId(wh.getWarehouseId());
+            bin.setWarehouseCode(wh.getWarehouseCode());
+            bin.setWarehouseName(wh.getWarehouseName());
+            bin.setMaxCapacity(Double.valueOf(((Number) spinMaxCapacity.getValue()).doubleValue()));
+            bin.setUsedCapacity(0.0);
+            bin.setBinType((String) cmbBinType.getSelectedItem());
+            bin.setIsActive(chkActive.isSelected());
+
+            String zone = "";
+            if (binCode.contains("-")) {
+                zone = binCode.split("-")[0];
+            }
+            bin.setZone(zone);
+
+            BackgroundTask task = new BackgroundTask(this, "Creating Bin") {
+                private int newBinId;
+
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Saving new storage bin...");
+                    newBinId = controller.createBin(bin);
+                    return newBinId > 0;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, "Bin created successfully!");
+                    isAddMode = false;
+                    clearForm();
+                    updateButtonStates();
+                    loadBinsList();
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    StatusMessageHandler.showError(txtStatus, "Failed to create bin: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        if (selectedBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a bin to update first!");
+            return;
+        }
+
+        if (txtBinCode.getText().trim().isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Bin Code cannot be empty!");
+            return;
+        }
+
+        selectedBin.setBinCode(txtBinCode.getText().trim());
+        selectedBin.setMaxCapacity(Double.valueOf(((Number) spinMaxCapacity.getValue()).doubleValue()));
+        selectedBin.setBinType((String) cmbBinType.getSelectedItem());
+        selectedBin.setIsActive(chkActive.isSelected());
+
+        String zone = "";
+        if (selectedBin.getBinCode().contains("-")) {
+            zone = selectedBin.getBinCode().split("-")[0];
+        }
+        selectedBin.setZone(zone);
+
+        BackgroundTask task = new BackgroundTask(this, "Updating Bin") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Updating bin details...");
+                return controller.updateBin(selectedBin);
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Bin updated successfully!");
+                clearForm();
+                updateButtonStates();
+                loadBinsList();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to update bin: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        if (selectedBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a bin to delete!");
+            return;
+        }
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete bin " + selectedBin.getBinCode() + "?",
+            "Confirm Delete",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm != javax.swing.JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        BackgroundTask task = new BackgroundTask(this, "Deleting Bin") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Deleting bin...");
+                return controller.deleteBin(selectedBin.getBinId());
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Bin deleted successfully!");
+                clearForm();
+                updateButtonStates();
+                loadBinsList();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to delete bin: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        java.util.Set<String> selectedWhSet = cmbWarehouse.getSelectedItems();
+        if (selectedWhSet.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first!");
+            return;
+        }
+        String firstWhStr = selectedWhSet.iterator().next();
+        WarehouseDTO wh = null;
+        for (WarehouseDTO w : allWarehouses) {
+            if (w.toString().equals(firstWhStr)) {
+                wh = w;
+                break;
+            }
+        }
+        if (wh == null) return;
+        int warehouseId = wh.getWarehouseId();
+
+        String zone = txtBulkZone.getText().trim();
+        if (zone.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a Zone Code!");
+            return;
+        }
+
+        int aisles = (int) spinBulkAisles.getValue();
+        int racks = (int) spinBulkRacks.getValue();
+        int levels = (int) spinBulkLevels.getValue();
+
+        BackgroundTask task = new BackgroundTask(this, "Generating Bins") {
+            private List<StorageBinDTO> generatedBins = new ArrayList<>();
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Generating bins...");
+                for (int a = 1; a <= aisles; a++) {
+                    String aisleName = String.valueOf((char) ('A' + (a - 1)));
+                    for (int r = 1; r <= racks; r++) {
+                        String rackName = String.format("%02d", r);
+                        String prefix = zone + "-" + aisleName + "-" + rackName + "-";
+                        
+                        List<StorageBinDTO> list = controller.generateBins(
+                            warehouseId, zone, prefix, 1, levels, 2
+                        );
+                        if (list != null) {
+                            generatedBins.addAll(list);
+                        }
+                    }
+                }
+                return !generatedBins.isEmpty();
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Generated " + generatedBins.size() + " bins successfully!");
+                loadBinsList();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to generate bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void btnViewStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewStockActionPerformed
+        if (selectedBin != null) {
+            ui.dialogs.BinStockViewForm dialog = new ui.dialogs.BinStockViewForm(this, true, selectedBin);
+            dialog.setVisible(true);
+        } else {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a bin first!");
+        }
+    }//GEN-LAST:event_btnViewStockActionPerformed
+
+    private void btnPrintLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintLabelActionPerformed
+        StatusMessageHandler.showInfo(txtStatus, "Print Label feature is coming soon!");
+    }//GEN-LAST:event_btnPrintLabelActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        isAddMode = false;
+        clearForm();
+        updateButtonStates();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    // loads warehouses and initializes filter dropdowns
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = WarehouseDAO.getInstance().getWarehouses();
+                return warehouses != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                allWarehouses = warehouses;
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.setSelectAllLabel("All");
+                cmbWarehouse.addItem("All");
+                if (warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        cmbWarehouse.addItem(wh.toString());
+                    }
+                }
+                if (!allWarehouses.isEmpty()) {
+                    Integer userWhId = null;
+                    try {
+                        if (UserSession.getInstance().getCurrentUser() != null) {
+                            userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
+                        }
+                    } catch (Exception e) {
+                        Logger.errlog("Could not read warehouse ID from session", e);
+                    }
+
+                    if (userWhId != null && warehouses != null) {
+                        for (WarehouseDTO wh : warehouses) {
+                            if (wh.getWarehouseId().equals(userWhId)) {
+                                java.util.Set<String> selected = new java.util.HashSet<>();
+                                selected.add(wh.toString());
+                                cmbWarehouse.setSelectedItems(selected);
+                                break;
+                            }
+                        }
+                    }
+
+                    loadZonesForAllWarehouses();
+                    loadBinsList();
+                }
+                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + (warehouses != null ? warehouses.size() : 0) + " warehouses.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadZonesForAllWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
+            private java.util.Set<String> allZoneCodes = new java.util.HashSet<>();
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                for (WarehouseDTO wh : allWarehouses) {
+                    List<models.dto.ZoneDTO> zones = new masterdata.controllers.ZoneManagementController().getZonesByWarehouse(wh.getWarehouseId());
+                    if (zones != null) {
+                        for (models.dto.ZoneDTO z : zones) {
+                            allZoneCodes.add(z.getZoneCode());
+                        }
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbFilterZone.removeAllItems();
+                cmbFilterZone.setSelectAllLabel("All");
+                cmbFilterZone.addItem("All");
+                List<String> sorted = new ArrayList<>(allZoneCodes);
+                java.util.Collections.sort(sorted);
+                for (String code : sorted) {
+                    cmbFilterZone.addItem(code);
+                }
+                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + sorted.size() + " zones.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load zones: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadBinsList() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Bins") {
+            private List<StorageBinDTO> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching bins...");
+                bins = controller.getAllBins();
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                allBinsList = bins;
+                filterAndPopulateBinsTable();
+                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + (bins != null ? bins.size() : 0) + " bins.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void filterAndPopulateBinsTable() {
+        DefaultTableModel model = (DefaultTableModel) tblBins.getModel();
+        model.setRowCount(0);
+
+        java.util.Set<String> selectedWarehouses = cmbWarehouse.getSelectedItems();
+        java.util.Set<String> selectedZones = cmbFilterZone.getSelectedItems();
+        java.util.Set<String> selectedTypes = cmbFilterBinType.getSelectedItems();
+        java.util.Set<String> selectedUtils = cmbFilterUtilization.getSelectedItems();
+
+        for (StorageBinDTO bin : allBinsList) {
+            if (!selectedWarehouses.isEmpty()) {
+                String whKey = null;
+                for (WarehouseDTO wh : allWarehouses) {
+                    if (wh.getWarehouseId().equals(bin.getWarehouseId())) {
+                        whKey = wh.toString();
+                        break;
+                    }
+                }
+                if (whKey == null || !selectedWarehouses.contains(whKey)) {
+                    continue;
+                }
+            }
+
+            if (!selectedZones.isEmpty()) {
+                if (bin.getZone() == null || !selectedZones.contains(bin.getZone())) {
+                    continue;
+                }
+            }
+
+            if (!selectedTypes.isEmpty()) {
+                if (bin.getBinType() == null || !selectedTypes.contains(bin.getBinType())) {
+                    continue;
+                }
+            }
+
+            if (!selectedUtils.isEmpty()) {
+                double max = bin.getMaxCapacity() != null ? bin.getMaxCapacity() : 0.0;
+                double used = bin.getUsedCapacity() != null ? bin.getUsedCapacity() : 0.0;
+                double pct = max > 0 ? (used / max) * 100.0 : 0.0;
+
+                boolean matchesUtil = false;
+                for (String util : selectedUtils) {
+                    if (util.equals("Empty (0%)") && used == 0) {
+                        matchesUtil = true; break;
+                    } else if (util.equals("Low (<30%)") && used > 0 && pct < 30.0) {
+                        matchesUtil = true; break;
+                    } else if (util.equals("Medium (30%-80%)") && pct >= 30.0 && pct <= 80.0) {
+                        matchesUtil = true; break;
+                    } else if (util.equals("High (80%-99%)") && pct >= 80.0 && pct < 100.0) {
+                        matchesUtil = true; break;
+                    } else if (util.equals("Full (100%)") && pct >= 100.0) {
+                        matchesUtil = true; break;
+                    }
+                }
+                if (!matchesUtil) continue;
+            }
+
+            String aisle = "";
+            String rack = "";
+            String level = "";
+            if (bin.getBinCode() != null) {
+                String[] parts = bin.getBinCode().split("-");
+                if (parts.length >= 4) {
+                    aisle = parts[1];
+                    rack = parts[2];
+                    level = parts[3];
+                }
+            }
+
+            model.addRow(new Object[]{
+                bin.getBinCode(),
+                bin.getZone(),
+                aisle,
+                rack,
+                level,
+                bin.getBinType(),
+                bin.getMaxCapacity(),
+                bin.getUsedCapacity(),
+                (bin.getIsActive() != null && bin.getIsActive()) ? "Active" : "Inactive"
+            });
+        }
+    }
+
+    private void updateBulkPreview() {
+        int aisles = (int) spinBulkAisles.getValue();
+        int racks = (int) spinBulkRacks.getValue();
+        int levels = (int) spinBulkLevels.getValue();
+        int total = aisles * racks * levels;
+        lblBulkPreview.setText("Preview: " + total + " bins to create");
+    }
+
+    private void clearForm() {
+        txtBinCode.setText("");
+        txtAisle.setText("");
+        txtRack.setText("");
+        txtLevelNumber.setText("");
+        spinMaxCapacity.setValue(0);
+        cmbBinType.setSelectedIndex(0);
+        chkActive.setSelected(true);
+        selectedBin = null;
+        tblBins.clearSelection();
+    }
+
+    private void updateButtonStates() {
+        if (isAddMode) {
+            btnAdd.setText("Save Bin");
+            btnUpdate.setEnabled(false);
+            btnDelete.setEnabled(false);
+            btnClear.setEnabled(true);
+        } else {
+            btnAdd.setText("Add Bin");
+            btnUpdate.setEnabled(selectedBin != null);
+            btnDelete.setEnabled(selectedBin != null);
+            btnClear.setEnabled(selectedBin != null);
+        }
+    }
+
+    private boolean validateForm() {
+        if (txtBinCode.getText().trim().isEmpty()) return false;
+        return !cmbWarehouse.getSelectedItems().isEmpty();
+    }
+
+    private void setupTttFieldNavigation() {
+        javax.swing.JTextField[] textFields = {txtBinCode, txtAisle, txtRack, txtLevelNumber, txtBulkZone};
+
+        for (int i = 0; i < textFields.length; i++) {
+            final int currentIndex = i;
+            textFields[i].addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent evt) {
+                    if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
+                        evt.consume();
+                        if (currentIndex < textFields.length - 1) {
+                            textFields[currentIndex + 1].requestFocus();
+                        }
+                    } else if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
+                        evt.consume();
+                        if (currentIndex > 0) {
+                            textFields[currentIndex - 1].requestFocus();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void setupKeyBindings() {
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = getRootPane().getActionMap();
+
+        Action addAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnAdd.isEnabled()) btnAdd.doClick();
+            }
+        };
+
+        Action updateAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnUpdate.isEnabled()) btnUpdate.doClick();
+            }
+        };
+
+        Action deleteAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnDelete.isEnabled()) btnDelete.doClick();
+            }
+        };
+
+        Action clearAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnClear.isEnabled()) btnClear.doClick();
+            }
+        };
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), "add");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
+        actionMap.put("add", addAction);
+        actionMap.put("addF6", addAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_DOWN_MASK), "update");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0), "updateF9");
+        actionMap.put("update", updateAction);
+        actionMap.put("updateF9", updateAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK), "delete");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0), "deleteF10");
+        actionMap.put("delete", deleteAction);
+        actionMap.put("deleteF10", deleteAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK), "clear");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), "clearF8");
+        actionMap.put("clear", clearAction);
+        actionMap.put("clearF8", clearAction);
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +1178,50 @@ public class BinManagementForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnGenerate;
+    private javax.swing.JButton btnPrintLabel;
+    private javax.swing.JButton btnUpdate;
+    private javax.swing.JButton btnViewStock;
+    private javax.swing.JCheckBox chkActive;
+    private javax.swing.JComboBox<String> cmbBinType;
+    private ui.components.CheckedComboBox<String> cmbFilterBinType;
+    private ui.components.CheckedComboBox<String> cmbFilterUtilization;
+    private ui.components.CheckedComboBox<String> cmbFilterZone;
+    private ui.components.CheckedComboBox<String> cmbWarehouse;
+    private javax.swing.JLabel jLabelAisle;
+    private javax.swing.JLabel jLabelBinCode;
+    private javax.swing.JLabel jLabelBinType;
+    private javax.swing.JLabel jLabelBulkAisles;
+    private javax.swing.JLabel jLabelBulkLevels;
+    private javax.swing.JLabel jLabelBulkRacks;
+    private javax.swing.JLabel jLabelBulkZone;
+    private javax.swing.JLabel jLabelCapacity;
+    private javax.swing.JLabel jLabelFilterType;
+    private javax.swing.JLabel jLabelFilterUtil;
+    private javax.swing.JLabel jLabelFilterZone;
+    private javax.swing.JLabel jLabelLevel;
+    private javax.swing.JLabel jLabelRack;
+    private javax.swing.JLabel jLabelWarehouse;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanelBulk;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblBulkPreview;
+    private javax.swing.JSpinner spinBulkAisles;
+    private javax.swing.JSpinner spinBulkLevels;
+    private javax.swing.JSpinner spinBulkRacks;
+    private javax.swing.JSpinner spinMaxCapacity;
+    private javax.swing.JTable tblBins;
+    private javax.swing.JTextField txtAisle;
+    private javax.swing.JTextField txtBinCode;
+    private javax.swing.JTextField txtBulkZone;
+    private javax.swing.JTextField txtLevelNumber;
+    private javax.swing.JTextField txtRack;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
