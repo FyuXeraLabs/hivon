@@ -4,17 +4,48 @@
  */
 package ui.masterdata;
 
+import java.util.List;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+
+import masterdata.controllers.MaterialController;
+import models.dto.MaterialDTO;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+
 /**
  *
- * @author Kasun
+ * @author Sanod
  */
 public class MaterialMasterForm extends javax.swing.JFrame {
+
+    private MaterialController controller;
+    private MaterialDTO selectedMaterial;
+    private List<MaterialDTO> allMaterials = new ArrayList<>();
+    private boolean isAddMode = false;
 
     /**
      * Creates new form MaterialMasterForm
      */
     public MaterialMasterForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new MaterialController();
+        setupTttFieldNavigation();
+        setupKeyBindings();
+        loadMaterialList();
+        updateButtonStates();
     }
 
     /**
@@ -26,57 +57,914 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txtSearch = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        btnRefresh = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblMaterials = new javax.swing.JTable();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        chkIsActive = new javax.swing.JCheckBox();
+        txtCode = new javax.swing.JTextField();
+        txtDescription = new javax.swing.JTextField();
+        txtBaseUOM = new javax.swing.JTextField();
+        txtWeight = new javax.swing.JTextField();
+        txtVolume = new javax.swing.JTextField();
+        txtMaterialGroup = new javax.swing.JTextField();
+        txtStorageType = new javax.swing.JTextField();
+        cmbMaterialCategory = new javax.swing.JComboBox<>();
+        cmbStorageConditions = new javax.swing.JComboBox<>();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        txtMinStock = new javax.swing.JTextField();
+        txtMaxStock = new javax.swing.JTextField();
+        txtReorderPoint = new javax.swing.JTextField();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        txtUnitCost = new javax.swing.JTextField();
+        chkBatchManaged = new javax.swing.JCheckBox();
+        jPanel2 = new javax.swing.JPanel();
+        btnAdd = new javax.swing.JButton();
+        btnUpdate = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Material Master");
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
+
+        jLabel1.setText("Material Code");
+
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearch.setText("  Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/refresh-2-14.png"))); // NOI18N
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRefresh)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSearch)))
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Material List"));
+
+        tblMaterials.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Code", "Description", "UOM", "Batch Managed", "Active", "Last Modified"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblMaterials.setShowGrid(false);
+        tblMaterials.getTableHeader().setReorderingAllowed(false);
+        tblMaterials.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblMaterialsMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblMaterials);
+
+        jTabbedPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Details"));
+
+        jLabel2.setText("Material Code *");
+
+        jLabel3.setText("Description *");
+
+        jLabel4.setText("Base UOM *");
+
+        jLabel10.setText("Weight");
+
+        jLabel11.setText("Volume");
+
+        jLabel12.setText("Material Group");
+
+        jLabel13.setText("Storage Type");
+
+        jLabel14.setText("Category");
+
+        jLabel15.setText("Storage Conditions");
+
+        chkIsActive.setText("Active");
+
+        cmbMaterialCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Raw Material", "Finished Goods", "Packaging", "Consumable" }));
+        cmbMaterialCategory.setSelectedIndex(-1);
+
+        cmbStorageConditions.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Ambient", "Refrigerated", "Frozen", "Controlled" }));
+        cmbStorageConditions.setSelectedIndex(-1);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel11)
+                            .addComponent(jLabel12)
+                            .addComponent(jLabel13))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(chkIsActive))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(txtBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(30, 30, 30)
+                                .addComponent(jLabel14)
+                                .addGap(18, 18, 18)
+                                .addComponent(cmbMaterialCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(30, 30, 30)
+                                .addComponent(jLabel15)
+                                .addGap(18, 18, 18)
+                                .addComponent(cmbStorageConditions, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtMaterialGroup)
+                            .addComponent(txtStorageType))))
+                .addContainerGap(555, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkIsActive))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel14)
+                    .addComponent(cmbMaterialCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15)
+                    .addComponent(cmbStorageConditions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(txtVolume, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(txtMaterialGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(txtStorageType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Basic Information", jPanel3);
+
+        jLabel5.setText("Min Stock Level");
+
+        jLabel6.setText("Max Stock Level");
+
+        jLabel7.setText("Reorder Point");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtMinStock, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtMaxStock, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtReorderPoint, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(555, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtMinStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtMaxStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtReorderPoint, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Stock Levels", jPanel4);
+
+        jLabel8.setText("Unit Cost");
+
+        jLabel9.setText("Batch Managed");
+
+        chkBatchManaged.setText("Batch Managed");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtUnitCost, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addGap(18, 18, 18)
+                        .addComponent(chkBatchManaged)))
+                .addContainerGap(555, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtUnitCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(chkBatchManaged))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Pricing", jPanel6);
+
+        btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAdd.setText("Add Material");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdate.setText("  Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnDelete.setText("  Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("  Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
+        btnSave.setText("  Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
+
+        jPanel5.setMaximumSize(new java.awt.Dimension(200, 22));
+        jPanel5.setMinimumSize(new java.awt.Dimension(50, 22));
+        jPanel5.setPreferredSize(new java.awt.Dimension(47, 22));
+
+        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
+        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(btnAdd)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSave)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addGap(37, 37, 37)
+                .addComponent(btnUpdate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnDelete)
+                .addGap(37, 37, 37)
+                .addComponent(btnExport)
+                .addGap(200, 200, 200)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnAdd)
+                        .addComponent(btnUpdate)
+                        .addComponent(btnDelete)
+                        .addComponent(btnExport)
+                        .addComponent(btnClear)
+                        .addComponent(btnSave))
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jTabbedPane1)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+    private void tblMaterialsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblMaterialsMouseClicked
+        int selectedRow = tblMaterials.getSelectedRow();
+        if (selectedRow != -1) {
+            String code = (String) tblMaterials.getValueAt(selectedRow, 0);
+            selectedMaterial = findMaterialByCode(code);
+            if (selectedMaterial != null) {
+                txtCode.setText(selectedMaterial.getMaterialCode());
+                txtDescription.setText(selectedMaterial.getMaterialDescription());
+                txtBaseUOM.setText(selectedMaterial.getUnitOfMeasure());
+                txtWeight.setText(selectedMaterial.getUnitWeight() != null ? String.valueOf(selectedMaterial.getUnitWeight()) : "");
+                txtMaterialGroup.setText(selectedMaterial.getCategory());
+                cmbMaterialCategory.setSelectedItem(selectedMaterial.getMaterialType());
+                if (selectedMaterial.getStorageCondition() != null) {
+                    cmbStorageConditions.setSelectedItem(selectedMaterial.getStorageCondition());
                 }
+                chkIsActive.setSelected(selectedMaterial.getIsActive() != null && selectedMaterial.getIsActive());
+                txtCode.setEditable(false);
+                isAddMode = false;
+                updateButtonStates();
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MaterialMasterForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MaterialMasterForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MaterialMasterForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MaterialMasterForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
+    }//GEN-LAST:event_tblMaterialsMouseClicked
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new MaterialMasterForm().setVisible(true);
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        isAddMode = true;
+        selectedMaterial = null;
+        clearForm();
+        txtCode.requestFocusInWindow();
+        updateButtonStates();
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        if (!validateForm()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please fill all required fields!");
+            return;
+        }
+
+        MaterialDTO dto = new MaterialDTO();
+        dto.setMaterialCode(txtCode.getText().trim());
+        dto.setMaterialDescription(txtDescription.getText().trim());
+        dto.setUnitOfMeasure(txtBaseUOM.getText().trim());
+        if (!txtWeight.getText().trim().isEmpty()) {
+            try { dto.setUnitWeight(Double.parseDouble(txtWeight.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        dto.setCategory(txtMaterialGroup.getText().trim());
+        if (cmbMaterialCategory.getSelectedIndex() >= 0) {
+            dto.setMaterialType(cmbMaterialCategory.getSelectedItem().toString());
+        }
+        if (cmbStorageConditions.getSelectedIndex() >= 0) {
+            dto.setStorageCondition(cmbStorageConditions.getSelectedItem().toString());
+        }
+        dto.setIsActive(chkIsActive.isSelected());
+
+        BackgroundTask task = new BackgroundTask(this, "Saving Material") {
+            private int materialId;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Creating material...");
+                materialId = controller.createMaterial(dto);
+                return materialId > 0;
             }
-        });
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Material created successfully!");
+                clearForm();
+                loadMaterialList();
+                updateButtonStates();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to create material: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        clearForm();
+        updateButtonStates();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        if (!validateForm() || selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please fill all required fields!");
+            return;
+        }
+
+        selectedMaterial.setMaterialCode(txtCode.getText().trim());
+        selectedMaterial.setMaterialDescription(txtDescription.getText().trim());
+        selectedMaterial.setUnitOfMeasure(txtBaseUOM.getText().trim());
+        if (!txtWeight.getText().trim().isEmpty()) {
+            try { selectedMaterial.setUnitWeight(Double.parseDouble(txtWeight.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        selectedMaterial.setCategory(txtMaterialGroup.getText().trim());
+        if (cmbMaterialCategory.getSelectedIndex() >= 0) {
+            selectedMaterial.setMaterialType(cmbMaterialCategory.getSelectedItem().toString());
+        }
+        if (cmbStorageConditions.getSelectedIndex() >= 0) {
+            selectedMaterial.setStorageCondition(cmbStorageConditions.getSelectedItem().toString());
+        }
+        selectedMaterial.setIsActive(chkIsActive.isSelected());
+
+        BackgroundTask task = new BackgroundTask(this, "Updating Material") {
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Updating material...");
+                return controller.updateMaterial(selectedMaterial);
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Material updated successfully!");
+                clearForm();
+                loadMaterialList();
+                updateButtonStates();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to update material: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        if (selectedMaterial == null) return;
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete material " + selectedMaterial.getMaterialCode() + "?",
+                "Confirm Delete", JOptionPane.YES_NO_OPTION);
+
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        BackgroundTask task = new BackgroundTask(this, "Deleting Material") {
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Deleting material...");
+                return controller.deleteMaterial(selectedMaterial.getMaterialId());
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Material deleted successfully!");
+                clearForm();
+                loadMaterialList();
+                updateButtonStates();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to delete material: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        String searchTerm = txtSearch.getText().trim();
+        if (searchTerm.isEmpty()) {
+            loadMaterialList();
+            return;
+        }
+
+        BackgroundTask task = new BackgroundTask(this, "Searching Materials") {
+            private List<MaterialDTO> results;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching materials...");
+                results = controller.searchMaterials(searchTerm);
+                return results != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                populateMaterialTable(results);
+                StatusMessageHandler.showSuccess(txtStatus, "Found " + results.size() + " materials.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Search failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        loadMaterialList();
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        StatusMessageHandler.showInfo(txtStatus, "Export feature coming soon");
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void setupTttFieldNavigation() {
+        javax.swing.JTextField[] textFields = {
+            txtSearch, txtCode, txtDescription, txtBaseUOM, txtWeight, txtVolume, 
+            txtMaterialGroup, txtStorageType, txtMinStock, txtMaxStock, txtReorderPoint, txtUnitCost
+        };
+
+        for (int i = 0; i < textFields.length; i++) {
+            final int currentIndex = i;
+            textFields[i].addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent evt) {
+                    if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DOWN) {
+                        evt.consume();
+                        if (currentIndex < textFields.length - 1) {
+                            textFields[currentIndex + 1].requestFocus();
+                        }
+                    } else if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_UP) {
+                        evt.consume();
+                        if (currentIndex > 0) {
+                            textFields[currentIndex - 1].requestFocus();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void setupKeyBindings() {
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = getRootPane().getActionMap();
+
+        Action addAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnAdd.isEnabled()) btnAdd.doClick();
+            }
+        };
+
+        Action saveAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnSave.isEnabled()) btnSave.doClick();
+            }
+        };
+
+        Action clearAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnClear.isEnabled()) btnClear.doClick();
+            }
+        };
+
+        Action updateAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnUpdate.isEnabled()) btnUpdate.doClick();
+            }
+        };
+
+        Action deleteAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnDelete.isEnabled()) btnDelete.doClick();
+            }
+        };
+
+        Action refreshAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnRefresh.isEnabled()) btnRefresh.doClick();
+            }
+        };
+
+        Action searchAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnSearch.isEnabled()) btnSearch.doClick();
+            }
+        };
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK), "add");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
+        actionMap.put("add", addAction);
+        actionMap.put("addF6", addAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK), "save");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), "saveF7");
+        actionMap.put("save", saveAction);
+        actionMap.put("saveF7", saveAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK), "clear");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), "clearF8");
+        actionMap.put("clear", clearAction);
+        actionMap.put("clearF8", clearAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_U, ActionEvent.ALT_MASK), "update");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0), "updateF9");
+        actionMap.put("update", updateAction);
+        actionMap.put("updateF9", updateAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.ALT_MASK), "delete");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0), "deleteF10");
+        actionMap.put("delete", deleteAction);
+        actionMap.put("deleteF10", deleteAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK), "refresh");
+        actionMap.put("refresh", refreshAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK), "search");
+        actionMap.put("search", searchAction);
+    }
+
+    // loads and populates material data into the table
+
+    private void loadMaterialList() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Materials") {
+            private List<MaterialDTO> materials;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching materials...");
+                materials = controller.getAllMaterials();
+                return materials != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                populateMaterialTable(materials);
+                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + materials.size() + " materials successfully!");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load materials: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateMaterialTable(List<MaterialDTO> materials) {
+        this.allMaterials = materials;
+        DefaultTableModel model = (DefaultTableModel) tblMaterials.getModel();
+        model.setRowCount(0);
+
+        if (materials != null) {
+            for (MaterialDTO m : materials) {
+                model.addRow(new Object[]{
+                    m.getMaterialCode(),
+                    m.getMaterialDescription(),
+                    m.getUnitOfMeasure(),
+                    m.getIsActive() != null && m.getIsActive() ? "Yes" : "No",
+                    m.getModifiedDate()
+                });
+            }
+        }
+    }
+
+    private MaterialDTO findMaterialByCode(String code) {
+        if (code == null || allMaterials == null) return null;
+        for (MaterialDTO m : allMaterials) {
+            if (m.getMaterialCode().equals(code)) return m;
+        }
+        return null;
+    }
+
+    private boolean validateForm() {
+        return !txtCode.getText().trim().isEmpty() && !txtDescription.getText().trim().isEmpty()
+                && !txtBaseUOM.getText().trim().isEmpty();
+    }
+
+    private void clearForm() {
+        txtCode.setText("");
+        txtDescription.setText("");
+        txtBaseUOM.setText("");
+        txtWeight.setText("");
+        txtVolume.setText("");
+        txtMaterialGroup.setText("");
+        txtStorageType.setText("");
+        txtMinStock.setText("");
+        txtMaxStock.setText("");
+        txtReorderPoint.setText("");
+        txtUnitCost.setText("");
+        cmbMaterialCategory.setSelectedIndex(-1);
+        cmbStorageConditions.setSelectedIndex(-1);
+        chkIsActive.setSelected(false);
+        chkBatchManaged.setSelected(false);
+        txtCode.setEditable(true);
+        selectedMaterial = null;
+        tblMaterials.clearSelection();
+        isAddMode = false;
+    }
+
+    private void updateButtonStates() {
+        btnAdd.setEnabled(!isAddMode && selectedMaterial == null);
+        btnSave.setEnabled(isAddMode);
+        btnClear.setEnabled(isAddMode || selectedMaterial != null);
+        btnUpdate.setEnabled(selectedMaterial != null && !isAddMode);
+        btnDelete.setEnabled(selectedMaterial != null && !isAddMode);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdate;
+    private javax.swing.JCheckBox chkBatchManaged;
+    private javax.swing.JCheckBox chkIsActive;
+    private javax.swing.JComboBox<String> cmbMaterialCategory;
+    private javax.swing.JComboBox<String> cmbStorageConditions;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable tblMaterials;
+    private javax.swing.JTextField txtBaseUOM;
+    private javax.swing.JTextField txtCode;
+    private javax.swing.JTextField txtDescription;
+    private javax.swing.JTextField txtMaterialGroup;
+    private javax.swing.JTextField txtMaxStock;
+    private javax.swing.JTextField txtMinStock;
+    private javax.swing.JTextField txtReorderPoint;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JLabel txtStatus;
+    private javax.swing.JTextField txtStorageType;
+    private javax.swing.JTextField txtUnitCost;
+    private javax.swing.JTextField txtVolume;
+    private javax.swing.JTextField txtWeight;
     // End of variables declaration//GEN-END:variables
 }
