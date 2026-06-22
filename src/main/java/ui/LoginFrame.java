@@ -4,12 +4,17 @@
  */
 package ui;
 
+import com.google.gson.JsonObject;
+import core.api.ApiClient;
+import core.api.dao.UserDAO;
+import core.api.dao.PermissionDAO;
 import core.security.*;
 import core.workers.BackgroundTask;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -20,6 +25,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import models.entity.User;
+import ui.masterdata.UserManagementForm;
 
 /**
  *
@@ -257,27 +263,36 @@ public class LoginFrame extends javax.swing.JFrame {
         String username = txtUsername.getText().trim();
         String password = new String(pwdPassword.getPassword());
 
+        // check if we have saved state from a session timeout
+        final boolean hadSavedState = LogoutManager.hasSavedState();
+
         BackgroundTask task = new BackgroundTask(this, "Authenticating User") {
 
             private User user;
             private Set<String> permissions;
+            private String accessToken;
+            private String refreshToken;
 
             @Override
             protected Boolean performTask() throws Exception {
 
-                updateProgress("Authenticating credentials...");
+                updateProgress("Authenticating via API...");
 
-                UserAuthentication auth = new UserAuthentication();
-                user = auth.authenticate(username, password);
+                // single API call returns user + permissions + tokens
+                ApiClient api = ApiClient.getInstance();
+                JsonObject response = api.login(username, password);
+
+                JsonObject data = response.getAsJsonObject("data");
+                JsonObject userJson = data.getAsJsonObject("user");
+
+                user = UserDAO.getInstance().jsonToUser(userJson);
+                permissions = PermissionDAO.getInstance().extractPermissions(response);
+                accessToken = data.get("access_token").getAsString();
+                refreshToken = data.get("refresh_token").getAsString();
 
                 if (user == null) {
                     return false;
                 }
-
-                updateProgress("Loading permissions...");
-
-                PermissionManager pm = new PermissionManager();
-                permissions = pm.loadUserPermissions(user.getUserId());
 
                 return true;
             }
@@ -285,13 +300,18 @@ public class LoginFrame extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
 
-                // initialize session
+                // initialize session with tokens
                 UserSession session = UserSession.getInstance();
-                session.initialize(user, permissions);
+                session.initialize(user, permissions, accessToken, refreshToken);
 
                 // transition UI
                 dispose();
                 new MainFrame().setVisible(true);
+
+                // restore saved frame state if session had expired
+                if (hadSavedState) {
+                    restoreSavedFrames(user);
+                }
             }
 
             @Override
@@ -353,6 +373,35 @@ public class LoginFrame extends javax.swing.JFrame {
             tglbtnShowPwd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/view-14.png")));
         }
     }//GEN-LAST:event_tglbtnShowPwdActionPerformed
+
+    /**
+     * Restore saved frames after session timeout re-login.
+     */
+    private void restoreSavedFrames(User user) {
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            try {
+                // check if UserManagementForm was open
+                Set<String> savedFrames = LogoutManager.getSavedFrameClassNames();
+                for (String frameClass : savedFrames) {
+                    if (frameClass.contains("UserManagementForm")) {
+                        Map<String, String> state = LogoutManager.getSavedFrameState(frameClass);
+                        UserManagementForm form = new UserManagementForm(user);
+                        form.setVisible(true);
+                        if (state != null) {
+                            form.restoreState(state);
+                        }
+                    }
+                }
+
+                // clear saved state after restoration
+                LogoutManager.clearSavedState();
+
+            } catch (Exception e) {
+                core.logging.Logger.errlog("Error restoring frame states: " + e.getMessage(), e);
+                LogoutManager.clearSavedState();
+            }
+        });
+    }
 
     /**
      * @param args the command line arguments

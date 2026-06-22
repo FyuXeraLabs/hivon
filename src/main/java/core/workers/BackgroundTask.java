@@ -19,13 +19,19 @@ import core.logging.Logger;
 public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
     
     private final ProgressDialog progressDialog;
-    private final JFrame parentFrame;
+    private final java.awt.Component parentComponent;
     private final String taskName;
     
     public BackgroundTask(JFrame parentFrame, String taskName) {
-        this.parentFrame = parentFrame;
+        this.parentComponent = parentFrame;
         this.taskName = taskName;
         this.progressDialog = new ProgressDialog(parentFrame, true);
+    }
+    
+    public BackgroundTask(JDialog parentDialog, String taskName) {
+        this.parentComponent = parentDialog;
+        this.taskName = taskName;
+        this.progressDialog = new ProgressDialog(parentDialog, true);
     }
     
     /**
@@ -39,7 +45,7 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
      * default shows success message
      */
     protected void onSuccess() {
-        JOptionPane.showMessageDialog(parentFrame, taskName + " completed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(parentComponent, taskName + " completed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
     
     /**
@@ -48,7 +54,7 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
      */
     protected void onFailure(Exception e) {
         Logger.errlog(taskName + " failed: " + e.getMessage(), e);
-        JOptionPane.showMessageDialog(parentFrame, taskName + " failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(parentComponent, taskName + " failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
     
     /**

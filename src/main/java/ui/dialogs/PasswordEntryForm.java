@@ -22,6 +22,7 @@ public class PasswordEntryForm extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         this.setLocationRelativeTo(null);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         
         defaultEchoChar = txtPassword.getEchoChar();
         

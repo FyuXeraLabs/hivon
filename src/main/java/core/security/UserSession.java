@@ -4,10 +4,13 @@
  */
 package core.security;
 
+import core.api.ApiConfig;
+import core.logging.Logger;
 import models.entity.User;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.Timer;
 
 /**
  *
@@ -22,6 +25,15 @@ public class UserSession {
     private User currentUser;
     private LocalDateTime loginTime;
     private Set<String> permissions;
+
+    // jwt tokens
+    private String accessToken;
+    private String refreshToken;
+
+    // inactivity tracking
+    private long lastActivityTime;
+    private Timer inactivityTimer;
+    private static final int TIMER_CHECK_INTERVAL_MS = 30_000; // 30 seconds
 
     // private constructor for singleton
     private UserSession() {
@@ -40,14 +52,26 @@ public class UserSession {
         return instance;
     }
 
-    // init session with user
-    public void initialize(User user, Set<String> userPermissions) {
+    // init session with user, permissions, and tokens
+    public void initialize(User user, Set<String> userPermissions,
+                           String accessToken, String refreshToken) {
         this.currentUser = user;
         this.loginTime = LocalDateTime.now();
         this.permissions.clear();
         if (userPermissions != null) {
             this.permissions.addAll(userPermissions);
         }
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.lastActivityTime = System.currentTimeMillis();
+
+        // start inactivity monitor
+        // startInactivityTimer(); // disabled inactivity auto-logout
+    }
+
+    // init session with user (backward compatibility)
+    public void initialize(User user, Set<String> userPermissions) {
+        initialize(user, userPermissions, null, null);
     }
 
     // invalidate session
@@ -55,7 +79,76 @@ public class UserSession {
         this.currentUser = null;
         this.loginTime = null;
         this.permissions.clear();
+        this.accessToken = null;
+        this.refreshToken = null;
+
+        stopInactivityTimer();
     }
+
+    // ─── INACTIVITY TIMER ──────────────────────────────────────────────
+
+    private void startInactivityTimer() {
+        stopInactivityTimer();
+
+        inactivityTimer = new Timer(TIMER_CHECK_INTERVAL_MS, e -> {
+            if (isExpired()) {
+                Logger.log("UserSession", "Session expired due to inactivity ("
+                        + ApiConfig.SESSION_TIMEOUT_MINUTES + " minutes)");
+                stopInactivityTimer();
+
+                // trigger session expiry on EDT
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    LogoutManager.sessionExpired();
+                });
+            }
+        });
+        inactivityTimer.setRepeats(true);
+        inactivityTimer.start();
+
+        Logger.log("UserSession", "Inactivity timer started ("
+                + ApiConfig.SESSION_TIMEOUT_MINUTES + " min timeout)");
+    }
+
+    private void stopInactivityTimer() {
+        if (inactivityTimer != null && inactivityTimer.isRunning()) {
+            inactivityTimer.stop();
+            inactivityTimer = null;
+        }
+    }
+
+    /**
+     * Update the last activity time. Called on every API call or user interaction.
+     */
+    public void updateActivity() {
+        this.lastActivityTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Check if session has expired due to inactivity.
+     */
+    public boolean isExpired() {
+        return false;
+    }
+
+    // ─── TOKEN MANAGEMENT ──────────────────────────────────────────────
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    // ─── EXISTING GETTERS ──────────────────────────────────────────────
 
     // get current user
     public User getCurrentUser() {

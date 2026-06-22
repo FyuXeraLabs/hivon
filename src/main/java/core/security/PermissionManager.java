@@ -4,22 +4,21 @@
  */
 package core.security;
 
-import database.dao.PermissionDAO;
-import database.dao.UserDAO;
-import models.entity.User;
-
+import core.api.dao.PermissionDAO;
 import java.util.HashSet;
 import java.util.Set;
 
 import core.logging.Logger;
 
 /**
+ * Permission management via REST API.
+ * Replaces direct PermissionDAO access with API calls.
  *
  * @author Sanod
  */
 public class PermissionManager {
 
-    // load user permissions from database
+    // load user permissions from API
     public Set<String> loadUserPermissions(Integer userId) {
         Set<String> permissions = new HashSet<>();
 
@@ -28,8 +27,7 @@ public class PermissionManager {
         }
 
         try {
-            PermissionDAO permissionDAO = new PermissionDAO();
-            permissions = permissionDAO.getPermissionsByUserId(userId);
+            permissions = PermissionDAO.getInstance().getUserPermissions(userId);
         } catch (Exception e) {
             Logger.errlog("error loading permissions for user id " + userId, e);
         }
@@ -52,8 +50,7 @@ public class PermissionManager {
         Set<String> allPermissions = new HashSet<>();
 
         try {
-            PermissionDAO permissionDAO = new PermissionDAO();
-            allPermissions = permissionDAO.getAllPermissionCodes();
+            allPermissions = PermissionDAO.getInstance().getAllPermissions();
         } catch (Exception e) {
             Logger.errlog("error loading system permissions", e);
         }
@@ -64,8 +61,7 @@ public class PermissionManager {
     // assign permission to user
     public boolean assignPermission(Integer userId, String permissionCode) {
         try {
-            PermissionDAO permissionDAO = new PermissionDAO();
-            return permissionDAO.assignPermissionToUser(userId, permissionCode);
+            return PermissionDAO.getInstance().assignPermission(userId, permissionCode);
         } catch (Exception e) {
             Logger.errlog("error assigning permission to user id " + userId, e);
             return false;
@@ -75,8 +71,7 @@ public class PermissionManager {
     // remove permission from user
     public boolean removePermission(Integer userId, String permissionCode) {
         try {
-            PermissionDAO permissionDAO = new PermissionDAO();
-            return permissionDAO.removePermissionFromUser(userId, permissionCode);
+            return PermissionDAO.getInstance().removePermission(userId, permissionCode);
         } catch (Exception e) {
             Logger.errlog("error removing permission from user id " + userId, e);
             return false;

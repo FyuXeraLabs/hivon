@@ -21,6 +21,13 @@ public class ProgressDialog extends javax.swing.JDialog {
         setupDialog();
     }
     
+    public ProgressDialog(java.awt.Dialog parent, boolean modal) {
+        super(parent, modal);
+        initComponents();
+        this.setLocationRelativeTo(null);
+        setupDialog();
+    }
+    
     // setup dialog properties
     private void setupDialog() {
         setLocationRelativeTo(getParent());
