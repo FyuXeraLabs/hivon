@@ -22,9 +22,12 @@ import javax.swing.KeyStroke;
 import models.entity.User;
 import masterdata.controllers.UserManagementController;
 import models.dto.UserDTO;
+import core.api.dao.PermissionDAO;
 import core.security.PermissionManager;
 import core.workers.BackgroundTask;
+import core.logging.Logger;
 import java.util.HashSet;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import ui.components.StatusMessageHandler;
 import ui.dialogs.PasswordEntryForm;
@@ -226,34 +229,53 @@ public class UserManagementForm extends javax.swing.JFrame {
         // get defaults for this role
         List<String> defaultPermissions = getDefaultPermissionsForRole(role);
 
-        // get all system permissions
-        Set<String> allPermissions = permissionManager.getAllSystemPermissions();
+        // fetch all system permissions from API (async)
+        BackgroundTask task = new BackgroundTask(this, "Loading Permissions") {
 
-        // assigned = defaults
-        List<String> assignedList = new ArrayList<>(defaultPermissions);
-        assignedList.sort(String::compareTo);
+            private Set<String> allPermissions;
 
-        // available = all minus defaults
-        List<String> availableList = new ArrayList<>();
-        for (String p : allPermissions) {
-            if (!defaultPermissions.contains(p)) {
-                availableList.add(p);
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching system permissions...");
+                allPermissions = permissionManager.getAllSystemPermissions();
+                return allPermissions != null;
             }
-        }
-        availableList.sort(String::compareTo);
 
-        // populate lists
-        javax.swing.DefaultListModel<String> assignedModel = new javax.swing.DefaultListModel<>();
-        for (String p : assignedList) {
-            assignedModel.addElement(p);
-        }
-        lstAssignedPermissions.setModel(assignedModel);
+            @Override
+            protected void onSuccess() {
+                // assigned = defaults
+                List<String> assignedList = new ArrayList<>(defaultPermissions);
+                assignedList.sort(String::compareTo);
 
-        javax.swing.DefaultListModel<String> availableModel = new javax.swing.DefaultListModel<>();
-        for (String p : availableList) {
-            availableModel.addElement(p);
-        }
-        lstAvailablePermisions.setModel(availableModel);
+                // available = all minus defaults
+                List<String> availableList = new ArrayList<>();
+                for (String p : allPermissions) {
+                    if (!defaultPermissions.contains(p)) {
+                        availableList.add(p);
+                    }
+                }
+                availableList.sort(String::compareTo);
+
+                // populate lists
+                javax.swing.DefaultListModel<String> assignedModel = new javax.swing.DefaultListModel<>();
+                for (String p : assignedList) {
+                    assignedModel.addElement(p);
+                }
+                lstAssignedPermissions.setModel(assignedModel);
+
+                javax.swing.DefaultListModel<String> availableModel = new javax.swing.DefaultListModel<>();
+                for (String p : availableList) {
+                    availableModel.addElement(p);
+                }
+                lstAvailablePermisions.setModel(availableModel);
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load permissions!");
+            }
+        };
+        task.executeWithDialog();
     }
 
     private List<String> getDefaultPermissionsForRole(String role) {
@@ -311,38 +333,30 @@ public class UserManagementForm extends javax.swing.JFrame {
     }
 
     private void saveUserPermissions(int userId) {
-        // get all items currently in assigned list
+        // batch sync all assigned permissions in one API call
         javax.swing.DefaultListModel<String> assignedModel = (javax.swing.DefaultListModel<String>) lstAssignedPermissions.getModel();
-
+        List<String> permissions = new ArrayList<>();
         for (int i = 0; i < assignedModel.getSize(); i++) {
-            String permissionCode = assignedModel.getElementAt(i);
-            permissionManager.assignPermission(userId, permissionCode);
+            permissions.add(assignedModel.getElementAt(i));
+        }
+        try {
+            PermissionDAO.getInstance().syncPermissions(userId, permissions);
+        } catch (Exception e) {
+            Logger.errlog("error syncing permissions for user id " + userId, e);
         }
     }
 
     private void updateUserPermissions(int userId) {
-        // get current permissions from database
-        Set<String> currentPermissions = permissionManager.loadUserPermissions(userId);
-
-        // get desired permissions from lstAssignedPermissions
+        // batch sync: replace all permissions in one API call
         javax.swing.DefaultListModel<String> assignedModel = (javax.swing.DefaultListModel<String>) lstAssignedPermissions.getModel();
-        Set<String> desiredPermissions = new HashSet<>();
+        List<String> desiredPermissions = new ArrayList<>();
         for (int i = 0; i < assignedModel.getSize(); i++) {
             desiredPermissions.add(assignedModel.getElementAt(i));
         }
-
-        // remove permissions that are in current but not in desired
-        for (String p : currentPermissions) {
-            if (!desiredPermissions.contains(p)) {
-                permissionManager.removePermission(userId, p);
-            }
-        }
-
-        // add permissions that are in desired but not in current
-        for (String p : desiredPermissions) {
-            if (!currentPermissions.contains(p)) {
-                permissionManager.assignPermission(userId, p);
-            }
+        try {
+            PermissionDAO.getInstance().syncPermissions(userId, desiredPermissions);
+        } catch (Exception e) {
+            Logger.errlog("error syncing permissions for user id " + userId, e);
         }
     }
 
@@ -1555,37 +1569,131 @@ public class UserManagementForm extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 
     private void loadPermissions(Integer userId) {
-        // get what this user currently has from database
-        Set<String> userPermissions = permissionManager.loadUserPermissions(userId);
+        // async load from API to avoid blocking EDT
+        BackgroundTask task = new BackgroundTask(this, "Loading Permissions") {
 
-        // get all system permissions
-        Set<String> allPermissions = permissionManager.getAllSystemPermissions();
+            private Set<String> userPermissions;
+            private Set<String> allPermissions;
 
-        // assigned = what user has
-        List<String> assignedList = new ArrayList<>(userPermissions);
-        assignedList.sort(String::compareTo);
-
-        // available = all system permissions MINUS what user has
-        List<String> availableList = new ArrayList<>();
-        for (String p : allPermissions) {
-            if (!userPermissions.contains(p)) {
-                availableList.add(p);
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching permissions...");
+                userPermissions = permissionManager.loadUserPermissions(userId);
+                allPermissions = permissionManager.getAllSystemPermissions();
+                return true;
             }
-        }
-        availableList.sort(String::compareTo);
 
-        // populate lists
-        javax.swing.DefaultListModel<String> assignedModel = new javax.swing.DefaultListModel<>();
-        for (String p : assignedList) {
-            assignedModel.addElement(p);
-        }
-        lstAssignedPermissions.setModel(assignedModel);
+            @Override
+            protected void onSuccess() {
+                // assigned = what user has
+                List<String> assignedList = new ArrayList<>(userPermissions);
+                assignedList.sort(String::compareTo);
 
-        javax.swing.DefaultListModel<String> availableModel = new javax.swing.DefaultListModel<>();
-        for (String p : availableList) {
-            availableModel.addElement(p);
+                // available = all system permissions MINUS what user has
+                List<String> availableList = new ArrayList<>();
+                for (String p : allPermissions) {
+                    if (!userPermissions.contains(p)) {
+                        availableList.add(p);
+                    }
+                }
+                availableList.sort(String::compareTo);
+
+                // populate lists
+                javax.swing.DefaultListModel<String> assignedModel = new javax.swing.DefaultListModel<>();
+                for (String p : assignedList) {
+                    assignedModel.addElement(p);
+                }
+                lstAssignedPermissions.setModel(assignedModel);
+
+                javax.swing.DefaultListModel<String> availableModel = new javax.swing.DefaultListModel<>();
+                for (String p : availableList) {
+                    availableModel.addElement(p);
+                }
+                lstAvailablePermisions.setModel(availableModel);
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load permissions!");
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    /**
+     * Restore form state after session timeout re-login.
+     * Called by LoginFrame after re-authentication.
+     */
+    public void restoreState(Map<String, String> state) {
+        if (state == null || state.isEmpty()) {
+            return;
         }
-        lstAvailablePermisions.setModel(availableModel);
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            try {
+                // restore text fields
+                if (state.containsKey("tf:txtSearch")) {
+                    txtSearch.setText(state.get("tf:txtSearch"));
+                }
+                if (state.containsKey("tf:txtUsername")) {
+                    txtUsername.setText(state.get("tf:txtUsername"));
+                }
+                if (state.containsKey("tf:txtFullName")) {
+                    txtFullName.setText(state.get("tf:txtFullName"));
+                }
+                if (state.containsKey("tf:txtEmail")) {
+                    txtEmail.setText(state.get("tf:txtEmail"));
+                }
+
+                // restore combo box
+                if (state.containsKey("cb:cmbRole")) {
+                    try {
+                        int idx = Integer.parseInt(state.get("cb:cmbRole"));
+                        if (idx >= -1 && idx < cmbRole.getItemCount()) {
+                            cmbRole.setSelectedIndex(idx);
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // restore checkbox
+                if (state.containsKey("chk:chkIsActive")) {
+                    chkIsActive.setSelected(Boolean.parseBoolean(state.get("chk:chkIsActive")));
+                }
+
+                // restore username editability
+                if (state.containsKey("tf:txtUsername:editable")) {
+                    boolean editable = Boolean.parseBoolean(state.get("tf:txtUsername:editable"));
+                    txtUsername.setEditable(editable);
+                    if (editable) {
+                        isAddMode = true;
+                        updateButtonStates();
+                    }
+                }
+
+                Logger.log("UserManagementForm", "Form state restored (" + state.size() + " fields)");
+
+            } catch (Exception e) {
+                Logger.errlog("Error restoring form state: " + e.getMessage(), e);
+            }
+        });
+    }
+
+    /**
+     * Capture current form state for preservation during session timeout.
+     */
+    public Map<String, String> captureState() {
+        Map<String, String> state = new java.util.HashMap<>();
+
+        state.put("tf:txtSearch", txtSearch.getText());
+        state.put("tf:txtUsername", txtUsername.getText());
+        state.put("tf:txtUsername:editable", String.valueOf(txtUsername.isEditable()));
+        state.put("tf:txtFullName", txtFullName.getText());
+        state.put("tf:txtEmail", txtEmail.getText());
+        state.put("cb:cmbRole", String.valueOf(cmbRole.getSelectedIndex()));
+        state.put("chk:chkIsActive", String.valueOf(chkIsActive.isSelected()));
+
+        return state;
     }
 
     /**

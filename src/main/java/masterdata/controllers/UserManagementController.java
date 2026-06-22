@@ -1,21 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package masterdata.controllers;
 
-import core.security.UserAuthentication;
+import core.api.dao.UserDAO;
+import core.api.dao.PermissionDAO;
 import core.security.UserSession;
-import database.dao.UserDAO;
 import models.dto.UserDTO;
-import models.entity.User;
-import models.entity.User.UserRole;
 import core.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 /**
+ * Controller for User management operations.
+ * Handles fetching, creating, updating, deleting, activating, deactivating users and resetting passwords.
  *
  * @author Sanod
  */
@@ -24,14 +22,17 @@ public class UserManagementController {
     private String username = UserSession.getInstance().getUsername();
 
     public UserManagementController() {
-        
+
     }
 
     // get all users
     public List<UserDTO> getAllUsers() {
-        UserDAO userDAO = new UserDAO();
-        List<User> users = userDAO.getAllUsers();
-        return users.stream().map(this::convertEntityToDto).collect(Collectors.toList());
+        try {
+            return UserDAO.getInstance().getUsers(null);
+        } catch (Exception e) {
+            Logger.errlog("failed to get all users: " + e.getMessage(), e);
+            return new ArrayList<>();
+        }
     }
 
     // create new user
@@ -42,38 +43,19 @@ public class UserManagementController {
             return 0;
         }
 
-        UserDAO userDAO = new UserDAO();
-        UserAuthentication authenticator = new UserAuthentication();
+        try {
+            int userId = UserDAO.getInstance().createUser(userDto, initialPassword, null);
 
-        // check if username already exists
-        if (userDAO.usernameExists(userDto.getUsername())) {
-            Logger.errlog("create user failed: username already exists - " + userDto.getUsername(), new IllegalArgumentException("Username already exists"));
-            return 0;
+            if (userId > 0) {
+                Logger.log(username, "user created successfully: " + userDto.getUsername() + " (id: " + userId + ")");
+            }
+
+            return userId;
+
+        } catch (Exception e) {
+            Logger.errlog("create user failed: " + e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
-
-        // validate password complexity
-        if (!authenticator.validatePasswordComplexity(initialPassword)) {
-            Logger.errlog("create user failed: password does not meet complexity requirements", new IllegalArgumentException("Password does not meet complexity requirements"));
-            return 0;
-        }
-
-        // convert dto to entity
-        User user = convertDtoToEntity(userDto);
-
-        // hash password
-        String passwordHash = authenticator.hashPassword(initialPassword);
-
-        // save to database
-        int userId = userDAO.createUser(user, passwordHash);
-        boolean success = userId > 0;
-
-        if (userId > 0) {
-            Logger.log(username, "user created successfully: " + userDto.getUsername() + " (id: " + userId + ")");
-        } else {
-            Logger.errlog("create user failed: database error for user - " + userDto.getUsername(), new IllegalStateException("Database error during user creation"));
-        }
-
-        return userId;
     }
 
     // update existing user
@@ -83,29 +65,19 @@ public class UserManagementController {
             return false;
         }
 
-        UserDAO userDAO = new UserDAO();
+        try {
+            boolean success = UserDAO.getInstance().updateUser(userDto, null);
 
-        // get existing user
-        User existingUser = userDAO.getUserById(userDto.getUserId());
-        if (existingUser == null) {
-            Logger.errlog("update user failed: user not found - id=" + userDto.getUserId(), new IllegalArgumentException("User not found"));
+            if (success) {
+                Logger.log(username, "user updated successfully: " + userDto.getUsername() + " (id: " + userDto.getUserId() + ")");
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            Logger.errlog("update user failed: " + e.getMessage(), e);
             return false;
         }
-
-        // convert dto to entity
-        User user = convertDtoToEntity(userDto);
-        user.setUserId(userDto.getUserId());
-
-        // update in database
-        boolean success = userDAO.updateUser(user);
-
-        if (success) {
-            Logger.log(username, "user updated successfully: " + userDto.getUsername() + " (id: " + userDto.getUserId() + ")");
-        } else {
-            Logger.errlog("failed to update user: " + userDto.getUsername(), new IllegalStateException("Failed to update user in database"));
-        }
-
-        return success;
     }
 
     // delete user
@@ -115,16 +87,19 @@ public class UserManagementController {
             return false;
         }
 
-        UserDAO userDAO = new UserDAO();
-        boolean success = userDAO.deleteUser(userId);
+        try {
+            boolean success = UserDAO.getInstance().deleteUser(userId);
 
-        if (success) {
-            Logger.log(username, "user deleted successfully: id=" + userId);
-        } else {
-            Logger.errlog("failed to delete user: id=" + userId, new IllegalStateException("Failed to delete user from database"));
+            if (success) {
+                Logger.log(username, "user deleted successfully: id=" + userId);
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            Logger.errlog("failed to delete user: id=" + userId + " - " + e.getMessage(), e);
+            return false;
         }
-
-        return success;
     }
 
     // deactivate user
@@ -134,16 +109,19 @@ public class UserManagementController {
             return false;
         }
 
-        UserDAO userDAO = new UserDAO();
-        boolean success = userDAO.deactivateUser(userId);
+        try {
+            boolean success = UserDAO.getInstance().deactivateUser(userId);
 
-        if (success) {
-            Logger.log(username, "user deactivated successfully: id=" + userId);
-        } else {
-            Logger.errlog("failed to deactivate user: id=" + userId, new IllegalStateException("Failed to deactivate user in database"));
+            if (success) {
+                Logger.log(username, "user deactivated successfully: id=" + userId);
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            Logger.errlog("failed to deactivate user: id=" + userId + " - " + e.getMessage(), e);
+            return false;
         }
-
-        return success;
     }
 
     // activate user
@@ -153,16 +131,19 @@ public class UserManagementController {
             return false;
         }
 
-        UserDAO userDAO = new UserDAO();
-        boolean success = userDAO.activateUser(userId);
+        try {
+            boolean success = UserDAO.getInstance().activateUser(userId);
 
-        if (success) {
-            Logger.log(username, "user activated successfully: id=" + userId);
-        } else {
-            Logger.errlog("failed to activate user: id=" + userId, new IllegalStateException("Failed to activate user in database"));
+            if (success) {
+                Logger.log(username, "user activated successfully: id=" + userId);
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            Logger.errlog("failed to activate user: id=" + userId + " - " + e.getMessage(), e);
+            return false;
         }
-
-        return success;
     }
 
     // reset user password
@@ -172,111 +153,38 @@ public class UserManagementController {
             return false;
         }
 
-        UserAuthentication authenticator = new UserAuthentication();
-        UserDAO userDAO = new UserDAO();
+        try {
+            boolean success = UserDAO.getInstance().resetPassword(userId, newPassword);
 
-        // validate password complexity
-        if (!authenticator.validatePasswordComplexity(newPassword)) {
-            Logger.errlog("reset password failed: password does not meet complexity requirements", new IllegalArgumentException("Password does not meet complexity requirements"));
+            if (success) {
+                Logger.log(username, "password reset for user id: " + userId);
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            Logger.errlog("failed to reset password for user id: " + userId + " - " + e.getMessage(), e);
             return false;
         }
-
-        User user = userDAO.getUserById(userId);
-        if (user == null) {
-            Logger.errlog("reset password failed: user not found - id=" + userId, new IllegalArgumentException("User not found"));
-            return false;
-        }
-
-        boolean success = authenticator.resetPassword(user.getUsername(), newPassword);
-
-        if (success) {
-            Logger.log(username, "password reset for user: " + user.getUsername());
-        } else {
-            Logger.errlog("failed to reset password for user: " + user.getUsername(), new IllegalStateException("Failed to reset user password in database"));
-        }
-
-        return success;
-    }
-
-    // get all active users as dtos
-    public List<UserDTO> getAllActiveUsers() {
-        UserDAO userDAO = new UserDAO();
-        List<User> users = userDAO.getAllActiveUsers();
-        return users.stream().map(this::convertEntityToDto).collect(Collectors.toList());
     }
 
     // search users by criteria
     public List<UserDTO> searchUsers(String searchTerm) {
-        UserDAO userDAO = new UserDAO();
-        List<User> allUsers = userDAO.getAllActiveUsers();
-
-        return allUsers.stream().filter(user -> matchesSearch(user, searchTerm)).map(this::convertEntityToDto).collect(Collectors.toList());
+        try {
+            return UserDAO.getInstance().getUsers(searchTerm);
+        } catch (Exception e) {
+            Logger.errlog("search users failed: " + e.getMessage(), e);
+            return new ArrayList<>();
+        }
     }
 
     // get user by id as dto
     public UserDTO getUserById(int userId) {
-        UserDAO userDAO = new UserDAO();
-        User user = userDAO.getUserById(userId);
-        return user != null ? convertEntityToDto(user) : null;
-    }
-
-    // get user by username as dto
-    public UserDTO getUserByUsername(String username) {
-        UserDAO userDAO = new UserDAO();
-        User user = userDAO.getUserByUsername(username);
-        return user != null ? convertEntityToDto(user) : null;
-    }
-
-    // convert dto to entity
-    private User convertDtoToEntity(UserDTO dto) {
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setFullName(dto.getFullName());
-        user.setEmail(dto.getEmail());
-
-        // convert string role to enum
-        if (dto.getRole() != null) {
-            try {
-                UserRole role = UserRole.valueOf(dto.getRole().toUpperCase());
-                user.setRole(role);
-            } catch (IllegalArgumentException e) {
-                // default to operator if invalid
-                user.setRole(UserRole.OPERATOR);
-            }
-        } else {
-            user.setRole(UserRole.OPERATOR);
+        try {
+            return UserDAO.getInstance().getUserById(userId);
+        } catch (Exception e) {
+            Logger.errlog("get user by id failed: " + e.getMessage(), e);
+            return null;
         }
-
-        user.setWarehouseId(dto.getWarehouseId());
-        user.setIsActive(dto.getIsActive());
-
-        return user;
-    }
-
-    // convert entity to dto
-    private UserDTO convertEntityToDto(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setUserId(user.getUserId());
-        dto.setUsername(user.getUsername());
-        dto.setFullName(user.getFullName());
-        dto.setEmail(user.getEmail());
-        dto.setRole(user.getRole().toString());
-        dto.setWarehouseId(user.getWarehouseId());
-        dto.setIsActive(user.getIsActive());
-        dto.setLastLogin(user.getLastLogin());
-        dto.setCreatedDate(user.getCreatedDate());
-        dto.setModifiedDate(user.getLastModified());
-
-        return dto;
-    }
-
-    // check if user matches search term
-    private boolean matchesSearch(User user, String searchTerm) {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            return true;
-        }
-
-        String term = searchTerm.toLowerCase();
-        return user.getUsername().toLowerCase().contains(term) || user.getFullName().toLowerCase().contains(term) || (user.getEmail() != null && user.getEmail().toLowerCase().contains(term));
     }
 }
