@@ -5,8 +5,6 @@
 package ui;
 
 import core.security.*;
-import java.sql.Connection;
-import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Map;
@@ -17,7 +15,6 @@ import ui.movements.*;
 import ui.reports.*;
 import ui.inventory.*;
 
-import database.DBConnection;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -66,6 +63,9 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         setupKeyBindings();
+
+        // hide What's New content by default (accordion collapsed)
+        pnlWhatsNewContent.setVisible(false);
     }
     
     private void setupKeyBindings() {
@@ -115,6 +115,32 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
         btnUser = new javax.swing.JButton();
+        pnlWelcome = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        btnWhatsNewToggle = new javax.swing.JButton();
+        pnlWhatsNewContent = new javax.swing.JPanel();
+        lblUpdate1Title = new javax.swing.JLabel();
+        lblUpdate1Desc = new javax.swing.JLabel();
+        lblUpdate2Title = new javax.swing.JLabel();
+        lblUpdate2Desc = new javax.swing.JLabel();
+        lblUpdate3Title = new javax.swing.JLabel();
+        lblUpdate3Desc = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        pnlCap1 = new javax.swing.JPanel();
+        lblCap1Title = new javax.swing.JLabel();
+        lblCap1Desc = new javax.swing.JLabel();
+        pnlCap2 = new javax.swing.JPanel();
+        lblCap2Title = new javax.swing.JLabel();
+        lblCap2Desc = new javax.swing.JLabel();
+        pnlCap3 = new javax.swing.JPanel();
+        lblCap3Title = new javax.swing.JLabel();
+        lblCap3Desc = new javax.swing.JLabel();
+        pnlCap4 = new javax.swing.JPanel();
+        lblCap4Title = new javax.swing.JLabel();
+        lblCap4Desc = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -273,7 +299,7 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -290,6 +316,277 @@ public class MainFrame extends javax.swing.JFrame {
                 btnUserActionPerformed(evt);
             }
         });
+
+        pnlWelcome.setBackground(new java.awt.Color(255, 255, 255));
+        pnlWelcome.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(100, 116, 139));
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/logo-28.png"))); // NOI18N
+        jLabel1.setText("FYUXERA");
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 24)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(15, 23, 42));
+        jLabel2.setText("Welcome to Hivon");
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(100, 116, 139));
+        jLabel3.setText("WAREHOUSE MANAGEMENT SYSTEM");
+
+        jLabel4.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel4.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(71, 85, 105));
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel4.setText("<html> <div style='width:250px'> Hivon is a secure, enterprise-grade warehouse management platform designed to optimize daily stock tracking, streamline goods movements, and maintain accurate inventory control across physical locations. </div> </html>");
+        jLabel4.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        jLabel4.setFocusable(false);
+        jLabel4.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        jLabel4.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        btnWhatsNewToggle.setText("<html><b>What's new</b><br><font size='2' color='#64748B'>Latest updates in Hivon WMS</font></html>");
+        btnWhatsNewToggle.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnWhatsNewToggle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnWhatsNewToggleActionPerformed(evt);
+            }
+        });
+
+        pnlWhatsNewContent.setBackground(new java.awt.Color(255, 255, 255));
+
+        lblUpdate1Title.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        lblUpdate1Title.setText("Auto-Calculated Putaway Suggestion (June 2026)");
+
+        lblUpdate1Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblUpdate1Desc.setForeground(new java.awt.Color(71, 85, 105));
+        lblUpdate1Desc.setText("<html><div style='width:250px'>The system now automatically suggests optimal storage bins upon goods receipt, preventing capacity overload and optimizing rack configuration.</div></html>");
+
+        lblUpdate2Title.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        lblUpdate2Title.setText("FEFO Stock Picking Priority (May 2026)");
+
+        lblUpdate2Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblUpdate2Desc.setForeground(new java.awt.Color(71, 85, 105));
+        lblUpdate2Desc.setText("<html><div style='width:250px'>Picking lists automatically prioritize batches closest to their expiry date first, drastically reducing material waste in perishable lines.</div></html>");
+
+        lblUpdate3Title.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        lblUpdate3Title.setText("Real-Time Inventory Adjustment Approvals (April 2026)");
+
+        lblUpdate3Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblUpdate3Desc.setForeground(new java.awt.Color(71, 85, 105));
+        lblUpdate3Desc.setText("<html><div style='width:250px'>Supervisors can now authorize count discrepancies directly from the floor, adjusting inventory valuation immediately in the central database.</div></html>");
+
+        javax.swing.GroupLayout pnlWhatsNewContentLayout = new javax.swing.GroupLayout(pnlWhatsNewContent);
+        pnlWhatsNewContent.setLayout(pnlWhatsNewContentLayout);
+        pnlWhatsNewContentLayout.setHorizontalGroup(
+            pnlWhatsNewContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlWhatsNewContentLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlWhatsNewContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblUpdate1Title)
+                    .addComponent(lblUpdate1Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblUpdate2Title)
+                    .addComponent(lblUpdate2Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblUpdate3Title)
+                    .addComponent(lblUpdate3Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlWhatsNewContentLayout.setVerticalGroup(
+            pnlWhatsNewContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlWhatsNewContentLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblUpdate1Title)
+                .addGap(2, 2, 2)
+                .addComponent(lblUpdate1Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(lblUpdate2Title)
+                .addGap(2, 2, 2)
+                .addComponent(lblUpdate2Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(lblUpdate3Title)
+                .addGap(2, 2, 2)
+                .addComponent(lblUpdate3Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(100, 116, 139));
+        jLabel5.setText("CORE CAPABILITIES");
+
+        pnlCap1.setBackground(new java.awt.Color(255, 255, 255));
+        pnlCap1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        lblCap1Title.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
+        lblCap1Title.setText("INBOUND & OUTBOUND LOGISTICS");
+
+        lblCap1Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblCap1Desc.setForeground(new java.awt.Color(100, 116, 139));
+        lblCap1Desc.setText("<html><div style='width:250px'>Manages standard goods receipts from purchase orders, picking workflows for customer sales orders, inbound returns, and supplier returns.</div></html>");
+
+        javax.swing.GroupLayout pnlCap1Layout = new javax.swing.GroupLayout(pnlCap1);
+        pnlCap1.setLayout(pnlCap1Layout);
+        pnlCap1Layout.setHorizontalGroup(
+            pnlCap1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlCap1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblCap1Title)
+                    .addComponent(lblCap1Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+        pnlCap1Layout.setVerticalGroup(
+            pnlCap1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblCap1Title)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCap1Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        pnlCap2.setBackground(new java.awt.Color(255, 255, 255));
+        pnlCap2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        lblCap2Title.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
+        lblCap2Title.setText("INTERNAL STOCK MOVEMENTS");
+
+        lblCap2Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblCap2Desc.setForeground(new java.awt.Color(100, 116, 139));
+        lblCap2Desc.setText("<html><div style='width:250px'>Coordinates inventory relocation via bin-to-bin transfers, stock splitting, cyclic count verification, and controlled scrap write-offs.</div></html>");
+
+        javax.swing.GroupLayout pnlCap2Layout = new javax.swing.GroupLayout(pnlCap2);
+        pnlCap2.setLayout(pnlCap2Layout);
+        pnlCap2Layout.setHorizontalGroup(
+            pnlCap2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlCap2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblCap2Title)
+                    .addComponent(lblCap2Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+        pnlCap2Layout.setVerticalGroup(
+            pnlCap2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblCap2Title)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCap2Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        pnlCap3.setBackground(new java.awt.Color(255, 255, 255));
+        pnlCap3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        lblCap3Title.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
+        lblCap3Title.setText("TRACEABILITY & LOCATION CONTROL");
+
+        lblCap3Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblCap3Desc.setForeground(new java.awt.Color(100, 116, 139));
+        lblCap3Desc.setText("<html><div style='width:250px'>Maintains material attributes, organizes storage zones, defines specific storage bin capacities, and tracks individual item batch numbers.</div></html>");
+
+        javax.swing.GroupLayout pnlCap3Layout = new javax.swing.GroupLayout(pnlCap3);
+        pnlCap3.setLayout(pnlCap3Layout);
+        pnlCap3Layout.setHorizontalGroup(
+            pnlCap3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlCap3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblCap3Title)
+                    .addComponent(lblCap3Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+        pnlCap3Layout.setVerticalGroup(
+            pnlCap3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblCap3Title)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCap3Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        pnlCap4.setBackground(new java.awt.Color(255, 255, 255));
+        pnlCap4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        lblCap4Title.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
+        lblCap4Title.setText("OPERATIONAL REPORTING");
+
+        lblCap4Desc.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        lblCap4Desc.setForeground(new java.awt.Color(100, 116, 139));
+        lblCap4Desc.setText("<html><div style='width:250px'>Generates real-time summaries for daily activities, inventory valuations, stock aging trends, and warehouse space utilization levels.</div></html>");
+
+        javax.swing.GroupLayout pnlCap4Layout = new javax.swing.GroupLayout(pnlCap4);
+        pnlCap4.setLayout(pnlCap4Layout);
+        pnlCap4Layout.setHorizontalGroup(
+            pnlCap4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlCap4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblCap4Title)
+                    .addComponent(lblCap4Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+        pnlCap4Layout.setVerticalGroup(
+            pnlCap4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCap4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblCap4Title)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCap4Desc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout pnlWelcomeLayout = new javax.swing.GroupLayout(pnlWelcome);
+        pnlWelcome.setLayout(pnlWelcomeLayout);
+        pnlWelcomeLayout.setHorizontalGroup(
+            pnlWelcomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlWelcomeLayout.createSequentialGroup()
+                .addGap(31, 31, 31)
+                .addGroup(pnlWelcomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4)
+                    .addComponent(btnWhatsNewToggle)
+                    .addComponent(pnlWhatsNewContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(61, 61, 61)
+                .addGroup(pnlWelcomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5)
+                    .addComponent(pnlCap1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlCap2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlCap3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlCap4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(37, 37, 37))
+        );
+        pnlWelcomeLayout.setVerticalGroup(
+            pnlWelcomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlWelcomeLayout.createSequentialGroup()
+                .addGap(37, 37, 37)
+                .addComponent(jLabel1)
+                .addGap(0, 0, 0)
+                .addGroup(pnlWelcomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlWelcomeLayout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addGap(26, 26, 26)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnWhatsNewToggle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, 0)
+                        .addComponent(pnlWhatsNewContent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(pnlWelcomeLayout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(14, 14, 14)
+                        .addComponent(pnlCap1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(10, 10, 10)
+                        .addComponent(pnlCap2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(10, 10, 10)
+                        .addComponent(pnlCap3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(10, 10, 10)
+                        .addComponent(pnlCap4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jMenuBar1.setMinimumSize(new java.awt.Dimension(70, 28));
         jMenuBar1.setPreferredSize(new java.awt.Dimension(70, 28));
@@ -342,12 +639,15 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(451, 451, 451)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE))
+                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnUser, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnUser, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlWelcome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -362,9 +662,10 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(btnUser, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(pnlWelcome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -377,19 +678,6 @@ public class MainFrame extends javax.swing.JFrame {
         if (!userSession.isValid()) {
             StatusMessageHandler.showError(txtStatus, "Session expired. Please login again!");
             // JOptionPane.showMessageDialog(this, "Session expired. Please login again.", "Session Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Connection conn;
-        try {
-            conn = DBConnection.getConnection();
-            if (conn == null || conn.isClosed()) {
-                StatusMessageHandler.showError(txtStatus, "Database connection error. Please restart the application.");
-                return;
-            }
-        } catch (SQLException e) {
-            StatusMessageHandler.showError(txtStatus, "Failed to connect to database");
-            e.printStackTrace();
             return;
         }
 
@@ -571,6 +859,13 @@ public class MainFrame extends javax.swing.JFrame {
         LogoutManager.logout();
     }//GEN-LAST:event_menuitemLogoutActionPerformed
 
+    private void btnWhatsNewToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWhatsNewToggleActionPerformed
+        boolean isVisible = pnlWhatsNewContent.isVisible();
+        pnlWhatsNewContent.setVisible(!isVisible);
+        pnlWelcome.revalidate();
+        pnlWelcome.repaint();
+    }//GEN-LAST:event_btnWhatsNewToggleActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -609,8 +904,14 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConfirm;
     private javax.swing.JButton btnUser;
+    private javax.swing.JButton btnWhatsNewToggle;
     private javax.swing.JComboBox<String> cmbMovement;
     private javax.swing.JButton jButton3;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
@@ -620,8 +921,28 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblCap1Desc;
+    private javax.swing.JLabel lblCap1Title;
+    private javax.swing.JLabel lblCap2Desc;
+    private javax.swing.JLabel lblCap2Title;
+    private javax.swing.JLabel lblCap3Desc;
+    private javax.swing.JLabel lblCap3Title;
+    private javax.swing.JLabel lblCap4Desc;
+    private javax.swing.JLabel lblCap4Title;
+    private javax.swing.JLabel lblUpdate1Desc;
+    private javax.swing.JLabel lblUpdate1Title;
+    private javax.swing.JLabel lblUpdate2Desc;
+    private javax.swing.JLabel lblUpdate2Title;
+    private javax.swing.JLabel lblUpdate3Desc;
+    private javax.swing.JLabel lblUpdate3Title;
     private javax.swing.JMenuItem menuitemLogout;
     private javax.swing.JMenuItem mitemLogout;
+    private javax.swing.JPanel pnlCap1;
+    private javax.swing.JPanel pnlCap2;
+    private javax.swing.JPanel pnlCap3;
+    private javax.swing.JPanel pnlCap4;
+    private javax.swing.JPanel pnlWelcome;
+    private javax.swing.JPanel pnlWhatsNewContent;
     private javax.swing.JPopupMenu popupUserBtn;
     private javax.swing.JTree treeMovement;
     private javax.swing.JLabel txtStatus;
