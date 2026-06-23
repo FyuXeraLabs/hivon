@@ -40,39 +40,82 @@ public class Hivon {
             e.printStackTrace();
         }
 
-        // check internet conn
-        if (!isInternetAvailable()) {
+        // Check internet connection with retry support
+        while (!isInternetAvailable()) {
             Logger.errlog("Startup Check Failed: No internet connection detected.", null);
-            JOptionPane.showMessageDialog(null,
+            
+            // Show retry/exit dialog
+            Object[] options = {"Retry", "Exit"};
+            int choice = JOptionPane.showOptionDialog(
+                    null,
                     "No internet connection detected. Please check your network connection and try again!",
                     "Connection Error",
-                    JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.ERROR_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
 
-        //check API health
-        try {
-            JsonObject healthResponse = ApiClient.getInstance().checkHealth();
-            boolean success = healthResponse.has("success") && healthResponse.get("success").getAsBoolean();
-            String message = healthResponse.has("message") ? healthResponse.get("message").getAsString() : "No message provided";
-            
-            if (success) {
-                Logger.log("System", "API health check passed: " + healthResponse.toString());
-            } else {
-                Logger.errlog("API health check failed: " + healthResponse.toString(), null);
-                JOptionPane.showMessageDialog(null,
-                        "The application server is experiencing issues or undergoing maintenance. Please try again later!",
-                        "System Health Error",
-                        JOptionPane.ERROR_MESSAGE);
+            // Exit if user didn't click Retry
+            if (choice != 0) {
                 System.exit(1);
             }
-        } catch (Exception e) {
-            Logger.errlog("API health check request failed: " + e.getMessage(), e);
-            JOptionPane.showMessageDialog(null,
-                    "Unable to connect to the application server. Please verify your connection or try again later!",
-                    "Connection Error",
-                    JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
+        }
+
+        // Check API health with retry support
+        boolean healthCheckPassed = false;
+        while (!healthCheckPassed) {
+            try {
+                JsonObject healthResponse = ApiClient.getInstance().checkHealth();
+                boolean success = healthResponse.has("success") && healthResponse.get("success").getAsBoolean();
+                String message = healthResponse.has("message") ? healthResponse.get("message").getAsString() : "No message provided";
+                
+                if (success) {
+                    Logger.log("System", "API health check passed: " + healthResponse.toString());
+                    healthCheckPassed = true;
+                } else {
+                    Logger.errlog("API health check failed: " + healthResponse.toString(), null);
+                    
+                    // Show retry/exit dialog for server maintenance issues
+                    Object[] options = {"Retry", "Exit"};
+                    int choice = JOptionPane.showOptionDialog(
+                            null,
+                            "The application server is experiencing issues or undergoing maintenance. Please try again later!",
+                            "System Health Error",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.ERROR_MESSAGE,
+                            null,
+                            options,
+                            options[0]
+                    );
+                    
+                    // Exit if user didn't click Retry
+                    if (choice != 0) {
+                        System.exit(1);
+                    }
+                }
+            } catch (Exception e) {
+                Logger.errlog("API health check request failed: " + e.getMessage(), e);
+                
+                // Show retry/exit dialog for connection failure
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        null,
+                        "Unable to connect to the application server. Please verify your connection or try again later!",
+                        "Connection Error",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                
+                // Exit if user didn't click Retry
+                if (choice != 0) {
+                    System.exit(1);
+                }
+            }
         }
                 
         LoginFrame login = new LoginFrame();
