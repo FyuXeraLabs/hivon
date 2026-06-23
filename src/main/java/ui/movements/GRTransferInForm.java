@@ -4,17 +4,38 @@
  */
 package ui.movements;
 
+import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
+import models.dto.TransferOrderDTO;
+import models.dto.TransferOrderItemDTO;
+import movements.controllers.GRTransferInController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author Sanod
  */
 public class GRTransferInForm extends javax.swing.JFrame {
 
+    // Instance-level business variables matching structural design specification
+    private TransferOrderDTO currentTO;
+    private GRTransferInController controller;
+    private List<TransferOrderItemDTO> currentItemsList = new ArrayList<>();
+
     /**
      * Creates new form GRTransferInForm
      */
     public GRTransferInForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new GRTransferInController();
+        txtActualReceiptDate.setText(java.time.LocalDate.now().toString());
     }
 
     /**
@@ -26,21 +47,464 @@ public class GRTransferInForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jPanelSearch = new javax.swing.JPanel();
+        lblTONumber = new javax.swing.JLabel();
+        txtTONumber = new javax.swing.JTextField();
+        btnLoadTO = new javax.swing.JButton();
+        jPanelDetails = new javax.swing.JPanel();
+        lblFromWarehouse = new javax.swing.JLabel();
+        txtFromWarehouse = new javax.swing.JTextField();
+        lblToWarehouse = new javax.swing.JLabel();
+        txtToWarehouse = new javax.swing.JTextField();
+        lblExpectedQty = new javax.swing.JLabel();
+        txtExpectedQuantity = new javax.swing.JTextField();
+        lblExpectedDate = new javax.swing.JLabel();
+        txtExpectedReceiptDate = new javax.swing.JTextField();
+        lblActualDate = new javax.swing.JLabel();
+        txtActualReceiptDate = new javax.swing.JTextField();
+        jScrollPaneTable = new javax.swing.JScrollPane();
+        tblTOItems = new javax.swing.JTable();
+        jPanelActions = new javax.swing.JPanel();
+        btnReceiveGoods = new javax.swing.JButton();
+        btnPartialReceipt = new javax.swing.JButton();
+        btnCompleteReceipt = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Goods Receipt - Transfer In (IN12)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Transfer Order"));
+
+        lblTONumber.setText("Transfer Order Number");
+
+        btnLoadTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/load-14.png"))); // NOI18N
+        btnLoadTO.setText("Load Transfer Order");
+        btnLoadTO.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadTOActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanelSearchLayout = new javax.swing.GroupLayout(jPanelSearch);
+        jPanelSearch.setLayout(jPanelSearchLayout);
+        jPanelSearchLayout.setHorizontalGroup(
+            jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelSearchLayout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(lblTONumber)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtTONumber, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnLoadTO, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanelSearchLayout.setVerticalGroup(
+            jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelSearchLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTONumber)
+                    .addComponent(txtTONumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnLoadTO))
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+
+        jPanelDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Information"));
+
+        lblFromWarehouse.setText("From Warehouse");
+
+        txtFromWarehouse.setEditable(false);
+
+        lblToWarehouse.setText("To Warehouse");
+
+        txtToWarehouse.setEditable(false);
+
+        lblExpectedQty.setText("Expected Quantity");
+
+        txtExpectedQuantity.setEditable(false);
+
+        lblExpectedDate.setText("Expected Receipt Date");
+
+        txtExpectedReceiptDate.setEditable(false);
+
+        lblActualDate.setText("Actual Receipt Date");
+
+        javax.swing.GroupLayout jPanelDetailsLayout = new javax.swing.GroupLayout(jPanelDetails);
+        jPanelDetails.setLayout(jPanelDetailsLayout);
+        jPanelDetailsLayout.setHorizontalGroup(
+            jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelDetailsLayout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblFromWarehouse)
+                    .addComponent(lblExpectedQty)
+                    .addComponent(lblExpectedDate))
+                .addGap(20, 20, 20)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtFromWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtExpectedQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtExpectedReceiptDate, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblToWarehouse)
+                    .addComponent(lblActualDate))
+                .addGap(20, 20, 20)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtToWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtActualReceiptDate, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+        jPanelDetailsLayout.setVerticalGroup(
+            jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelDetailsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblFromWarehouse)
+                    .addComponent(txtFromWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblToWarehouse)
+                    .addComponent(txtToWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblExpectedQty)
+                    .addComponent(txtExpectedQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblExpectedDate)
+                    .addComponent(txtExpectedReceiptDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblActualDate)
+                    .addComponent(txtActualReceiptDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10))
+        );
+
+        jScrollPaneTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Order Items"));
+
+        tblTOItems.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Material Code", "Description", "Expected Qty", "Received Qty"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblTOItems.getTableHeader().setReorderingAllowed(false);
+        jScrollPaneTable.setViewportView(tblTOItems);
+
+        jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        btnReceiveGoods.setText("Receive Goods");
+        btnReceiveGoods.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReceiveGoodsActionPerformed(evt);
+            }
+        });
+
+        btnPartialReceipt.setText("Partial Receipt");
+        btnPartialReceipt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPartialReceiptActionPerformed(evt);
+            }
+        });
+
+        btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnCompleteReceipt.setText("Complete Receipt");
+        btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompleteReceiptActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
+        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
+        jPanelActions.setLayout(jPanelActionsLayout);
+        jPanelActionsLayout.setHorizontalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(btnReceiveGoods, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(btnPartialReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48)
+                .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanelActionsLayout.setVerticalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnReceiveGoods)
+                        .addComponent(btnPartialReceipt)
+                        .addComponent(btnCompleteReceipt)
+                        .addComponent(btnCancel))
+                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanelSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPaneTable)
+                    .addComponent(jPanelDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanelSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(11, 11, 11))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnReceiveGoodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReceiveGoodsActionPerformed
+        submitGoodsReceipt(false);
+    }//GEN-LAST:event_btnReceiveGoodsActionPerformed
+
+    private void btnPartialReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPartialReceiptActionPerformed
+        submitGoodsReceipt(true);
+    }//GEN-LAST:event_btnPartialReceiptActionPerformed
+
+    private void btnCompleteReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteReceiptActionPerformed
+        if (currentTO == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Transfer Order first!");
+            return;
+        }
+
+        DefaultTableModel model = (DefaultTableModel) tblTOItems.getModel();
+        int rowCount = model.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            TransferOrderItemDTO item = currentItemsList.get(i);
+            model.setValueAt(item.getOutstandingQuantity(), i, 3);
+        }
+
+        submitGoodsReceipt(false);
+    }//GEN-LAST:event_btnCompleteReceiptActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnLoadTOActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadTOActionPerformed
+        String toNumber = txtTONumber.getText().trim();
+        loadTransferOrder(toNumber);
+    }//GEN-LAST:event_btnLoadTOActionPerformed
+
+    // loads transfer order details and populates the items table
+    private void loadTransferOrder(String toNumber) {
+        if (toNumber == null || toNumber.trim().isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a Transfer Order number!");
+            return;
+        }
+
+        BackgroundTask task = new BackgroundTask(this, "Loading Transfer Order") {
+            private TransferOrderDTO to;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching Transfer Order details...");
+                to = controller.loadTransferOrder(toNumber);
+                return to != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (to == null) {
+                    StatusMessageHandler.showError(txtStatus, "Transfer Order not found!");
+                    return;
+                }
+
+                if ("COMPLETED".equalsIgnoreCase(to.getStatus())) {
+                    StatusMessageHandler.showWarning(txtStatus, "Transfer Order is already completed!");
+                } else {
+                    StatusMessageHandler.showInfo(txtStatus, "Transfer Order loaded successfully.");
+                }
+
+                currentTO = to;
+                
+                // Populate details fields
+                txtFromWarehouse.setText(String.valueOf(to.getFromWarehouseId()));
+                txtToWarehouse.setText(String.valueOf(to.getToWarehouseId()));
+                
+                // Calculate expected quantity (sum of outstanding required quantities)
+                double totalExpected = 0.0;
+                for (TransferOrderItemDTO item : to.getItems()) {
+                    totalExpected += item.getOutstandingQuantity();
+                }
+                txtExpectedQuantity.setText(String.format("%.2f", totalExpected));
+                
+                if (to.getCreatedDate() != null) {
+                    txtExpectedReceiptDate.setText(to.getCreatedDate().toString().replace("T", " "));
+                } else {
+                    txtExpectedReceiptDate.setText("");
+                }
+                
+                txtActualReceiptDate.setText(java.time.LocalDate.now().toString());
+
+                // Populate JTable
+                populateItemsTable(to.getItems());
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load Transfer Order: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateItemsTable(List<TransferOrderItemDTO> items) {
+        this.currentItemsList = items;
+        DefaultTableModel model = (DefaultTableModel) tblTOItems.getModel();
+        model.setRowCount(0);
+
+        for (TransferOrderItemDTO item : items) {
+            model.addRow(new Object[]{
+                item.getMaterialCode(),
+                item.getMaterialName(),
+                item.getOutstandingQuantity(),
+                0.0 // Default received qty to 0.0
+            });
+        }
+    }
+
+    // validates received quantities and posts goods receipt to backend
+    private void submitGoodsReceipt(boolean isPartialCheck) {
+        if (currentTO == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Transfer Order first!");
+            return;
+        }
+
+        // Stop table editing to commit current edits
+        if (tblTOItems.isEditing()) {
+            tblTOItems.getCellEditor().stopCellEditing();
+        }
+
+        DefaultTableModel model = (DefaultTableModel) tblTOItems.getModel();
+        int rowCount = model.getRowCount();
+        if (rowCount == 0 || currentItemsList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No items to receive.");
+            return;
+        }
+
+        List<TransferOrderItemDTO> itemsToSubmit = new ArrayList<>();
+        double totalReceived = 0.0;
+        double totalOutstandingRemaining = 0.0;
+
+        for (int i = 0; i < rowCount; i++) {
+            TransferOrderItemDTO item = currentItemsList.get(i);
+            Object val = model.getValueAt(i, 3); // "Received Qty" column
+            double qty = 0.0;
+            if (val != null) {
+                try {
+                    qty = Double.parseDouble(val.toString());
+                } catch (NumberFormatException e) {
+                    StatusMessageHandler.showError(txtStatus, "Invalid quantity at row " + (i + 1));
+                    return;
+                }
+            }
+
+            if (qty < 0) {
+                StatusMessageHandler.showError(txtStatus, "Received quantity cannot be negative at row " + (i + 1));
+                return;
+            }
+
+            double outstanding = item.getOutstandingQuantity();
+            if (qty > outstanding) {
+                StatusMessageHandler.showError(txtStatus, String.format("Received quantity (%.2f) exceeds outstanding (%.2f) at row %d", qty, outstanding, i + 1));
+                return;
+            }
+
+            item.setReceivedQuantity(qty);
+            totalReceived += qty;
+            totalOutstandingRemaining += (outstanding - qty);
+
+            if (qty > 0) {
+                itemsToSubmit.add(item);
+            }
+        }
+
+        if (totalReceived == 0.0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a quantity greater than zero to receive.");
+            return;
+        }
+
+        if (isPartialCheck && totalOutstandingRemaining > 0.0) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "There are outstanding quantities remaining. Do you want to process this as a partial receipt?",
+                    "Confirm Partial Receipt", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        String actualDate = txtActualReceiptDate.getText().trim();
+        String notes = "GR from Transfer Order " + currentTO.getToNumber();
+
+        BackgroundTask task = new BackgroundTask(this, "Submitting Goods Receipt") {
+            private boolean success = false;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Posting Goods Receipt to database...");
+                success = controller.receiveGoods(currentTO.getToNumber(), itemsToSubmit, actualDate, notes);
+                return success;
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Goods Receipt posted successfully!");
+                // Reload Transfer Order to show updated status/quantities
+                loadTransferOrder(currentTO.getToNumber());
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to post Goods Receipt: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +542,28 @@ public class GRTransferInForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnCompleteReceipt;
+    private javax.swing.JButton btnLoadTO;
+    private javax.swing.JButton btnPartialReceipt;
+    private javax.swing.JButton btnReceiveGoods;
+    private javax.swing.JPanel jPanelActions;
+    private javax.swing.JPanel jPanelDetails;
+    private javax.swing.JPanel jPanelSearch;
+    private javax.swing.JScrollPane jScrollPaneTable;
+    private javax.swing.JLabel lblActualDate;
+    private javax.swing.JLabel lblExpectedDate;
+    private javax.swing.JLabel lblExpectedQty;
+    private javax.swing.JLabel lblFromWarehouse;
+    private javax.swing.JLabel lblTONumber;
+    private javax.swing.JLabel lblToWarehouse;
+    private javax.swing.JTable tblTOItems;
+    private javax.swing.JTextField txtActualReceiptDate;
+    private javax.swing.JTextField txtExpectedQuantity;
+    private javax.swing.JTextField txtExpectedReceiptDate;
+    private javax.swing.JTextField txtFromWarehouse;
+    private javax.swing.JLabel txtStatus;
+    private javax.swing.JTextField txtTONumber;
+    private javax.swing.JTextField txtToWarehouse;
     // End of variables declaration//GEN-END:variables
 }
