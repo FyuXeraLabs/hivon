@@ -1,0 +1,484 @@
+<svg width="100%" viewBox="0 0 2200 4860" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Hivon - Use Case Diagram</title>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<rect x="0" y="0" width="2200" height="4860" fill="white"/>
+
+<!-- System boundary -->
+<rect x="350" y="50" width="1500" height="4770" rx="24" fill="none" stroke="black" stroke-width="3"/>
+
+<!-- ═══════════════════════════════════════════════
+     WAREHOUSE SUPERVISOR  (left actor @ cx=170)
+     Use cases centered @ cx=700
+     ═══════════════════════════════════════════════ -->
+<!-- Actor -->
+<circle cx="170" cy="270" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="292" x2="170" y2="360" stroke="black" stroke-width="3"/>
+<line x1="170" y1="320" x2="130" y2="300" stroke="black" stroke-width="3"/>
+<line x1="170" y1="320" x2="210" y2="300" stroke="black" stroke-width="3"/>
+<line x1="170" y1="360" x2="140" y2="400" stroke="black" stroke-width="3"/>
+<line x1="170" y1="360" x2="200" y2="400" stroke="black" stroke-width="3"/>
+<text x="170" y="428" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Warehouse</text>
+<text x="170" y="450" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Supervisor</text>
+
+<!-- Use cases -->
+<ellipse cx="700" cy="200" rx="195" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="205" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Transfer Orders</text>
+
+<ellipse cx="700" cy="295" rx="215" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="300" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Approve Inventory Adjustments</text>
+
+<ellipse cx="700" cy="390" rx="215" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="395" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Approve Scrap Write-offs</text>
+
+<ellipse cx="700" cy="485" rx="180" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="490" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Cycle Counts</text>
+
+<ellipse cx="700" cy="580" rx="130" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="585" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Reports</text>
+
+<ellipse cx="700" cy="675" rx="185" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="680" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Replenishment</text>
+
+<!-- Shared include: View Adjustment Details @ cx=1350 -->
+<ellipse cx="1370" cy="342" rx="200" ry="36" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="347" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Adjustment Details</text>
+
+<!-- include lines from Approve Inventory Adjustments → View Adjustment Details -->
+<line x1="915" y1="295" x2="1170" y2="332" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1030" y="300" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+<!-- include line from Approve Scrap Write-offs → View Adjustment Details -->
+<line x1="915" y1="390" x2="1170" y2="355" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1030" y="385" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<!-- Manage Cycle Counts includes: Freeze Bins, Post Adjustments; extends: Request Recount -->
+<ellipse cx="1370" cy="455" rx="145" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="460" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Freeze Bins</text>
+<line x1="880" y1="480" x2="1225" y2="460" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1050" y="462" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<ellipse cx="1370" cy="545" rx="165" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="550" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post Adjustments</text>
+<line x1="878" y1="495" x2="1205" y2="538" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<ellipse cx="1370" cy="635" rx="160" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="640" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Request Recount</text>
+<line x1="875" y1="502" x2="1210" y2="625" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1050" y="580" text-anchor="start" font-family="sans-serif" font-size="15" fill="black">«extend»</text>
+
+<!-- Manage Replenishment includes: Generate Replenishment Tasks -->
+<ellipse cx="1370" cy="720" rx="230" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="725" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Generate Replenishment Tasks</text>
+<line x1="885" y1="675" x2="1140" y2="716" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1010" y="688" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<!-- Association lines: Supervisor → use cases -->
+<line x1="240" y1="310" x2="505" y2="202" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="318" x2="485" y2="296" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="326" x2="485" y2="390" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="334" x2="520" y2="484" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="342" x2="570" y2="580" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="350" x2="515" y2="673" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     WAREHOUSE OPERATOR  (left actor @ cx=170, y~870)
+     Use cases cx=700, y=800..2180
+     ═══════════════════════════════════════════════ -->
+<circle cx="170" cy="820" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="842" x2="170" y2="910" stroke="black" stroke-width="3"/>
+<line x1="170" y1="870" x2="130" y2="850" stroke="black" stroke-width="3"/>
+<line x1="170" y1="870" x2="210" y2="850" stroke="black" stroke-width="3"/>
+<line x1="170" y1="910" x2="140" y2="950" stroke="black" stroke-width="3"/>
+<line x1="170" y1="910" x2="200" y2="950" stroke="black" stroke-width="3"/>
+<text x="170" y="978" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Warehouse</text>
+<text x="170" y="1000" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Operator</text>
+
+<ellipse cx="700" cy="830" rx="215" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="835" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post GR Purchase Order</text>
+
+<ellipse cx="700" cy="920" rx="185" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="925" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post GI Sales Order</text>
+
+<ellipse cx="700" cy="1010" rx="205" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1015" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post GI Production Issue</text>
+
+<ellipse cx="700" cy="1100" rx="210" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1105" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post GR Customer Returns</text>
+
+<ellipse cx="700" cy="1190" rx="185" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1195" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post Return to Vendor</text>
+
+<ellipse cx="700" cy="1280" rx="220" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1285" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post GI Internal Consumption</text>
+
+<ellipse cx="700" cy="1370" rx="205" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1375" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Execute Bin-to-Bin Transfer</text>
+
+<ellipse cx="700" cy="1460" rx="215" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1465" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Execute Splitting/Pack Break</text>
+
+<ellipse cx="700" cy="1550" rx="200" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1555" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post Inventory Adjustment</text>
+
+<ellipse cx="700" cy="1640" rx="185" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1645" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Post Scrap Write-off</text>
+
+<ellipse cx="700" cy="1730" rx="185" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1735" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Execute Putaway Task</text>
+
+<ellipse cx="700" cy="1820" rx="185" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1825" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Execute Picking Task</text>
+
+<ellipse cx="700" cy="1910" rx="215" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="1915" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Execute Replenishment Task</text>
+
+<ellipse cx="700" cy="2000" rx="160" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2005" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Print Documents</text>
+
+<!-- Operator's include/extend sub-use-cases on right -->
+<!-- Create Putaway TO -->
+<ellipse cx="1370" cy="830" rx="180" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="835" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Create Putaway TO</text>
+<line x1="915" y1="830" x2="1190" y2="830" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1050" y="822" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<!-- Create Picking TO -->
+<ellipse cx="1370" cy="920" rx="175" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="925" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Create Picking TO</text>
+<line x1="885" y1="920" x2="1195" y2="920" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1038" y="912" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<!-- Create Scrap extends Post GR Customer Returns -->
+<ellipse cx="1370" cy="1100" rx="145" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="1105" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Create Scrap</text>
+<line x1="910" y1="1100" x2="1225" y2="1100" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1065" y="1092" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«extend»</text>
+
+<!-- Request Approval (shared for Post Inventory Adjustment and Post Scrap) -->
+<ellipse cx="1370" cy="1595" rx="170" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="1600" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Request Approval</text>
+<line x1="900" y1="1548" x2="1200" y2="1588" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1048" y="1560" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+<line x1="885" y1="1644" x2="1200" y2="1605" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<!-- Scan Bin + Scan Material + Report Issue (shared across Execute tasks) -->
+<ellipse cx="1370" cy="1730" rx="125" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="1735" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Scan Bin</text>
+
+<ellipse cx="1370" cy="1820" rx="150" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="1825" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Scan Material</text>
+
+<ellipse cx="1370" cy="1910" rx="135" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="1915" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Report Issue</text>
+
+<!-- Execute Putaway Task → Scan Bin, Scan Material, Report Issue -->
+<line x1="885" y1="1723" x2="1245" y2="1730" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1063" y="1715" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+<line x1="885" y1="1732" x2="1220" y2="1818" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="885" y1="1740" x2="1235" y2="1906" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1060" y="1835" text-anchor="start" font-family="sans-serif" font-size="15" fill="black">«extend»</text>
+
+<!-- Execute Picking Task → Scan Bin, Scan Material, Report Issue -->
+<line x1="885" y1="1813" x2="1245" y2="1738" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="885" y1="1822" x2="1220" y2="1822" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="885" y1="1830" x2="1235" y2="1913" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<!-- Execute Replenishment Task → Scan Bin, Scan Material, Report Issue -->
+<line x1="915" y1="1903" x2="1245" y2="1745" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="915" y1="1912" x2="1220" y2="1828" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="915" y1="1920" x2="1235" y2="1916" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<!-- Operator association lines -->
+<line x1="240" y1="860" x2="485" y2="832" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="868" x2="515" y2="921" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="876" x2="495" y2="1012" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="884" x2="490" y2="1102" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="892" x2="515" y2="1192" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="900" x2="480" y2="1282" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="908" x2="495" y2="1372" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="916" x2="485" y2="1462" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="924" x2="500" y2="1553" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="932" x2="515" y2="1643" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="940" x2="515" y2="1733" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="948" x2="515" y2="1823" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="956" x2="485" y2="1913" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="964" x2="540" y2="2003" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     PICKER  (left actor @ cx=170, y~2130)
+     Use cases cx=700, y=2080..2310
+     ═══════════════════════════════════════════════ -->
+<circle cx="170" cy="2130" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2152" x2="170" y2="2220" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2180" x2="130" y2="2160" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2180" x2="210" y2="2160" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2220" x2="140" y2="2260" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2220" x2="200" y2="2260" stroke="black" stroke-width="3"/>
+<text x="170" y="2288" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Picker</text>
+
+<ellipse cx="700" cy="2090" rx="205" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2095" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Assigned Picks</text>
+
+<ellipse cx="700" cy="2180" rx="155" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2185" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Pick Route</text>
+
+<ellipse cx="700" cy="2360" rx="145" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2365" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Print Pick List</text>
+
+<!-- Picker → Manage Assigned Picks includes Scan Bin, Scan Material; extends Report Issue -->
+<line x1="905" y1="2083" x2="1245" y2="1742" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1050" y="1920" text-anchor="start" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+<line x1="905" y1="2092" x2="1220" y2="1832" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="905" y1="2100" x2="1235" y2="1918" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<!-- Picker association lines -->
+<line x1="240" y1="2163" x2="495" y2="2092" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="2171" x2="545" y2="2182" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="2187" x2="555" y2="2363" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     PUTAWAY WORKER  (left actor @ cx=170, y~2490)
+     Use cases cx=700, y=2450..2680
+     ═══════════════════════════════════════════════ -->
+<circle cx="170" cy="2490" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2512" x2="170" y2="2580" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2540" x2="130" y2="2520" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2540" x2="210" y2="2520" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2580" x2="140" y2="2620" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2580" x2="200" y2="2620" stroke="black" stroke-width="3"/>
+<text x="170" y="2648" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Putaway</text>
+<text x="170" y="2670" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Worker</text>
+
+<ellipse cx="700" cy="2460" rx="215" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2465" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Assigned Putaways</text>
+
+<ellipse cx="700" cy="2550" rx="170" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2555" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Putaway Route</text>
+
+<ellipse cx="700" cy="2730" rx="165" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2735" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Print Putaway List</text>
+
+<!-- Putaway includes Scan Bin, Scan Material; extends Report Issue -->
+<line x1="915" y1="2453" x2="1245" y2="1752" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="915" y1="2462" x2="1220" y2="1840" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="915" y1="2470" x2="1235" y2="1922" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<line x1="240" y1="2523" x2="485" y2="2463" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="2531" x2="530" y2="2553" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="2547" x2="535" y2="2733" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     REPLENISHMENT WORKER  (left actor @ cx=170, y~2870)
+     Use cases cx=700
+     ═══════════════════════════════════════════════ -->
+<circle cx="170" cy="2870" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2892" x2="170" y2="2960" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2920" x2="130" y2="2900" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2920" x2="210" y2="2900" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2960" x2="140" y2="3000" stroke="black" stroke-width="3"/>
+<line x1="170" y1="2960" x2="200" y2="3000" stroke="black" stroke-width="3"/>
+<text x="170" y="3028" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Replenishment</text>
+<text x="170" y="3050" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Worker</text>
+
+<ellipse cx="700" cy="2840" rx="230" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2845" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Assigned Replenishments</text>
+
+<ellipse cx="700" cy="2930" rx="205" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="2935" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Replenishment Route</text>
+
+<ellipse cx="700" cy="3020" rx="195" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3025" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Picking Bin Levels</text>
+
+<!-- Replenishment includes Scan Bin, Scan Material; extends Report Issue -->
+<line x1="930" y1="2833" x2="1245" y2="1758" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="930" y1="2842" x2="1220" y2="1845" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<line x1="930" y1="2850" x2="1235" y2="1926" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+
+<line x1="240" y1="2903" x2="470" y2="2843" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="2911" x2="495" y2="2933" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="2919" x2="505" y2="3023" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     CYCLE COUNTER  (left actor @ cx=170, y~3250)
+     Use cases cx=700
+     ═══════════════════════════════════════════════ -->
+<circle cx="170" cy="3250" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3272" x2="170" y2="3340" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3300" x2="130" y2="3280" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3300" x2="210" y2="3280" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3340" x2="140" y2="3380" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3340" x2="200" y2="3380" stroke="black" stroke-width="3"/>
+<text x="170" y="3408" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Cycle Counter</text>
+
+<ellipse cx="700" cy="3230" rx="210" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3235" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Assigned Counts</text>
+
+<ellipse cx="700" cy="3320" rx="175" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3325" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Count Sheet</text>
+
+<ellipse cx="700" cy="3410" rx="190" ry="36" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3415" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Report Counting Issues</text>
+
+<!-- Manage Assigned Counts includes Scan Bin -->
+<ellipse cx="1370" cy="3230" rx="125" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="3235" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Scan Bin</text>
+<line x1="910" y1="3230" x2="1245" y2="3230" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1075" y="3222" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<line x1="240" y1="3280" x2="490" y2="3232" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3288" x2="525" y2="3323" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3296" x2="510" y2="3413" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     SYSTEM ADMINISTRATOR  (left actor @ cx=170, y~3660)
+     Use cases cx=700
+     ═══════════════════════════════════════════════ -->
+<circle cx="170" cy="3660" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3682" x2="170" y2="3750" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3710" x2="130" y2="3690" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3710" x2="210" y2="3690" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3750" x2="140" y2="3790" stroke="black" stroke-width="3"/>
+<line x1="170" y1="3750" x2="200" y2="3790" stroke="black" stroke-width="3"/>
+<text x="170" y="3818" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">System</text>
+<text x="170" y="3840" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Administrator</text>
+
+<ellipse cx="700" cy="3630" rx="215" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3635" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Users &amp; Permissions</text>
+
+<ellipse cx="700" cy="3710" rx="210" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3715" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage System Parameters</text>
+
+<ellipse cx="700" cy="3950" rx="145" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="3955" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage API Keys</text>
+
+<ellipse cx="700" cy="4030" rx="145" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="4035" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View Audit Logs</text>
+
+<ellipse cx="700" cy="4110" rx="150" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="4115" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Perform Backup</text>
+
+<ellipse cx="700" cy="4270" rx="195" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="4275" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Configure System Settings</text>
+
+<ellipse cx="700" cy="4350" rx="175" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="700" y="4355" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">View System Status</text>
+
+
+<!-- Assign Permissions include -->
+<ellipse cx="1370" cy="3630" rx="185" ry="34" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="1370" y="3635" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Assign Permissions</text>
+<line x1="915" y1="3630" x2="1185" y2="3630" stroke="black" stroke-width="1.5" stroke-dasharray="7 4" marker-end="url(#arrow)"/>
+<text x="1048" y="3622" text-anchor="middle" font-family="sans-serif" font-size="15" fill="black">«include»</text>
+
+<!-- SysAdmin association lines -->
+<line x1="240" y1="3693" x2="485" y2="3633" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3701" x2="490" y2="3713" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3725" x2="555" y2="3953" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3733" x2="555" y2="4033" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3741" x2="550" y2="4113" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3757" x2="505" y2="4273" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="3765" x2="525" y2="4353" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     REPORT GENERATOR  (left INTERNAL actor @ cx=170, y~4500)
+     Use cases cx=700  (internal per PDF)
+     ═══════════════════════════════════════════════ -->
+<!-- NOTE: Report Generator is INTERNAL per PDF table -->
+<circle cx="170" cy="4470" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="170" y1="4492" x2="170" y2="4540" stroke="black" stroke-width="3"/>
+<line x1="170" y1="4516" x2="130" y2="4498" stroke="black" stroke-width="3"/>
+<line x1="170" y1="4516" x2="210" y2="4498" stroke="black" stroke-width="3"/>
+<line x1="170" y1="4540" x2="140" y2="4570" stroke="black" stroke-width="3"/>
+<line x1="170" y1="4540" x2="200" y2="4570" stroke="black" stroke-width="3"/>
+<!-- Report Generator label goes below but we put use cases here, so place actor at y=4470 centered on its use cases -->
+
+<!-- The Report Generator use cases - need more vertical space, so placed inside the boundary -->
+<!-- We'll reuse the right side column at cx=1370 for Report Generator's use cases to avoid overlap -->
+<!-- Actually place them at cx=700 continuing downward, but system boundary height covers them -->
+
+<!-- Re-examining: Report Generator is internal in PDF. Let's keep it on the left side but 
+     place its use cases at cx=1000 area since left side is occupied all the way to 4430 -->
+<!-- Place Report Generator use cases right-side bottom: cx=1050, y starting at 4460 -->
+
+<text x="170" y="4595" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Report</text>
+<text x="170" y="4617" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Generator</text>
+
+<ellipse cx="950" cy="4470" rx="235" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="950" y="4475" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Generate Operational Reports</text>
+
+<ellipse cx="950" cy="4550" rx="220" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="950" y="4555" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Generate Inventory Reports</text>
+
+<!-- Export Reports (shared, centered) -->
+<ellipse cx="1350" cy="4510" rx="265" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="4506" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Export Reports</text>
+<text x="1350" y="4524" text-anchor="middle" font-family="sans-serif" font-size="17" fill="black">(PDF / Excel / CSV)</text>
+
+<ellipse cx="950" cy="4710" rx="215" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="950" y="4715" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Generate Financial Reports</text>
+
+<!-- Report Generator → use cases -->
+<line x1="240" y1="4500" x2="715" y2="4473" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="4508" x2="730" y2="4553" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="4524" x2="735" y2="4713" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="240" y1="4532" x2="1085" y2="4512" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     EXTERNAL ACTORS on RIGHT side
+     MERCHANDISER  @ cx=2030
+     Use cases  cx=1350, y=3230..3600
+     ═══════════════════════════════════════════════ -->
+<circle cx="2030" cy="3350" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3372" x2="2030" y2="3440" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3400" x2="1990" y2="3380" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3400" x2="2070" y2="3380" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3440" x2="2000" y2="3480" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3440" x2="2060" y2="3480" stroke="black" stroke-width="3"/>
+<text x="2030" y="3508" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Merchandiser</text>
+
+<ellipse cx="1350" cy="3320" rx="160" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="3325" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Materials</text>
+
+<ellipse cx="1350" cy="3400" rx="150" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="3405" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Batches</text>
+
+<ellipse cx="1350" cy="3480" rx="195" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="3485" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Purchase Orders</text>
+
+<ellipse cx="1350" cy="3560" rx="150" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="3565" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Vendors</text>
+
+<!-- Merchandiser association lines (from right actor to use cases on left of it) -->
+<line x1="1960" y1="3388" x2="1510" y2="3323" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="1960" y1="3396" x2="1500" y2="3403" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="1960" y1="3404" x2="1545" y2="3483" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="1960" y1="3412" x2="1500" y2="3563" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- ═══════════════════════════════════════════════
+     SALES TEAM  @ cx=2030, y~3810
+     Use cases cx=1350, y=3780..3930
+     ═══════════════════════════════════════════════ -->
+<circle cx="2030" cy="3810" r="22" fill="none" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3832" x2="2030" y2="3900" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3860" x2="1990" y2="3840" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3860" x2="2070" y2="3840" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3900" x2="2000" y2="3940" stroke="black" stroke-width="3"/>
+<line x1="2030" y1="3900" x2="2060" y2="3940" stroke="black" stroke-width="3"/>
+<text x="2030" y="3968" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="black">Sales Team</text>
+
+<ellipse cx="1350" cy="3780" rx="185" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="3785" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Sales Orders</text>
+
+<ellipse cx="1350" cy="3860" rx="175" ry="34" fill="white" stroke="black" stroke-width="1.5"/>
+<text x="1350" y="3865" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="black">Manage Customers</text>
+
+<!-- Sales Team association lines -->
+<line x1="1960" y1="3847" x2="1535" y2="3783" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="1960" y1="3855" x2="1525" y2="3863" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+
+</svg>
