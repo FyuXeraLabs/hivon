@@ -1,0 +1,368 @@
+<svg width="100%" viewBox="0 0 1400 2960" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Hivon - Activity Diagram</title>
+<desc>End-to-end warehouse management system business process activity diagram with swimlanes.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<style>
+  text { font-family: Arial, sans-serif; }
+  .th { font-size:15px; font-weight:700; }
+  .ts { font-size:12px; }
+  .lbl { font-size:11px; }
+  .sw { font-size:13px; font-weight:700; }
+</style>
+
+<!-- Band fills -->
+<rect x="0" y="0"    width="1400" height="280"  fill="#F0F0F0"/>
+<rect x="0" y="280"  width="1400" height="280"  fill="#FFFFFF"/>
+<rect x="0" y="560"  width="1400" height="880"  fill="#FFFFFF"/>
+<rect x="0" y="1440" width="1400" height="640"  fill="#FFFFFF"/>
+<rect x="0" y="2080" width="1400" height="600"  fill="#FFFFFF"/>
+<rect x="0" y="2680" width="1400" height="260"  fill="#FFFFFF"/>
+
+<!-- Band dividers -->
+<line x1="0" y1="280"  x2="1400" y2="280"  stroke="#AAAAAA" stroke-width="1"/>
+<line x1="0" y1="560"  x2="1400" y2="560"  stroke="#AAAAAA" stroke-width="1"/>
+<line x1="0" y1="1440" x2="1400" y2="1440" stroke="#AAAAAA" stroke-width="1"/>
+<line x1="0" y1="2080" x2="1400" y2="2080" stroke="#AAAAAA" stroke-width="1"/>
+<line x1="0" y1="2680" x2="1400" y2="2680" stroke="#AAAAAA" stroke-width="1"/>
+
+<!-- Label column -->
+<rect x="0" y="0" width="80" height="3200" fill="#E8E8E8"/>
+<line x1="80" y1="0" x2="80" y2="3200" stroke="#888888" stroke-width="1.5"/>
+
+<!-- Swimlane labels -->
+<text class="sw" transform="translate(22,140) rotate(-90)" text-anchor="middle" fill="#1A1A1A">System</text>
+<text class="sw" transform="translate(22,420) rotate(-90)" text-anchor="middle" fill="#333333">Ext. Partners</text>
+<text class="sw" transform="translate(22,960) rotate(-90)" text-anchor="middle" fill="#333333">Warehouse Operator</text>
+<text class="sw" transform="translate(22,1760) rotate(-90)" text-anchor="middle" fill="#333333">Supervisor</text>
+<text class="sw" transform="translate(22,2380) rotate(-90)" text-anchor="middle" fill="#333333">Inventory / Reports</text>
+<text class="sw" transform="translate(22,2790) rotate(-90)" text-anchor="middle" fill="#1A1A1A">System</text>
+
+<!-- TITLE -->
+<text x="740" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#111111">Hivon - Warehouse Management System</text>
+
+<!-- START NODE -->
+<circle cx="740" cy="72" r="16" fill="#1A1A1A"/>
+<line x1="740" y1="88" x2="740" y2="122" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Login box -->
+<rect x="600" y="122" width="280" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="740" y="147" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">User login</text>
+<text class="ts" x="740" y="167" text-anchor="middle" fill="#444444">Enter credentials</text>
+<line x1="740" y1="180" x2="740" y2="214" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Decision: Auth OK? -->
+<polygon points="740,214 826,244 740,274 654,244" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="740" y="244" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#1A1A1A">Auth OK?</text>
+<line x1="654" y1="244" x2="572" y2="244" stroke="#555555" stroke-width="1.8"/>
+<line x1="572" y1="244" x2="572" y2="151" stroke="#555555" stroke-width="1.8"/>
+<line x1="572" y1="151" x2="600" y2="151" stroke="#555555" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text class="lbl" x="608" y="234" fill="#555555">No / retry</text>
+<line x1="740" y1="274" x2="740" y2="304" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text class="lbl" x="756" y="293" fill="#333333">Yes</text>
+
+<!-- FORK BAR -->
+<rect x="100" y="304" width="1200" height="9" rx="3" fill="#1A1A1A"/>
+<line x1="260"  y1="313" x2="260"  y2="353" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="740"  y1="313" x2="740"  y2="353" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="1210" y1="313" x2="1210" y2="353" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="260"  y="344" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#1A1A1A">INBOUND TRACK</text>
+<text x="740"  y="344" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#1A1A1A">TRANSFER ORDERS TRACK</text>
+<text x="1210" y="344" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#1A1A1A">OUTBOUND TRACK</text>
+
+<!-- =====================
+     EXTERNAL PARTNERS LANE  y=280-560
+===================== -->
+
+<!-- Left: PO -->
+<rect x="110" y="362" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="386" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Merchandiser creates PO</text>
+<text class="ts" x="260" y="406" text-anchor="middle" fill="#555555">via PHP API</text>
+<line x1="260" y1="420" x2="260" y2="460" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="110" y="460" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#666666" stroke-width="1.5"/>
+<text class="th" x="260" y="484" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">System records PO</text>
+<text class="ts" x="260" y="504" text-anchor="middle" fill="#666666">Stored in shared database</text>
+<line x1="260" y1="518" x2="260" y2="560" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Centre: TOs queue -->
+<rect x="570" y="362" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#666666" stroke-width="1.5"/>
+<text class="th" x="740" y="386" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Check pending TOs / replenishment</text>
+<text class="ts" x="740" y="406" text-anchor="middle" fill="#666666">Supervisor reviews work queue</text>
+<line x1="740" y1="420" x2="740" y2="460" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="570" y="460" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#666666" stroke-width="1.5"/>
+<text class="th" x="740" y="484" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Supervisor assigns TO to operator</text>
+<text class="ts" x="740" y="504" text-anchor="middle" fill="#666666">Priority-based assignment</text>
+<line x1="740" y1="518" x2="740" y2="560" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Right: SO -->
+<rect x="1060" y="362" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="1210" y="386" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Sales team creates SO</text>
+<text class="ts" x="1210" y="406" text-anchor="middle" fill="#555555">via PHP API</text>
+<line x1="1210" y1="420" x2="1210" y2="460" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="1060" y="460" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#666666" stroke-width="1.5"/>
+<text class="th" x="1210" y="484" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">System records SO</text>
+<text class="ts" x="1210" y="504" text-anchor="middle" fill="#666666">Stored in shared database</text>
+<line x1="1210" y1="518" x2="1210" y2="560" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- =====================
+     WAREHOUSE OPERATOR LANE  y=560-1440
+===================== -->
+
+<!-- LEFT: INBOUND -->
+<rect x="110" y="576" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="600" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Receive goods at dock</text>
+<text class="ts" x="260" y="620" text-anchor="middle" fill="#555555">Inspect quantity &amp; condition vs PO / RMA</text>
+<line x1="260" y1="634" x2="260" y2="674" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Decision: Goods OK? -->
+<polygon points="260,674 348,704 260,734 172,704" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="260" y="704" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#1A1A1A">Goods OK?</text>
+<line x1="172" y1="704" x2="92"  y2="704" stroke="#555555" stroke-width="1.8"/>
+<line x1="92"  y1="704" x2="92"  y2="605" stroke="#555555" stroke-width="1.8"/>
+<line x1="92"  y1="605" x2="110" y2="605" stroke="#555555" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text class="lbl" x="130" y="694" fill="#555555">Return</text>
+<line x1="260" y1="734" x2="260" y2="774" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text class="lbl" x="278" y="758" fill="#333333">OK</text>
+
+<rect x="110" y="774" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="798" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Post GR – IN11 / IN12</text>
+<text class="ts" x="260" y="818" text-anchor="middle" fill="#555555">Update inventory &amp; PO qty received</text>
+<line x1="260" y1="832" x2="260" y2="872" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="110" y="872" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="896" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Create putaway TO – TR21</text>
+<text class="ts" x="260" y="916" text-anchor="middle" fill="#555555">System suggests bins (FEFO / FIFO)</text>
+<line x1="260" y1="930" x2="260" y2="970" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="110" y="970" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="994" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Execute putaway</text>
+<text class="ts" x="260" y="1014" text-anchor="middle" fill="#555555">Scan bin, confirm each item placed</text>
+<line x1="260" y1="1028" x2="260" y2="1068" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="110" y="1068" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="1092" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Confirm TO complete</text>
+<text class="ts" x="260" y="1112" text-anchor="middle" fill="#555555">Bin inventory updated in system</text>
+<line x1="260" y1="1126" x2="260" y2="1166" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="110" y="1166" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="1190" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Internal movements (optional)</text>
+<text class="ts" x="260" y="1210" text-anchor="middle" fill="#555555">Bin-to-bin, splitting, scrap ADJ21</text>
+<line x1="260" y1="1224" x2="260" y2="1264" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="110" y="1264" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+<text class="th" x="260" y="1288" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Check inventory alerts</text>
+<text class="ts" x="260" y="1308" text-anchor="middle" fill="#555555">Low stock / near-expiry warnings</text>
+<line x1="260" y1="1322" x2="260" y2="1362" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Alert decision -->
+<polygon points="260,1362 348,1392 260,1422 172,1392" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="260" y="1392" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#1A1A1A">Stock alert?</text>
+<!-- Yes branch -->
+<line x1="348" y1="1392" x2="440" y2="1392" stroke="#444444" stroke-width="1.8"/>
+<rect x="440" y="1362" width="240" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="560" y="1386" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#1A1A1A">Trigger replenishment</text>
+<text class="ts" x="560" y="1406" text-anchor="middle" fill="#444444">Auto or manual TR24</text>
+<text class="lbl" x="396" y="1383" fill="#444444">Yes</text>
+<line x1="260" y1="1422" x2="260" y2="1440" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text class="lbl" x="278" y="1436" fill="#333333">No</text>
+
+<!-- CENTRE: TRANSFER ORDERS -->
+<rect x="570" y="576" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="740" y="600" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Select TO type</text>
+<text class="ts" x="740" y="620" text-anchor="middle" fill="#444444">Putaway / Picking / Replenishment</text>
+<line x1="740" y1="634" x2="740" y2="674" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="570" y="674" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="740" y="698" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">System optimises route</text>
+<text class="ts" x="740" y="718" text-anchor="middle" fill="#444444">FIFO / FEFO, pick path algorithm</text>
+<line x1="740" y1="732" x2="740" y2="772" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="570" y="772" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="740" y="796" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Operator executes TO</text>
+<text class="ts" x="740" y="816" text-anchor="middle" fill="#444444">Scan bins, confirm each item</text>
+<line x1="740" y1="830" x2="740" y2="870" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="570" y="870" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="740" y="894" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Confirm TO complete</text>
+<text class="ts" x="740" y="914" text-anchor="middle" fill="#444444">Bin stock levels updated</text>
+<line x1="740" y1="928" x2="740" y2="968" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- More TOs decision -->
+<polygon points="740,968 828,998 740,1028 652,998" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="740" y="998" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#1A1A1A">More TOs?</text>
+<line x1="828" y1="998" x2="936" y2="998" stroke="#444444" stroke-width="1.8"/>
+<line x1="936" y1="998" x2="936" y2="605" stroke="#444444" stroke-width="1.8"/>
+<line x1="936" y1="605" x2="910" y2="605" stroke="#444444" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text class="lbl" x="880" y="990" fill="#444444">Yes</text>
+<line x1="740" y1="1028" x2="740" y2="1068" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text class="lbl" x="758" y="1052" fill="#333333">No</text>
+
+<rect x="570" y="1068" width="340" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="740" y="1092" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">All TO tasks complete</text>
+<text class="ts" x="740" y="1112" text-anchor="middle" fill="#444444">Bin and zone inventory current</text>
+<line x1="740" y1="1126" x2="740" y2="1440" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- RIGHT: OUTBOUND -->
+<rect x="1060" y="576" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="1210" y="600" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Create picking TO – TR23</text>
+<text class="ts" x="1210" y="620" text-anchor="middle" fill="#444444">For SO line items / production</text>
+<line x1="1210" y1="634" x2="1210" y2="674" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="1060" y="674" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="1210" y="698" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Execute pick</text>
+<text class="ts" x="1210" y="718" text-anchor="middle" fill="#444444">Scan bins, move to staging area</text>
+<line x1="1210" y1="732" x2="1210" y2="772" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="1060" y="772" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="1210" y="796" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Post GI – OUT14</text>
+<text class="ts" x="1210" y="816" text-anchor="middle" fill="#444444">Validate picks, reduce stock</text>
+<line x1="1210" y1="830" x2="1210" y2="870" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="1060" y="870" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="1210" y="894" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Print shipping documents</text>
+<text class="ts" x="1210" y="914" text-anchor="middle" fill="#444444">Labels, packing list, tracking no.</text>
+<line x1="1210" y1="928" x2="1210" y2="968" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="1060" y="968" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="1210" y="992" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Goods shipped to customer</text>
+<text class="ts" x="1210" y="1012" text-anchor="middle" fill="#444444">Carrier handoff</text>
+<line x1="1210" y1="1026" x2="1210" y2="1066" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="1060" y="1066" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="1210" y="1090" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">SO shipped qty updated</text>
+<text class="ts" x="1210" y="1110" text-anchor="middle" fill="#444444">Email notification to sales team</text>
+<line x1="1210" y1="1124" x2="1210" y2="1440" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- JOIN BAR -->
+<rect x="100" y="1440" width="1200" height="9" rx="3" fill="#1A1A1A"/>
+<line x1="700" y1="1449" x2="700" y2="1489" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- =====================
+     SUPERVISOR LANE  y=1449-2080
+===================== -->
+<rect x="500" y="1489" width="400" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="700" y="1513" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Schedule cycle count</text>
+<text class="ts" x="700" y="1533" text-anchor="middle" fill="#444444">Freeze counting bins / zones</text>
+<line x1="700" y1="1547" x2="700" y2="1587" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="500" y="1587" width="400" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="700" y="1611" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Operator performs blind count</text>
+<text class="ts" x="700" y="1631" text-anchor="middle" fill="#444444">Data entered into system</text>
+<line x1="700" y1="1645" x2="700" y2="1685" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Decision: Variance? -->
+<polygon points="700,1685 800,1715 700,1745 600,1715" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="700" y="1715" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#1A1A1A">Variance?</text>
+<line x1="600" y1="1715" x2="456" y2="1715" stroke="#555555" stroke-width="1.8"/>
+<line x1="456" y1="1715" x2="456" y2="1616" stroke="#555555" stroke-width="1.8"/>
+<line x1="456" y1="1616" x2="500" y2="1616" stroke="#555555" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text class="lbl" x="436" y="1664" text-anchor="middle" fill="#555555">Recount</text>
+<line x1="700" y1="1745" x2="700" y2="1785" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text class="lbl" x="718" y="1769" fill="#333333">None</text>
+
+<rect x="500" y="1785" width="400" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="700" y="1809" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Manager approves variance</text>
+<text class="ts" x="700" y="1829" text-anchor="middle" fill="#444444">Review variance report</text>
+<line x1="700" y1="1843" x2="700" y2="1883" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="500" y="1883" width="400" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="700" y="1907" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Post adjustment – ADJ20</text>
+<text class="ts" x="700" y="1927" text-anchor="middle" fill="#444444">Inventory updated to physical count</text>
+<line x1="700" y1="1941" x2="700" y2="1981" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="500" y="1981" width="400" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="700" y="2005" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Unfreeze bins – operations resume</text>
+<text class="ts" x="700" y="2025" text-anchor="middle" fill="#444444">Audit trail updated</text>
+<line x1="700" y1="2039" x2="700" y2="2080" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- =====================
+     INVENTORY / REPORTS LANE  y=2080-2680
+===================== -->
+<!-- fork -->
+<rect x="200" y="2098" width="1000" height="9" rx="3" fill="#1A1A1A"/>
+<line x1="430" y1="2107" x2="430" y2="2147" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="970" y1="2107" x2="970" y2="2147" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- Left: Inventory queries column -->
+<rect x="180" y="2147" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="420" y="2171" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Inventory queries &amp; monitoring</text>
+<text class="ts" x="420" y="2191" text-anchor="middle" fill="#444444">Stock levels, bin occupancy, batch status</text>
+<line x1="420" y1="2205" x2="420" y2="2245" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="180" y="2245" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="420" y="2269" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Monitor stock alerts</text>
+<text class="ts" x="420" y="2289" text-anchor="middle" fill="#444444">Low stock, near-expiry, slow movers</text>
+<line x1="420" y1="2303" x2="420" y2="2343" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="180" y="2343" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="420" y="2367" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">ABC analysis &amp; capacity planning</text>
+<text class="ts" x="420" y="2387" text-anchor="middle" fill="#444444">Optimise storage layout &amp; bin assignments</text>
+<line x1="420" y1="2401" x2="420" y2="2441" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="180" y="2441" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="420" y="2465" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Inventory valuation complete</text>
+<text class="ts" x="420" y="2485" text-anchor="middle" fill="#444444">Sent to accounting system</text>
+<line x1="420" y1="2499" x2="420" y2="2539" stroke="#222222" stroke-width="2"/>
+<line x1="420" y1="2539" x2="700" y2="2539" stroke="#222222" stroke-width="2"/>
+
+<!-- Right: Reports column -->
+<rect x="740" y="2147" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="980" y="2171" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Generate operational reports</text>
+<text class="ts" x="980" y="2191" text-anchor="middle" fill="#444444">Movement history, TO performance</text>
+<line x1="980" y1="2205" x2="980" y2="2245" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="740" y="2245" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="980" y="2269" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Generate inventory &amp; financial reports</text>
+<text class="ts" x="980" y="2289" text-anchor="middle" fill="#444444">Cycle count, valuation, write-offs</text>
+<line x1="980" y1="2303" x2="980" y2="2343" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="740" y="2343" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="980" y="2367" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Performance KPIs</text>
+<text class="ts" x="980" y="2387" text-anchor="middle" fill="#444444">Pick rate, accuracy, throughput</text>
+<line x1="980" y1="2401" x2="980" y2="2441" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="740" y="2441" width="480" height="58" rx="10" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text class="th" x="980" y="2465" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Export &amp; distribute reports</text>
+<text class="ts" x="980" y="2485" text-anchor="middle" fill="#444444">PDF / Excel / CSV – email notifications</text>
+<line x1="980" y1="2499" x2="980" y2="2539" stroke="#222222" stroke-width="2"/>
+<line x1="980" y1="2539" x2="700" y2="2539" stroke="#222222" stroke-width="2"/>
+
+<!-- JOIN -->
+<rect x="200" y="2539" width="1000" height="9" rx="3" fill="#1A1A1A"/>
+<line x1="700" y1="2548" x2="700" y2="2588" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<rect x="500" y="2588" width="400" height="58" rx="10" fill="#FFFFFF" stroke="#666666" stroke-width="1.5"/>
+<text class="th" x="700" y="2612" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">Log activity &amp; audit trail</text>
+<text class="ts" x="700" y="2632" text-anchor="middle" fill="#666666">All transactions timestamped &amp; logged</text>
+<line x1="700" y1="2646" x2="700" y2="2680" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- =====================
+     SYSTEM FINALIZE  y=2680-2960
+===================== -->
+<!-- Decision: Continue? -->
+<polygon points="700,2698 806,2728 700,2758 594,2728" fill="#FFFFFF" stroke="#444444" stroke-width="1.5"/>
+<text x="700" y="2728" text-anchor="middle" dominant-baseline="central" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#1A1A1A">Continue session?</text>
+<line x1="594" y1="2728" x2="86"  y2="2728" stroke="#333333" stroke-width="1.8"/>
+<line x1="86"  y1="2728" x2="86"  y2="308"  stroke="#333333" stroke-width="1.8"/>
+<line x1="86"  y1="308"  x2="100" y2="308"  stroke="#333333" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text class="lbl" x="594" y="2720" fill="#333333">Yes – new operation</text>
+<line x1="700" y1="2758" x2="700" y2="2798" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+<text class="lbl" x="718" y="2782" fill="#555555">No / logout</text>
+
+<rect x="546" y="2798" width="308" height="58" rx="10" fill="#FFFFFF" stroke="#666666" stroke-width="1.5"/>
+<text class="th" x="700" y="2822" text-anchor="middle" dominant-baseline="central" fill="#1A1A1A">User logout / session ended</text>
+<text class="ts" x="700" y="2842" text-anchor="middle" fill="#666666">Session token invalidated</text>
+<line x1="700" y1="2856" x2="700" y2="2900" stroke="#222222" stroke-width="2" marker-end="url(#arrow)"/>
+
+<!-- END NODE -->
+<circle cx="700" cy="2920" r="18" fill="none" stroke="#1A1A1A" stroke-width="2.5"/>
+<circle cx="700" cy="2920" r="11" fill="#1A1A1A"/>
+
+
+</svg>
