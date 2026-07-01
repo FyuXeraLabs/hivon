@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
@@ -30,6 +31,7 @@ import core.logging.Logger;
  */
 public class UOMForm extends javax.swing.JFrame {
 
+    private boolean isInitializing = true;
     private UOMController controller;
     private UOMDTO selectedUOM;
     private List<UOMDTO> allUOMs = new ArrayList<>();
@@ -47,6 +49,7 @@ public class UOMForm extends javax.swing.JFrame {
         setupKeyBindings();
         loadUOMList();
         updateButtonStates();
+        isInitializing = false;
     }
 
     /**
@@ -81,6 +84,7 @@ public class UOMForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Unit of Measure");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
@@ -499,27 +503,58 @@ public class UOMForm extends javax.swing.JFrame {
     // loads and populates UOM data into the table
 
     private void loadUOMList() {
-        BackgroundTask task = new BackgroundTask(this, "Loading UOMs") {
-            private List<UOMDTO> uoms;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching UOMs...");
-                uoms = controller.getAllUOMs();
-                return uoms != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading UOMs") {
+                private List<UOMDTO> uoms;
 
-            @Override
-            protected void onSuccess() {
-                populateUOMTable(uoms);
-            }
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching UOMs...");
+                    uoms = controller.getAllUOMs();
+                    return uoms != null;
+                }
 
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load UOMs!");
+                @Override
+                protected void onSuccess() {
+                    populateUOMTable(uoms);
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load UOMs: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load UOMs!");
+                        break;
+                    }
+                }
             }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void populateUOMTable(List<UOMDTO> uoms) {

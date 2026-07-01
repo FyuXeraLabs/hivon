@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for User management operations.
  * Handles fetching, creating, updating, deleting, activating, deactivating users and resetting passwords.
@@ -28,9 +30,11 @@ public class UserManagementController {
     // get all users
     public List<UserDTO> getAllUsers() {
         try {
-            return UserDAO.getInstance().getUsers(null);
+            return RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().getUsers(null),
+                "failed to get all users"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all users: " + e.getMessage(), e);
             return new ArrayList<>();
         }
     }
@@ -44,7 +48,10 @@ public class UserManagementController {
         }
 
         try {
-            int userId = UserDAO.getInstance().createUser(userDto, initialPassword, null);
+            int userId = RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().createUser(userDto, initialPassword, null),
+                "create user failed"
+            );
 
             if (userId > 0) {
                 Logger.log(username, "user created successfully: " + userDto.getUsername() + " (id: " + userId + ")");
@@ -53,7 +60,6 @@ public class UserManagementController {
             return userId;
 
         } catch (Exception e) {
-            Logger.errlog("create user failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -66,7 +72,10 @@ public class UserManagementController {
         }
 
         try {
-            boolean success = UserDAO.getInstance().updateUser(userDto, null);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().updateUser(userDto, null),
+                "update user failed"
+            );
 
             if (success) {
                 Logger.log(username, "user updated successfully: " + userDto.getUsername() + " (id: " + userDto.getUserId() + ")");
@@ -75,7 +84,6 @@ public class UserManagementController {
             return success;
 
         } catch (Exception e) {
-            Logger.errlog("update user failed: " + e.getMessage(), e);
             return false;
         }
     }
@@ -88,7 +96,10 @@ public class UserManagementController {
         }
 
         try {
-            boolean success = UserDAO.getInstance().deleteUser(userId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().deleteUser(userId),
+                "failed to delete user"
+            );
 
             if (success) {
                 Logger.log(username, "user deleted successfully: id=" + userId);
@@ -97,7 +108,6 @@ public class UserManagementController {
             return success;
 
         } catch (Exception e) {
-            Logger.errlog("failed to delete user: id=" + userId + " - " + e.getMessage(), e);
             return false;
         }
     }
@@ -110,7 +120,10 @@ public class UserManagementController {
         }
 
         try {
-            boolean success = UserDAO.getInstance().deactivateUser(userId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().deactivateUser(userId),
+                "failed to deactivate user"
+            );
 
             if (success) {
                 Logger.log(username, "user deactivated successfully: id=" + userId);
@@ -119,7 +132,6 @@ public class UserManagementController {
             return success;
 
         } catch (Exception e) {
-            Logger.errlog("failed to deactivate user: id=" + userId + " - " + e.getMessage(), e);
             return false;
         }
     }
@@ -132,7 +144,10 @@ public class UserManagementController {
         }
 
         try {
-            boolean success = UserDAO.getInstance().activateUser(userId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().activateUser(userId),
+                "failed to activate user"
+            );
 
             if (success) {
                 Logger.log(username, "user activated successfully: id=" + userId);
@@ -141,7 +156,6 @@ public class UserManagementController {
             return success;
 
         } catch (Exception e) {
-            Logger.errlog("failed to activate user: id=" + userId + " - " + e.getMessage(), e);
             return false;
         }
     }
@@ -154,7 +168,10 @@ public class UserManagementController {
         }
 
         try {
-            boolean success = UserDAO.getInstance().resetPassword(userId, newPassword);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().resetPassword(userId, newPassword),
+                "failed to reset password"
+            );
 
             if (success) {
                 Logger.log(username, "password reset for user id: " + userId);
@@ -163,7 +180,6 @@ public class UserManagementController {
             return success;
 
         } catch (Exception e) {
-            Logger.errlog("failed to reset password for user id: " + userId + " - " + e.getMessage(), e);
             return false;
         }
     }
@@ -171,9 +187,11 @@ public class UserManagementController {
     // search users by criteria
     public List<UserDTO> searchUsers(String searchTerm) {
         try {
-            return UserDAO.getInstance().getUsers(searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().getUsers(searchTerm),
+                "search users failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search users failed: " + e.getMessage(), e);
             return new ArrayList<>();
         }
     }
@@ -181,9 +199,11 @@ public class UserManagementController {
     // get user by id as dto
     public UserDTO getUserById(int userId) {
         try {
-            return UserDAO.getInstance().getUserById(userId);
+            return RetryHelper.executeWithRetry(
+                () -> UserDAO.getInstance().getUserById(userId),
+                "get user by id failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get user by id failed: " + e.getMessage(), e);
             return null;
         }
     }

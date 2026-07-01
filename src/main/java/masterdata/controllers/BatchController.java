@@ -9,6 +9,8 @@ import models.dto.BatchDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Batch master data operations.
  * Handles fetching, searching, creating, updating, deleting batches and retrieving batch stock.
@@ -25,9 +27,11 @@ public class BatchController {
     // retrieves all batches from the system
     public List<BatchDTO> getAllBatches() {
         try {
-            return BatchDAO.getInstance().getBatches(null, null);
+            return RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().getBatches(null, null),
+                "failed to get all batches"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all batches: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -35,9 +39,11 @@ public class BatchController {
     // searches batches by the given search term
     public List<BatchDTO> searchBatches(String searchTerm) {
         try {
-            return BatchDAO.getInstance().getBatches(null, searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().getBatches(null, searchTerm),
+                "search batches failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search batches failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -45,9 +51,11 @@ public class BatchController {
     // retrieves all batches associated with a specific material
     public List<BatchDTO> getBatchesByMaterial(int materialId) {
         try {
-            return BatchDAO.getInstance().getBatchesByMaterial(materialId);
+            return RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().getBatchesByMaterial(materialId),
+                "get batches by material failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get batches by material failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -55,10 +63,12 @@ public class BatchController {
     // retrieves a single batch by its ID
     public BatchDTO getBatchById(int batchId) {
         try {
-            return BatchDAO.getInstance().getBatchById(batchId);
+            return RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().getBatchById(batchId),
+                "get batch by id failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get batch by id failed: " + e.getMessage(), e);
-            throw new RuntimeException(e.getMessage(), e);
+            return null;
         }
     }
 
@@ -69,13 +79,15 @@ public class BatchController {
             return 0;
         }
         try {
-            int batchId = BatchDAO.getInstance().createBatch(batchDto);
+            int batchId = RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().createBatch(batchDto),
+                "create batch failed"
+            );
             if (batchId > 0) {
                 Logger.log(username, "batch created successfully: " + batchDto.getBatchNumber() + " (id: " + batchId + ")");
             }
             return batchId;
         } catch (Exception e) {
-            Logger.errlog("create batch failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -87,13 +99,15 @@ public class BatchController {
             throw new IllegalArgumentException("Invalid batch data");
         }
         try {
-            boolean success = BatchDAO.getInstance().updateBatch(batchDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().updateBatch(batchDto),
+                "update batch failed"
+            );
             if (success) {
                 Logger.log(username, "batch updated successfully: " + batchDto.getBatchNumber() + " (id: " + batchDto.getBatchId() + ")");
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("update batch failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -105,13 +119,15 @@ public class BatchController {
             throw new IllegalArgumentException("Invalid batch id");
         }
         try {
-            boolean success = BatchDAO.getInstance().deleteBatch(batchId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().deleteBatch(batchId),
+                "failed to delete batch"
+            );
             if (success) {
                 Logger.log(username, "batch deleted successfully: id=" + batchId);
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("failed to delete batch: id=" + batchId + " - " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -119,9 +135,11 @@ public class BatchController {
     // retrieves stock information for a specific batch
     public List<JsonObject> getBatchStock(int batchId) {
         try {
-            return BatchDAO.getInstance().getBatchStock(batchId);
+            return RetryHelper.executeWithRetry(
+                () -> BatchDAO.getInstance().getBatchStock(batchId),
+                "get batch stock failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get batch stock failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }

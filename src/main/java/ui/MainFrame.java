@@ -5,6 +5,8 @@
 package ui;
 
 import core.security.*;
+import core.logging.Logger;
+import java.awt.Image;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Map;
@@ -775,8 +777,12 @@ public class MainFrame extends javax.swing.JFrame {
                     return;
                 }
 
-                forms.get(key).run();
-                found = true;
+                try {
+                    forms.get(key).run();
+                    found = true;
+                } catch (RuntimeException ex) {
+                    Logger.errlog("Form loading aborted: " + ex.getMessage(), ex);
+                }
                 break;
             }
         }

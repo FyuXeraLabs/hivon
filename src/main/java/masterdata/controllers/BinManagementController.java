@@ -8,6 +8,8 @@ import models.dto.StorageBinDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Storage Bin management operations.
  * Handles fetching, searching, creating, updating, deleting, and generating storage bins.
@@ -24,9 +26,11 @@ public class BinManagementController {
     // retrieves all storage bins from the system
     public List<StorageBinDTO> getAllBins() {
         try {
-            return BinDAO.getInstance().getBins(null);
+            return RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().getBins(null),
+                "failed to get all bins"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all bins: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -34,9 +38,11 @@ public class BinManagementController {
     // searches storage bins by the given search term
     public List<StorageBinDTO> searchBins(String searchTerm) {
         try {
-            return BinDAO.getInstance().getBins(searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().getBins(searchTerm),
+                "search bins failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search bins failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -44,9 +50,11 @@ public class BinManagementController {
     // retrieves a single storage bin by its ID
     public StorageBinDTO getBinById(int binId) {
         try {
-            return BinDAO.getInstance().getBinById(binId);
+            return RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().getBinById(binId),
+                "get bin by id failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get bin by id failed: " + e.getMessage(), e);
             return null;
         }
     }
@@ -58,13 +66,15 @@ public class BinManagementController {
             return 0;
         }
         try {
-            int binId = BinDAO.getInstance().createBin(binDto);
+            int binId = RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().createBin(binDto),
+                "create bin failed"
+            );
             if (binId > 0) {
                 Logger.log(username, "bin created successfully: " + binDto.getBinCode() + " (id: " + binId + ")");
             }
             return binId;
         } catch (Exception e) {
-            Logger.errlog("create bin failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -76,13 +86,15 @@ public class BinManagementController {
             throw new IllegalArgumentException("Invalid bin data");
         }
         try {
-            boolean success = BinDAO.getInstance().updateBin(binDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().updateBin(binDto),
+                "update bin failed"
+            );
             if (success) {
                 Logger.log(username, "bin updated successfully: " + binDto.getBinCode() + " (id: " + binDto.getBinId() + ")");
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("update bin failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -94,13 +106,15 @@ public class BinManagementController {
             throw new IllegalArgumentException("Invalid bin id");
         }
         try {
-            boolean success = BinDAO.getInstance().deleteBin(binId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().deleteBin(binId),
+                "failed to delete bin"
+            );
             if (success) {
                 Logger.log(username, "bin deleted successfully: id=" + binId);
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("failed to delete bin: id=" + binId + " - " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -109,11 +123,13 @@ public class BinManagementController {
     public List<StorageBinDTO> generateBins(int warehouseId, String zone, String prefix,
                                               int startNum, int endNum, int digits) {
         try {
-            List<StorageBinDTO> bins = BinDAO.getInstance().generateBins(warehouseId, zone, prefix, startNum, endNum, digits);
+            List<StorageBinDTO> bins = RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().generateBins(warehouseId, zone, prefix, startNum, endNum, digits),
+                "generate bins failed"
+            );
             Logger.log(username, "generated " + bins.size() + " bins for warehouse " + warehouseId + " zone " + zone);
             return bins;
         } catch (Exception e) {
-            Logger.errlog("generate bins failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }

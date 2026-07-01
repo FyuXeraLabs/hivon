@@ -8,6 +8,8 @@ import models.dto.UOMDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Unit of Measure (UOM) master data operations.
  * Handles fetching, searching, creating, updating, and deleting UOM system parameters.
@@ -24,9 +26,11 @@ public class UOMController {
     // retrieves all UOM records from the system
     public List<UOMDTO> getAllUOMs() {
         try {
-            return SystemParameterDAO.getInstance().getUOMs(null);
+            return RetryHelper.executeWithRetry(
+                () -> SystemParameterDAO.getInstance().getUOMs(null),
+                "failed to get all UOMs"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all UOMs: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -34,9 +38,11 @@ public class UOMController {
     // searches UOM records by the given search term
     public List<UOMDTO> searchUOMs(String searchTerm) {
         try {
-            return SystemParameterDAO.getInstance().getUOMs(searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> SystemParameterDAO.getInstance().getUOMs(searchTerm),
+                "search UOMs failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search UOMs failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -48,13 +54,15 @@ public class UOMController {
             return false;
         }
         try {
-            boolean success = SystemParameterDAO.getInstance().createUOM(uomDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> SystemParameterDAO.getInstance().createUOM(uomDto),
+                "create UOM failed"
+            );
             if (success) {
                 Logger.log(username, "UOM created successfully: " + uomDto.getParamKey());
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("create UOM failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -66,13 +74,15 @@ public class UOMController {
             return false;
         }
         try {
-            boolean success = SystemParameterDAO.getInstance().updateUOM(uomDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> SystemParameterDAO.getInstance().updateUOM(uomDto),
+                "update UOM failed"
+            );
             if (success) {
                 Logger.log(username, "UOM updated successfully: " + uomDto.getParamKey());
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("update UOM failed: " + e.getMessage(), e);
             return false;
         }
     }
@@ -84,13 +94,15 @@ public class UOMController {
             return false;
         }
         try {
-            boolean success = SystemParameterDAO.getInstance().deleteUOM(paramKey);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> SystemParameterDAO.getInstance().deleteUOM(paramKey),
+                "failed to delete UOM"
+            );
             if (success) {
                 Logger.log(username, "UOM deleted successfully: " + paramKey);
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("failed to delete UOM: " + paramKey + " - " + e.getMessage(), e);
             return false;
         }
     }

@@ -68,33 +68,59 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         }
         
         final Integer whId = warehouseId;
-        BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
-            private List<StorageBinDTO> bins;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching active receiving bins...");
-                bins = controller.getReceivingBins(whId);
-                return bins != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
+                private List<StorageBinDTO> bins;
 
-            @Override
-            protected void onSuccess() {
-                cmbReceivingBin.removeAllItems();
-                cmbReceivingBin.addItem("-- Select Bin --");
-                if (bins != null) {
-                    for (StorageBinDTO bin : bins) {
-                        cmbReceivingBin.addItem(bin);
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching active receiving bins...");
+                    bins = controller.getReceivingBins(whId);
+                    return bins != null;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    cmbReceivingBin.removeAllItems();
+                    cmbReceivingBin.addItem("-- Select Bin --");
+                    if (bins != null) {
+                        for (StorageBinDTO bin : bins) {
+                            cmbReceivingBin.addItem(bin);
+                        }
                     }
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load receiving bins: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
                 }
             }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load receiving bins: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
+        }
     }
 
     // searches sales orders by SO number or customer name
@@ -454,7 +480,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Goods Receipt - Customer Returns (IN12)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+        setTitle("Goods Receipt - Customer Returns");
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Sales Order"));
 

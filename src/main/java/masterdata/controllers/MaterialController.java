@@ -8,6 +8,8 @@ import models.dto.MaterialDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Material master data operations.
  * Handles fetching, searching, creating, updating, and deleting materials.
@@ -24,9 +26,11 @@ public class MaterialController {
     // retrieves all materials from the system
     public List<MaterialDTO> getAllMaterials() {
         try {
-            return MaterialDAO.getInstance().getMaterials(null);
+            return RetryHelper.executeWithRetry(
+                () -> MaterialDAO.getInstance().getMaterials(null),
+                "failed to get all materials"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all materials: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -34,9 +38,11 @@ public class MaterialController {
     // searches materials by the given search term
     public List<MaterialDTO> searchMaterials(String searchTerm) {
         try {
-            return MaterialDAO.getInstance().getMaterials(searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> MaterialDAO.getInstance().getMaterials(searchTerm),
+                "search materials failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search materials failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -44,9 +50,11 @@ public class MaterialController {
     // retrieves a single material by its ID
     public MaterialDTO getMaterialById(int materialId) {
         try {
-            return MaterialDAO.getInstance().getMaterialById(materialId);
+            return RetryHelper.executeWithRetry(
+                () -> MaterialDAO.getInstance().getMaterialById(materialId),
+                "get material by id failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get material by id failed: " + e.getMessage(), e);
             return null;
         }
     }
@@ -58,13 +66,15 @@ public class MaterialController {
             return 0;
         }
         try {
-            int materialId = MaterialDAO.getInstance().createMaterial(materialDto);
+            int materialId = RetryHelper.executeWithRetry(
+                () -> MaterialDAO.getInstance().createMaterial(materialDto),
+                "create material failed"
+            );
             if (materialId > 0) {
                 Logger.log(username, "material created successfully: " + materialDto.getMaterialCode() + " (id: " + materialId + ")");
             }
             return materialId;
         } catch (Exception e) {
-            Logger.errlog("create material failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -76,13 +86,15 @@ public class MaterialController {
             throw new IllegalArgumentException("Invalid material data");
         }
         try {
-            boolean success = MaterialDAO.getInstance().updateMaterial(materialDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> MaterialDAO.getInstance().updateMaterial(materialDto),
+                "update material failed"
+            );
             if (success) {
                 Logger.log(username, "material updated successfully: " + materialDto.getMaterialCode() + " (id: " + materialDto.getMaterialId() + ")");
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("update material failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -94,13 +106,15 @@ public class MaterialController {
             throw new IllegalArgumentException("Invalid material id");
         }
         try {
-            boolean success = MaterialDAO.getInstance().deleteMaterial(materialId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> MaterialDAO.getInstance().deleteMaterial(materialId),
+                "failed to delete material"
+            );
             if (success) {
                 Logger.log(username, "material deleted successfully: id=" + materialId);
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("failed to delete material: id=" + materialId + " - " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }

@@ -6,10 +6,12 @@ package ui.masterdata;
 
 import java.util.List;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
@@ -34,6 +36,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
 
     private ZoneManagementController controller;
     private ZoneDTO selectedZone;
+    private boolean isInitializing = true;
     private List<ZoneDTO> allZones = new ArrayList<>();
     private List<WarehouseDTO> allWarehouses = new ArrayList<>();
 
@@ -53,6 +56,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
             }
         });
         loadWarehouses();
+        isInitializing = false;
     }
 
     /**
@@ -99,6 +103,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Zone Management");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
@@ -469,55 +474,86 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     // loads warehouses and populates zone data
 
     private void loadWarehouses() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
-            private List<WarehouseDTO> warehouses;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching warehouses...");
-                warehouses = WarehouseDAO.getInstance().getWarehouses();
-                return warehouses != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+                private List<WarehouseDTO> warehouses;
 
-            @Override
-            protected void onSuccess() {
-                allWarehouses = warehouses;
-                cmbWarehouse.removeAllItems();
-                cmbWarehouse.setSelectAllLabel("All");
-                cmbWarehouse.addItem("All");
-                if (warehouses != null) {
-                    for (WarehouseDTO wh : warehouses) {
-                        cmbWarehouse.addItem(wh.toString());
-                    }
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching warehouses...");
+                    warehouses = WarehouseDAO.getInstance().getWarehouses();
+                    return warehouses != null;
                 }
 
-                Integer userWhId = null;
-                try {
-                    if (UserSession.getInstance().getCurrentUser() != null) {
-                        userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
-                    }
-                } catch (Exception e) {
-                    Logger.errlog("Could not read warehouse ID from session", e);
-                }
-
-                if (userWhId != null && warehouses != null) {
-                    for (WarehouseDTO wh : warehouses) {
-                        if (wh.getWarehouseId().equals(userWhId)) {
-                            java.util.Set<String> selected = new java.util.HashSet<>();
-                            selected.add(wh.toString());
-                            cmbWarehouse.setSelectedItems(selected);
-                            break;
+                @Override
+                protected void onSuccess() {
+                    allWarehouses = warehouses;
+                    cmbWarehouse.removeAllItems();
+                    cmbWarehouse.setSelectAllLabel("All");
+                    cmbWarehouse.addItem("All");
+                    if (warehouses != null) {
+                        for (WarehouseDTO wh : warehouses) {
+                            cmbWarehouse.addItem(wh.toString());
                         }
                     }
+
+                    Integer userWhId = null;
+                    try {
+                        if (UserSession.getInstance().getCurrentUser() != null) {
+                            userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
+                        }
+                    } catch (Exception e) {
+                        Logger.errlog("Could not read warehouse ID from session", e);
+                    }
+
+                    if (userWhId != null && warehouses != null) {
+                        for (WarehouseDTO wh : warehouses) {
+                            if (wh.getWarehouseId().equals(userWhId)) {
+                                java.util.Set<String> selected = new java.util.HashSet<>();
+                                selected.add(wh.toString());
+                                cmbWarehouse.setSelectedItems(selected);
+                                break;
+                            }
+                        }
+                    }
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load warehouses: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load warehouses!");
+                        break;
+                    }
                 }
             }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void loadZones() {
@@ -530,54 +566,85 @@ public class ZoneManagementForm extends javax.swing.JFrame {
 
         String searchTerm = txtSearch.getText().trim();
 
-        BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
-            private List<ZoneDTO> allZonesResult = new ArrayList<>();
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching zones...");
-                java.util.Set<String> seenCodes = new java.util.HashSet<>();
-                for (String whStr : selectedWhSet) {
-                    WarehouseDTO wh = null;
-                    for (WarehouseDTO w : allWarehouses) {
-                        if (w.toString().equals(whStr)) {
-                            wh = w;
-                            break;
+            BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
+                private List<ZoneDTO> allZonesResult = new ArrayList<>();
+
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching zones...");
+                    java.util.Set<String> seenCodes = new java.util.HashSet<>();
+                    for (String whStr : selectedWhSet) {
+                        WarehouseDTO wh = null;
+                        for (WarehouseDTO w : allWarehouses) {
+                            if (w.toString().equals(whStr)) {
+                                wh = w;
+                                break;
+                            }
                         }
-                    }
-                    if (wh == null) continue;
-                    int wid = wh.getWarehouseId();
-                    List<ZoneDTO> zones;
-                    if (!searchTerm.isEmpty()) {
-                        zones = controller.searchZonesByWarehouse(wid, searchTerm);
-                    } else {
-                        zones = controller.getZonesByWarehouse(wid);
-                    }
-                    if (zones != null) {
-                        for (ZoneDTO z : zones) {
-                            if (seenCodes.add(z.getZoneCode())) {
-                                allZonesResult.add(z);
+                        if (wh == null) continue;
+                        int wid = wh.getWarehouseId();
+                        List<ZoneDTO> zones;
+                        if (!searchTerm.isEmpty()) {
+                            zones = controller.searchZonesByWarehouse(wid, searchTerm);
+                        } else {
+                            zones = controller.getZonesByWarehouse(wid);
+                        }
+                        if (zones != null) {
+                            for (ZoneDTO z : zones) {
+                                if (seenCodes.add(z.getZoneCode())) {
+                                    allZonesResult.add(z);
+                                }
                             }
                         }
                     }
+                    return true;
                 }
-                return true;
-            }
 
-            @Override
-            protected void onSuccess() {
-                populateZoneTable(allZonesResult);
-                if (!searchTerm.isEmpty()) {
-                    StatusMessageHandler.showInfo(txtStatus, "Found " + allZonesResult.size() + " zone(s) matching '" + searchTerm + "'");
+                @Override
+                protected void onSuccess() {
+                    populateZoneTable(allZonesResult);
+                    if (!searchTerm.isEmpty()) {
+                        StatusMessageHandler.showInfo(txtStatus, "Found " + allZonesResult.size() + " zone(s) matching '" + searchTerm + "'");
+                    }
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load zones: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load zones!");
+                        break;
+                    }
                 }
             }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load zones: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void setupTttFieldNavigation() {

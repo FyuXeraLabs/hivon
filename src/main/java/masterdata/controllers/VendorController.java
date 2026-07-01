@@ -8,6 +8,8 @@ import models.dto.VendorDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Vendor master data operations.
  * Handles fetching, searching, creating, updating, and deleting vendors.
@@ -24,9 +26,11 @@ public class VendorController {
     // retrieves all vendors from the system
     public List<VendorDTO> getAllVendors() {
         try {
-            return VendorDAO.getInstance().getVendors(null);
+            return RetryHelper.executeWithRetry(
+                () -> VendorDAO.getInstance().getVendors(null),
+                "failed to get all vendors"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all vendors: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -34,9 +38,11 @@ public class VendorController {
     // searches vendors by the given search term
     public List<VendorDTO> searchVendors(String searchTerm) {
         try {
-            return VendorDAO.getInstance().getVendors(searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> VendorDAO.getInstance().getVendors(searchTerm),
+                "search vendors failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search vendors failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -44,9 +50,11 @@ public class VendorController {
     // retrieves a single vendor by their ID
     public VendorDTO getVendorById(int vendorId) {
         try {
-            return VendorDAO.getInstance().getVendorById(vendorId);
+            return RetryHelper.executeWithRetry(
+                () -> VendorDAO.getInstance().getVendorById(vendorId),
+                "get vendor by id failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get vendor by id failed: " + e.getMessage(), e);
             return null;
         }
     }
@@ -58,13 +66,15 @@ public class VendorController {
             return 0;
         }
         try {
-            int vendorId = VendorDAO.getInstance().createVendor(vendorDto);
+            int vendorId = RetryHelper.executeWithRetry(
+                () -> VendorDAO.getInstance().createVendor(vendorDto),
+                "create vendor failed"
+            );
             if (vendorId > 0) {
                 Logger.log(username, "vendor created successfully: " + vendorDto.getVendorCode() + " (id: " + vendorId + ")");
             }
             return vendorId;
         } catch (Exception e) {
-            Logger.errlog("create vendor failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -76,13 +86,15 @@ public class VendorController {
             return false;
         }
         try {
-            boolean success = VendorDAO.getInstance().updateVendor(vendorDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> VendorDAO.getInstance().updateVendor(vendorDto),
+                "update vendor failed"
+            );
             if (success) {
                 Logger.log(username, "vendor updated successfully: " + vendorDto.getVendorCode() + " (id: " + vendorDto.getVendorId() + ")");
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("update vendor failed: " + e.getMessage(), e);
             return false;
         }
     }
@@ -94,13 +106,15 @@ public class VendorController {
             return false;
         }
         try {
-            boolean success = VendorDAO.getInstance().deleteVendor(vendorId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> VendorDAO.getInstance().deleteVendor(vendorId),
+                "failed to delete vendor"
+            );
             if (success) {
                 Logger.log(username, "vendor deleted successfully: id=" + vendorId);
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("failed to delete vendor: id=" + vendorId + " - " + e.getMessage(), e);
             return false;
         }
     }

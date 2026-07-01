@@ -8,6 +8,8 @@ import models.dto.CustomerDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Customer master data operations.
  * Handles fetching, searching, creating, updating, and deleting customers.
@@ -24,9 +26,11 @@ public class CustomerController {
     // retrieves all customers from the system
     public List<CustomerDTO> getAllCustomers() {
         try {
-            return CustomerDAO.getInstance().getCustomers(null);
+            return RetryHelper.executeWithRetry(
+                () -> CustomerDAO.getInstance().getCustomers(null),
+                "failed to get all customers"
+            );
         } catch (Exception e) {
-            Logger.errlog("failed to get all customers: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -34,9 +38,11 @@ public class CustomerController {
     // searches customers by the given search term
     public List<CustomerDTO> searchCustomers(String searchTerm) {
         try {
-            return CustomerDAO.getInstance().getCustomers(searchTerm);
+            return RetryHelper.executeWithRetry(
+                () -> CustomerDAO.getInstance().getCustomers(searchTerm),
+                "search customers failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("search customers failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -44,9 +50,11 @@ public class CustomerController {
     // retrieves a single customer by their ID
     public CustomerDTO getCustomerById(int customerId) {
         try {
-            return CustomerDAO.getInstance().getCustomerById(customerId);
+            return RetryHelper.executeWithRetry(
+                () -> CustomerDAO.getInstance().getCustomerById(customerId),
+                "get customer by id failed"
+            );
         } catch (Exception e) {
-            Logger.errlog("get customer by id failed: " + e.getMessage(), e);
             return null;
         }
     }
@@ -58,13 +66,15 @@ public class CustomerController {
             return 0;
         }
         try {
-            int customerId = CustomerDAO.getInstance().createCustomer(customerDto);
+            int customerId = RetryHelper.executeWithRetry(
+                () -> CustomerDAO.getInstance().createCustomer(customerDto),
+                "create customer failed"
+            );
             if (customerId > 0) {
                 Logger.log(username, "customer created successfully: " + customerDto.getCustomerCode() + " (id: " + customerId + ")");
             }
             return customerId;
         } catch (Exception e) {
-            Logger.errlog("create customer failed: " + e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -76,13 +86,15 @@ public class CustomerController {
             return false;
         }
         try {
-            boolean success = CustomerDAO.getInstance().updateCustomer(customerDto);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> CustomerDAO.getInstance().updateCustomer(customerDto),
+                "update customer failed"
+            );
             if (success) {
                 Logger.log(username, "customer updated successfully: " + customerDto.getCustomerCode() + " (id: " + customerDto.getCustomerId() + ")");
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("update customer failed: " + e.getMessage(), e);
             return false;
         }
     }
@@ -94,13 +106,15 @@ public class CustomerController {
             return false;
         }
         try {
-            boolean success = CustomerDAO.getInstance().deleteCustomer(customerId);
+            boolean success = RetryHelper.executeWithRetry(
+                () -> CustomerDAO.getInstance().deleteCustomer(customerId),
+                "failed to delete customer"
+            );
             if (success) {
                 Logger.log(username, "customer deleted successfully: id=" + customerId);
             }
             return success;
         } catch (Exception e) {
-            Logger.errlog("failed to delete customer: id=" + customerId + " - " + e.getMessage(), e);
             return false;
         }
     }

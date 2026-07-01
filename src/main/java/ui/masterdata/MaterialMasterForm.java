@@ -13,6 +13,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
@@ -29,6 +30,7 @@ import core.logging.Logger;
  */
 public class MaterialMasterForm extends javax.swing.JFrame {
 
+    private boolean isInitializing = true;
     private MaterialController controller;
     private MaterialDTO selectedMaterial;
     private List<MaterialDTO> allMaterials = new ArrayList<>();
@@ -46,6 +48,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         setupKeyBindings();
         loadMaterialList();
         updateButtonStates();
+        isInitializing = false;
     }
 
     /**
@@ -108,6 +111,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Material Master");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
@@ -831,28 +835,59 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     // loads and populates material data into the table
 
     private void loadMaterialList() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Materials") {
-            private List<MaterialDTO> materials;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching materials...");
-                materials = controller.getAllMaterials();
-                return materials != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Materials") {
+                private List<MaterialDTO> materials;
 
-            @Override
-            protected void onSuccess() {
-                populateMaterialTable(materials);
-                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + materials.size() + " materials successfully!");
-            }
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching materials...");
+                    materials = controller.getAllMaterials();
+                    return materials != null;
+                }
 
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load materials: " + e.getMessage());
+                @Override
+                protected void onSuccess() {
+                    populateMaterialTable(materials);
+                    StatusMessageHandler.showSuccess(txtStatus, "Loaded " + materials.size() + " materials successfully!");
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load materials: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load materials!");
+                        break;
+                    }
+                }
             }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void populateMaterialTable(List<MaterialDTO> materials) {

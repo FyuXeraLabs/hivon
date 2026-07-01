@@ -72,7 +72,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Goods Receipt - Transfer In (IN12)");
+        setTitle("Goods Receipt - Transfer In");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Transfer Order"));

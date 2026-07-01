@@ -31,6 +31,7 @@ import core.logging.Logger;
  */
 public class CustomerForm extends javax.swing.JFrame {
 
+    private boolean isInitializing = true;
     private CustomerController controller;
     private CustomerDTO selectedCustomer;
     private List<CustomerDTO> allCustomers = new ArrayList<>();
@@ -48,6 +49,7 @@ public class CustomerForm extends javax.swing.JFrame {
         setupKeyBindings();
         loadCustomerList();
         updateButtonStates();
+        isInitializing = false;
     }
 
     /**
@@ -95,6 +97,7 @@ public class CustomerForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Customer Management");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
@@ -619,27 +622,58 @@ public class CustomerForm extends javax.swing.JFrame {
     // loads and populates customer data into the table
 
     private void loadCustomerList() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Customers") {
-            private List<CustomerDTO> customers;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching customers...");
-                customers = controller.getAllCustomers();
-                return customers != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Customers") {
+                private List<CustomerDTO> customers;
 
-            @Override
-            protected void onSuccess() {
-                populateCustomerTable(customers);
-            }
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching customers...");
+                    customers = controller.getAllCustomers();
+                    return customers != null;
+                }
 
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load customers!");
+                @Override
+                protected void onSuccess() {
+                    populateCustomerTable(customers);
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load customers: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load customers!");
+                        break;
+                    }
+                }
             }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void populateCustomerTable(List<CustomerDTO> customers) {

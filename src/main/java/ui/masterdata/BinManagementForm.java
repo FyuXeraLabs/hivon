@@ -1,6 +1,7 @@
 package ui.masterdata;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import java.util.List;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
@@ -30,11 +31,12 @@ import ui.components.StatusMessageHandler;
  */
 public class BinManagementForm extends javax.swing.JFrame {
 
-    private final BinManagementController controller;
-    private java.util.Map<String, Object> generateParams;
+    private boolean isInitializing = true;
+    private BinManagementController controller;
     private StorageBinDTO selectedBin;
-    private List<WarehouseDTO> allWarehouses = new ArrayList<>();
     private List<StorageBinDTO> allBinsList = new ArrayList<>();
+    private List<WarehouseDTO> allWarehouses = new ArrayList<>();
+    private java.util.Map<String, Object> generateParams;
     private boolean isAddMode = false;
 
     /**
@@ -105,6 +107,9 @@ public class BinManagementForm extends javax.swing.JFrame {
         spinBulkRacks.addChangeListener(previewListener);
         spinBulkLevels.addChangeListener(previewListener);
         loadWarehouses();
+        loadZonesForAllWarehouses();
+        loadBinsList();
+        isInitializing = false;
     }
 
     /**
@@ -163,6 +168,7 @@ public class BinManagementForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Bin Management");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Warehouse Selection & Filters"));
@@ -823,124 +829,214 @@ public class BinManagementForm extends javax.swing.JFrame {
     // loads warehouses and initializes filter dropdowns
 
     private void loadWarehouses() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
-            private List<WarehouseDTO> warehouses;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching warehouses...");
-                warehouses = WarehouseDAO.getInstance().getWarehouses();
-                return warehouses != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+                private List<WarehouseDTO> warehouses;
 
-            @Override
-            protected void onSuccess() {
-                allWarehouses = warehouses;
-                cmbWarehouse.removeAllItems();
-                cmbWarehouse.setSelectAllLabel("All");
-                cmbWarehouse.addItem("All");
-                if (warehouses != null) {
-                    for (WarehouseDTO wh : warehouses) {
-                        cmbWarehouse.addItem(wh.toString());
-                    }
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching warehouses...");
+                    warehouses = WarehouseDAO.getInstance().getWarehouses();
+                    return warehouses != null;
                 }
-                if (!allWarehouses.isEmpty()) {
-                    Integer userWhId = null;
-                    try {
-                        if (UserSession.getInstance().getCurrentUser() != null) {
-                            userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
-                        }
-                    } catch (Exception e) {
-                        Logger.errlog("Could not read warehouse ID from session", e);
-                    }
 
-                    if (userWhId != null && warehouses != null) {
+                @Override
+                protected void onSuccess() {
+                    allWarehouses = warehouses;
+                    cmbWarehouse.removeAllItems();
+                    cmbWarehouse.setSelectAllLabel("All");
+                    cmbWarehouse.addItem("All");
+                    if (warehouses != null) {
                         for (WarehouseDTO wh : warehouses) {
-                            if (wh.getWarehouseId().equals(userWhId)) {
-                                java.util.Set<String> selected = new java.util.HashSet<>();
-                                selected.add(wh.toString());
-                                cmbWarehouse.setSelectedItems(selected);
-                                break;
+                            cmbWarehouse.addItem(wh.toString());
+                        }
+                    }
+                    if (!allWarehouses.isEmpty()) {
+                        Integer userWhId = null;
+                        try {
+                            if (UserSession.getInstance().getCurrentUser() != null) {
+                                userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
+                            }
+                        } catch (Exception e) {
+                            Logger.errlog("Could not read warehouse ID from session", e);
+                        }
+
+                        if (userWhId != null && warehouses != null) {
+                            for (WarehouseDTO wh : warehouses) {
+                                if (wh.getWarehouseId().equals(userWhId)) {
+                                    java.util.Set<String> selected = new java.util.HashSet<>();
+                                    selected.add(wh.toString());
+                                    cmbWarehouse.setSelectedItems(selected);
+                                    break;
+                                }
                             }
                         }
                     }
-
-                    loadZonesForAllWarehouses();
-                    loadBinsList();
+                    StatusMessageHandler.showSuccess(txtStatus, "Loaded " + (warehouses != null ? warehouses.size() : 0) + " warehouses.");
+                    success[0] = true;
                 }
-                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + (warehouses != null ? warehouses.size() : 0) + " warehouses.");
-            }
 
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load warehouses: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load warehouses!");
+                        break;
+                    }
+                }
             }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void loadZonesForAllWarehouses() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
-            private java.util.Set<String> allZoneCodes = new java.util.HashSet<>();
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                for (WarehouseDTO wh : allWarehouses) {
-                    List<models.dto.ZoneDTO> zones = new masterdata.controllers.ZoneManagementController().getZonesByWarehouse(wh.getWarehouseId());
-                    if (zones != null) {
-                        for (models.dto.ZoneDTO z : zones) {
-                            allZoneCodes.add(z.getZoneCode());
+            BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
+                private java.util.Set<String> allZoneCodes = new java.util.HashSet<>();
+
+                @Override
+                protected Boolean performTask() throws Exception {
+                    for (WarehouseDTO wh : allWarehouses) {
+                        List<models.dto.ZoneDTO> zones = new masterdata.controllers.ZoneManagementController().getZonesByWarehouse(wh.getWarehouseId());
+                        if (zones != null) {
+                            for (models.dto.ZoneDTO z : zones) {
+                                allZoneCodes.add(z.getZoneCode());
+                            }
                         }
                     }
+                    return true;
                 }
-                return true;
-            }
 
-            @Override
-            protected void onSuccess() {
-                cmbFilterZone.removeAllItems();
-                cmbFilterZone.setSelectAllLabel("All");
-                cmbFilterZone.addItem("All");
-                List<String> sorted = new ArrayList<>(allZoneCodes);
-                java.util.Collections.sort(sorted);
-                for (String code : sorted) {
-                    cmbFilterZone.addItem(code);
+                @Override
+                protected void onSuccess() {
+                    cmbFilterZone.removeAllItems();
+                    cmbFilterZone.setSelectAllLabel("All");
+                    cmbFilterZone.addItem("All");
+                    List<String> sorted = new ArrayList<>(allZoneCodes);
+                    java.util.Collections.sort(sorted);
+                    for (String code : sorted) {
+                        cmbFilterZone.addItem(code);
+                    }
+                    StatusMessageHandler.showSuccess(txtStatus, "Loaded " + sorted.size() + " zones.");
+                    success[0] = true;
                 }
-                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + sorted.size() + " zones.");
-            }
 
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load zones: " + e.getMessage());
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load zones: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load zones!");
+                        break;
+                    }
+                }
             }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void loadBinsList() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Bins") {
-            private List<StorageBinDTO> bins;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching bins...");
-                bins = controller.getAllBins();
-                return bins != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Bins") {
+                private List<StorageBinDTO> bins;
 
-            @Override
-            protected void onSuccess() {
-                allBinsList = bins;
-                filterAndPopulateBinsTable();
-                StatusMessageHandler.showSuccess(txtStatus, "Loaded " + (bins != null ? bins.size() : 0) + " bins.");
-            }
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching bins...");
+                    bins = controller.getAllBins();
+                    return bins != null;
+                }
 
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load bins: " + e.getMessage());
+                @Override
+                protected void onSuccess() {
+                    allBinsList = bins;
+                    filterAndPopulateBinsTable();
+                    StatusMessageHandler.showSuccess(txtStatus, "Loaded " + (bins != null ? bins.size() : 0) + " bins.");
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load bins: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    if (isInitializing) {
+                        dispose();
+                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                    } else {
+                        StatusMessageHandler.showError(txtStatus, "Failed to load bins!");
+                        break;
+                    }
+                }
             }
-        };
-        task.executeWithDialog();
+        }
     }
 
     private void filterAndPopulateBinsTable() {

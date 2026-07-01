@@ -8,6 +8,8 @@ import models.dto.TransferOrderItemDTO;
 
 import java.util.List;
 
+import core.utils.RetryHelper;
+
 /**
  * Controller for Goods Receipt - Transfer In operations.
  * Handles loading transfer orders and posting goods receipts for incoming transfers.
@@ -21,22 +23,19 @@ public class GRTransferInController {
     public GRTransferInController() {
     }
 
-    // loads transfer order details by TO number
+    // loads transfer order details by TO number
     public TransferOrderDTO loadTransferOrder(String toNumber) throws Exception {
         if (toNumber == null || toNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("Transfer Order number cannot be empty.");
         }
 
-        try {
-            Logger.log(username, "loading transfer order: " + toNumber);
-            return TransferOrderDAO.getInstance().loadTransferOrder(toNumber);
-        } catch (Exception e) {
-            Logger.errlog("failed to load transfer order " + toNumber + ": " + e.getMessage(), e);
-            throw e;
-        }
+        return RetryHelper.executeWithRetry(
+            () -> TransferOrderDAO.getInstance().loadTransferOrder(toNumber),
+            "failed to load transfer order " + toNumber
+        );
     }
 
-    // submits received quantities for a transfer order goods receipt
+    // submits received quantities for a transfer order goods receipt
     public boolean receiveGoods(String toNumber, List<TransferOrderItemDTO> items, String actualReceiptDate, String notes) throws Exception {
         if (toNumber == null || toNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("Transfer Order number cannot be empty.");
@@ -45,17 +44,14 @@ public class GRTransferInController {
             throw new IllegalArgumentException("Items list cannot be empty.");
         }
 
-        try {
-            Logger.log(username, "submitting goods receipt for transfer order: " + toNumber);
-            boolean success = TransferOrderDAO.getInstance().receiveGoods(toNumber, items, actualReceiptDate, notes);
-            if (success) {
-                Logger.log(username, "goods receipt from transfer order completed successfully: " + toNumber);
-            }
-            return success;
-        } catch (Exception e) {
-            Logger.errlog("failed to process goods receipt for transfer order " + toNumber + ": " + e.getMessage(), e);
-            throw e;
+        boolean success = RetryHelper.executeWithRetry(
+            () -> TransferOrderDAO.getInstance().receiveGoods(toNumber, items, actualReceiptDate, notes),
+            "failed to process goods receipt for transfer order " + toNumber
+        );
+        if (success) {
+            Logger.log(username, "goods receipt from transfer order completed successfully: " + toNumber);
         }
+        return success;
     }
 }
 

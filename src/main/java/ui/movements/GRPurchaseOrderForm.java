@@ -19,6 +19,7 @@ import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
 import core.security.UserSession;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -56,33 +57,59 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
         
         final Integer whId = warehouseId;
-        BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
-            private List<StorageBinDTO> bins;
+        while (true) {
+            final boolean[] success = new boolean[1];
+            final Exception[] error = new Exception[1];
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching active receiving bins...");
-                bins = controller.getReceivingBins(whId);
-                return bins != null;
-            }
+            BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
+                private List<StorageBinDTO> bins;
 
-            @Override
-            protected void onSuccess() {
-                cmbReceivingBin.removeAllItems();
-                cmbReceivingBin.addItem("-- Select Bin --");
-                if (bins != null) {
-                    for (StorageBinDTO bin : bins) {
-                        cmbReceivingBin.addItem(bin);
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Fetching active receiving bins...");
+                    bins = controller.getReceivingBins(whId);
+                    return bins != null;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    cmbReceivingBin.removeAllItems();
+                    cmbReceivingBin.addItem("-- Select Bin --");
+                    if (bins != null) {
+                        for (StorageBinDTO bin : bins) {
+                            cmbReceivingBin.addItem(bin);
+                        }
                     }
+                    success[0] = true;
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    error[0] = e;
+                }
+            };
+            task.executeWithDialog();
+
+            if (success[0]) {
+                break;
+            } else {
+                Object[] options = {"Retry", "Exit"};
+                int choice = JOptionPane.showOptionDialog(
+                        this,
+                        "Failed to load receiving bins: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
+                        "Loading Failed",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+                if (choice != 0) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
                 }
             }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load receiving bins: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
+        }
     }
 
     // searches and displays open purchase orders for selection
@@ -366,6 +393,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Goods Receipt - Purchase Order (IN11)");
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Purchase Order"));
