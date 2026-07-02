@@ -1124,9 +1124,9 @@ public class UserManagementForm extends javax.swing.JFrame {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
+        clearForm();
         isAddMode = true;
         selectedUser = null;
-        clearForm();
         txtUsername.requestFocusInWindow();
         updateButtonStates();
     }//GEN-LAST:event_btnAddActionPerformed

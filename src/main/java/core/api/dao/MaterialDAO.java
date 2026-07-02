@@ -93,6 +93,24 @@ public class MaterialDAO {
         if (materialDto.getStorageCondition() != null) {
             payload.addProperty("storage_condition", materialDto.getStorageCondition());
         }
+        if (materialDto.getVolume() != null) {
+            payload.addProperty("volume", materialDto.getVolume());
+        }
+        if (materialDto.getIsBatchManaged() != null) {
+            payload.addProperty("is_batch_managed", materialDto.getIsBatchManaged());
+        }
+        if (materialDto.getMinStockLevel() != null) {
+            payload.addProperty("min_stock_level", materialDto.getMinStockLevel());
+        }
+        if (materialDto.getMaxStockLevel() != null) {
+            payload.addProperty("max_stock_level", materialDto.getMaxStockLevel());
+        }
+        if (materialDto.getReorderPoint() != null) {
+            payload.addProperty("reorder_point", materialDto.getReorderPoint());
+        }
+        if (materialDto.getUnitCost() != null) {
+            payload.addProperty("unit_cost", materialDto.getUnitCost());
+        }
         payload.addProperty("is_active", materialDto.getIsActive() != null ? materialDto.getIsActive() : true);
 
         HttpRequest request = apiClient.authRequest(ApiConfig.MATERIALS)
@@ -124,6 +142,24 @@ public class MaterialDAO {
         }
         if (materialDto.getStorageCondition() != null) {
             payload.addProperty("storage_condition", materialDto.getStorageCondition());
+        }
+        if (materialDto.getVolume() != null) {
+            payload.addProperty("volume", materialDto.getVolume());
+        }
+        if (materialDto.getIsBatchManaged() != null) {
+            payload.addProperty("is_batch_managed", materialDto.getIsBatchManaged());
+        }
+        if (materialDto.getMinStockLevel() != null) {
+            payload.addProperty("min_stock_level", materialDto.getMinStockLevel());
+        }
+        if (materialDto.getMaxStockLevel() != null) {
+            payload.addProperty("max_stock_level", materialDto.getMaxStockLevel());
+        }
+        if (materialDto.getReorderPoint() != null) {
+            payload.addProperty("reorder_point", materialDto.getReorderPoint());
+        }
+        if (materialDto.getUnitCost() != null) {
+            payload.addProperty("unit_cost", materialDto.getUnitCost());
         }
         if (materialDto.getIsActive() != null) {
             payload.addProperty("is_active", materialDto.getIsActive());

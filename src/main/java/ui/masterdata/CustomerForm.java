@@ -448,9 +448,9 @@ public class CustomerForm extends javax.swing.JFrame {
     }//GEN-LAST:event_tblCustomersMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        clearForm();
         isAddMode = true;
         selectedCustomer = null;
-        clearForm();
         txtCode.requestFocusInWindow();
         updateButtonStates();
     }//GEN-LAST:event_btnAddActionPerformed

@@ -350,9 +350,9 @@ public class UOMForm extends javax.swing.JFrame {
     }//GEN-LAST:event_tblUOMsMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        clearForm();
         isAddMode = true;
         selectedUOM = null;
-        clearForm();
         txtCode.requestFocusInWindow();
         updateButtonStates();
     }//GEN-LAST:event_btnAddActionPerformed

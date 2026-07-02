@@ -587,8 +587,8 @@ public class BinManagementForm extends javax.swing.JFrame {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         if (!isAddMode) {
-            isAddMode = true;
             clearForm();
+            isAddMode = true;
             updateButtonStates();
             txtBinCode.requestFocusInWindow();
             StatusMessageHandler.showInfo(txtStatus, "Enter bin details and click 'Save Bin' to commit.");

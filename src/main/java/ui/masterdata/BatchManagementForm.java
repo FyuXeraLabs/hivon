@@ -436,9 +436,9 @@ public class BatchManagementForm extends javax.swing.JFrame {
     }//GEN-LAST:event_tblBatchesMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        clearForm();
         isAddMode = true;
         selectedBatch = null;
-        clearForm();
         txtBatchNo.requestFocusInWindow();
         updateButtonStates();
     }//GEN-LAST:event_btnAddActionPerformed

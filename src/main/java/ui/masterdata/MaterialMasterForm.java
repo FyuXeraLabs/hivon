@@ -534,6 +534,12 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                 if (selectedMaterial.getStorageCondition() != null) {
                     cmbStorageConditions.setSelectedItem(selectedMaterial.getStorageCondition());
                 }
+                txtVolume.setText(selectedMaterial.getVolume() != null ? String.valueOf(selectedMaterial.getVolume()) : "");
+                txtMinStock.setText(selectedMaterial.getMinStockLevel() != null ? String.valueOf(selectedMaterial.getMinStockLevel()) : "");
+                txtMaxStock.setText(selectedMaterial.getMaxStockLevel() != null ? String.valueOf(selectedMaterial.getMaxStockLevel()) : "");
+                txtReorderPoint.setText(selectedMaterial.getReorderPoint() != null ? String.valueOf(selectedMaterial.getReorderPoint()) : "");
+                txtUnitCost.setText(selectedMaterial.getUnitCost() != null ? String.valueOf(selectedMaterial.getUnitCost()) : "");
+                chkBatchManaged.setSelected(selectedMaterial.getIsBatchManaged() != null && selectedMaterial.getIsBatchManaged());
                 chkIsActive.setSelected(selectedMaterial.getIsActive() != null && selectedMaterial.getIsActive());
                 txtCode.setEditable(false);
                 isAddMode = false;
@@ -543,9 +549,9 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     }//GEN-LAST:event_tblMaterialsMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        clearForm();
         isAddMode = true;
         selectedMaterial = null;
-        clearForm();
         txtCode.requestFocusInWindow();
         updateButtonStates();
     }//GEN-LAST:event_btnAddActionPerformed
@@ -570,6 +576,22 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         if (cmbStorageConditions.getSelectedIndex() >= 0) {
             dto.setStorageCondition(cmbStorageConditions.getSelectedItem().toString());
         }
+        if (!txtVolume.getText().trim().isEmpty()) {
+            try { dto.setVolume(Double.parseDouble(txtVolume.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        if (!txtMinStock.getText().trim().isEmpty()) {
+            try { dto.setMinStockLevel(Double.parseDouble(txtMinStock.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        if (!txtMaxStock.getText().trim().isEmpty()) {
+            try { dto.setMaxStockLevel(Double.parseDouble(txtMaxStock.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        if (!txtReorderPoint.getText().trim().isEmpty()) {
+            try { dto.setReorderPoint(Double.parseDouble(txtReorderPoint.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        if (!txtUnitCost.getText().trim().isEmpty()) {
+            try { dto.setUnitCost(Double.parseDouble(txtUnitCost.getText().trim())); } catch (NumberFormatException e) {}
+        }
+        dto.setIsBatchManaged(chkBatchManaged.isSelected());
         dto.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Saving Material") {
@@ -622,6 +644,32 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         if (cmbStorageConditions.getSelectedIndex() >= 0) {
             selectedMaterial.setStorageCondition(cmbStorageConditions.getSelectedItem().toString());
         }
+        if (!txtVolume.getText().trim().isEmpty()) {
+            try { selectedMaterial.setVolume(Double.parseDouble(txtVolume.getText().trim())); } catch (NumberFormatException e) {}
+        } else {
+            selectedMaterial.setVolume(null);
+        }
+        if (!txtMinStock.getText().trim().isEmpty()) {
+            try { selectedMaterial.setMinStockLevel(Double.parseDouble(txtMinStock.getText().trim())); } catch (NumberFormatException e) {}
+        } else {
+            selectedMaterial.setMinStockLevel(null);
+        }
+        if (!txtMaxStock.getText().trim().isEmpty()) {
+            try { selectedMaterial.setMaxStockLevel(Double.parseDouble(txtMaxStock.getText().trim())); } catch (NumberFormatException e) {}
+        } else {
+            selectedMaterial.setMaxStockLevel(null);
+        }
+        if (!txtReorderPoint.getText().trim().isEmpty()) {
+            try { selectedMaterial.setReorderPoint(Double.parseDouble(txtReorderPoint.getText().trim())); } catch (NumberFormatException e) {}
+        } else {
+            selectedMaterial.setReorderPoint(null);
+        }
+        if (!txtUnitCost.getText().trim().isEmpty()) {
+            try { selectedMaterial.setUnitCost(Double.parseDouble(txtUnitCost.getText().trim())); } catch (NumberFormatException e) {}
+        } else {
+            selectedMaterial.setUnitCost(null);
+        }
+        selectedMaterial.setIsBatchManaged(chkBatchManaged.isSelected());
         selectedMaterial.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Updating Material") {
