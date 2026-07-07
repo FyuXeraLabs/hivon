@@ -31,18 +31,28 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     private GRPurchaseOrderController controller;
     private List<POItemDTO> currentPOItems = new ArrayList<>();
     private List<POReceiptItem> receiptSummaryList = new ArrayList<>();
+    private int editingReceiptSummaryIndex = -1;
+    private boolean isProgrammaticSelection = false;
 
     /**
      * Creates new form GRPurchaseOrderForm
      */
     public GRPurchaseOrderForm() {
         initComponents();
+        btnUpdateRecieptItem.setEnabled(false); // Disable update button initially
+        tblReceiptSummary.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new GRPurchaseOrderController();
         cmbBatch.setEditable(true);
         initTableSelectionListener();
+        setupTableRenderers();
         loadReceivingBins();
+
+        // Initialize spinner listeners for UI/UX color changes
+        attachDocumentListenerToSpinner();
+        spinReceivedQty.addChangeListener(e -> updateSpinnerColor());
+        spinReceivedQty.addPropertyChangeListener("editor", evt -> attachDocumentListenerToSpinner());
     }
 
     // loads active receiving bins for the user's warehouse
@@ -57,59 +67,33 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
         
         final Integer whId = warehouseId;
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
+            private List<StorageBinDTO> bins;
 
-            BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
-                private List<StorageBinDTO> bins;
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching active receiving bins...");
+                bins = controller.getReceivingBins(whId);
+                return bins != null;
+            }
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    updateProgress("Fetching active receiving bins...");
-                    bins = controller.getReceivingBins(whId);
-                    return bins != null;
-                }
-
-                @Override
-                protected void onSuccess() {
-                    cmbReceivingBin.removeAllItems();
-                    cmbReceivingBin.addItem("-- Select Bin --");
-                    if (bins != null) {
-                        for (StorageBinDTO bin : bins) {
-                            cmbReceivingBin.addItem(bin);
-                        }
+            @Override
+            protected void onSuccess() {
+                cmbReceivingBin.removeAllItems();
+                cmbReceivingBin.addItem("-- Select Bin --");
+                if (bins != null) {
+                    for (StorageBinDTO bin : bins) {
+                        cmbReceivingBin.addItem(bin);
                     }
-                    success[0] = true;
-                }
-
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
-            task.executeWithDialog();
-
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load receiving bins: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    dispose();
-                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
                 }
             }
-        }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load receiving bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
     }
 
     // searches and displays open purchase orders for selection
@@ -191,6 +175,8 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 
                 // Clear receipt summary
                 receiptSummaryList.clear();
+                editingReceiptSummaryIndex = -1;
+                isProgrammaticSelection = false;
                 refreshReceiptSummaryTable();
 
                 // Populate JTable
@@ -220,63 +206,230 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 item.getOutstandingQuantity()
             });
         }
+        updatePOItemsTableQuantities();
+    }
+
+    private void updatePOItemsTableQuantities() {
+        DefaultTableModel model = (DefaultTableModel) tblPOItems.getModel();
+        for (int i = 0; i < currentPOItems.size(); i++) {
+            POItemDTO item = currentPOItems.get(i);
+            double outstanding = item.getOutstandingQuantity();
+            double alreadyAdded = 0.0;
+            for (POReceiptItem summaryItem : receiptSummaryList) {
+                if (summaryItem.getPoItemId().equals(item.getPoItemId())) {
+                    alreadyAdded += summaryItem.getQuantity();
+                }
+            }
+            double remaining = outstanding - alreadyAdded;
+            model.setValueAt(remaining, i, 5);
+        }
     }
 
     // sets up table row selection to populate receipt details panel
+    private void updateInputsEnabledState(boolean enabled, POItemDTO item) {
+        spinReceivedQty.setEnabled(enabled);
+        cmbReceivingBin.setEnabled(enabled);
+        cmbQuality.setEnabled(enabled);
+        txtRemarks.setEnabled(enabled);
+        if (item != null) {
+            boolean isBatch = item.getIsBatchManaged() != null && item.getIsBatchManaged();
+            cmbBatch.setEnabled(enabled && isBatch);
+            txtExpiryDate.setEnabled(enabled && isBatch);
+        } else {
+            cmbBatch.setEnabled(false);
+            txtExpiryDate.setEnabled(false);
+        }
+    }
+
+    private void refreshInputsForSelectedPOItem() {
+        int selectedRow = tblPOItems.getSelectedRow();
+        if (selectedRow >= 0 && selectedRow < currentPOItems.size()) {
+            POItemDTO item = currentPOItems.get(selectedRow);
+            double outstanding = item.getOutstandingQuantity();
+            double alreadyAdded = 0.0;
+            for (POReceiptItem summaryItem : receiptSummaryList) {
+                if (summaryItem.getPoItemId().equals(item.getPoItemId())) {
+                    alreadyAdded += summaryItem.getQuantity();
+                }
+            }
+            double remaining = outstanding - alreadyAdded;
+            
+            txtMaterial.setText(item.getMaterialCode() + " - " + item.getMaterialDescription());
+            txtOrderedQty.setText(String.format("%.2f", remaining));
+            
+            SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, remaining > 0.0 ? remaining : 0.0, 1.0);
+            spinReceivedQty.setModel(spinnerModel);
+            updateSpinnerColor();
+            
+            updateInputsEnabledState(remaining > 0, item);
+            btnAddToReceipt.setEnabled(remaining > 0);
+            
+            if (remaining > 0) {
+                boolean isBatch = item.getIsBatchManaged() != null && item.getIsBatchManaged();
+                if (!isBatch) {
+                    cmbBatch.setSelectedIndex(0);
+                    txtExpiryDate.setText("");
+                }
+            } else {
+                cmbBatch.setSelectedIndex(0);
+                txtExpiryDate.setText("");
+            }
+        } else {
+            txtMaterial.setText("");
+            txtOrderedQty.setText("");
+            spinReceivedQty.setModel(new SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+            updateSpinnerColor();
+            
+            updateInputsEnabledState(false, null);
+            btnAddToReceipt.setEnabled(false);
+            cmbBatch.setSelectedIndex(0);
+            txtExpiryDate.setText("");
+        }
+    }
+
     private void initTableSelectionListener() {
         tblPOItems.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                int selectedRow = tblPOItems.getSelectedRow();
-                if (selectedRow >= 0 && selectedRow < currentPOItems.size()) {
-                    POItemDTO item = currentPOItems.get(selectedRow);
-                    
-                    // Populate Receipt Details panel
-                    txtMaterial.setText(item.getMaterialCode() + " - " + item.getMaterialDescription());
-                    
-                    // Calculate remaining outstanding quantity taking into account what's already added to receipt summary
-                    double outstanding = item.getOutstandingQuantity();
-                    double alreadyAdded = 0.0;
-                    for (POReceiptItem summaryItem : receiptSummaryList) {
-                        if (summaryItem.getPoItemId().equals(item.getPoItemId())) {
-                            alreadyAdded += summaryItem.getQuantity();
+                if (isProgrammaticSelection) {
+                    return;
+                }
+                
+                // Clear selection of receipt summary when user manually selects PO items to add new items
+                tblReceiptSummary.clearSelection();
+                editingReceiptSummaryIndex = -1;
+                btnUpdateRecieptItem.setEnabled(false);
+                
+                refreshInputsForSelectedPOItem();
+            }
+        });
+        
+        // Selection listener for receipt summary to support editing items
+        tblReceiptSummary.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int[] selectedRows = tblReceiptSummary.getSelectedRows();
+                if (selectedRows.length == 1) {
+                    int selectedRow = selectedRows[0];
+                    if (selectedRow >= 0 && selectedRow < receiptSummaryList.size()) {
+                        editingReceiptSummaryIndex = selectedRow;
+                        POReceiptItem item = receiptSummaryList.get(selectedRow);
+                        
+                        // Find matching PO item
+                        int matchingPOItemRow = -1;
+                        for (int i = 0; i < currentPOItems.size(); i++) {
+                            if (currentPOItems.get(i).getPoItemId().equals(item.getPoItemId())) {
+                                matchingPOItemRow = i;
+                                break;
+                            }
+                        }
+                        
+                        if (matchingPOItemRow >= 0) {
+                            isProgrammaticSelection = true;
+                            tblPOItems.setRowSelectionInterval(matchingPOItemRow, matchingPOItemRow);
+                            isProgrammaticSelection = false;
+                            
+                            POItemDTO poItem = currentPOItems.get(matchingPOItemRow);
+                            txtMaterial.setText(poItem.getMaterialCode() + " - " + poItem.getMaterialDescription());
+                            
+                            // Calculate remaining outstanding quantity taking into account what's already added to receipt summary
+                            double outstanding = poItem.getOutstandingQuantity();
+                            double alreadyAdded = 0.0;
+                            for (int k = 0; k < receiptSummaryList.size(); k++) {
+                                if (k != selectedRow && receiptSummaryList.get(k).getPoItemId().equals(poItem.getPoItemId())) {
+                                    alreadyAdded += receiptSummaryList.get(k).getQuantity();
+                                }
+                            }
+                            double remaining = outstanding - alreadyAdded;
+                            txtOrderedQty.setText(String.format("%.2f", remaining));
+                            
+                            // Setup spinner
+                            SpinnerNumberModel spinnerModel = new SpinnerNumberModel(item.getQuantity(), 0.0, remaining > 0.0 ? remaining : 0.0, 1.0);
+                            spinReceivedQty.setModel(spinnerModel);
+                            updateSpinnerColor();
+                            
+                            updateInputsEnabledState(true, poItem);
+                            
+                            if (poItem.getIsBatchManaged() != null && poItem.getIsBatchManaged()) {
+                                // Set batch combo selection/text
+                                String batchVal = item.getBatchNumber() != null ? item.getBatchNumber() : "";
+                                cmbBatch.setSelectedItem(batchVal);
+                                txtExpiryDate.setText(item.getExpiryDate() != null ? item.getExpiryDate() : "");
+                            } else {
+                                cmbBatch.setSelectedIndex(0);
+                                txtExpiryDate.setText("");
+                            }
+                            
+                            // Set Quality status
+                            String qStatus = item.getQualityStatus();
+                            if ("RELEASED".equals(qStatus)) {
+                                cmbQuality.setSelectedItem("Accepted");
+                            } else if ("DAMAGED".equals(qStatus)) {
+                                cmbQuality.setSelectedItem("Partial Damage");
+                            } else if ("BLOCKED".equals(qStatus)) {
+                                cmbQuality.setSelectedItem("Rejected");
+                            } else {
+                                cmbQuality.setSelectedIndex(0);
+                            }
+                            
+                            // Set receiving bin
+                            for (int i = 1; i < cmbReceivingBin.getItemCount(); i++) {
+                                Object o = cmbReceivingBin.getItemAt(i);
+                                if (o instanceof StorageBinDTO) {
+                                    StorageBinDTO b = (StorageBinDTO) o;
+                                    if (b.getBinId().equals(item.getToBinId())) {
+                                        cmbReceivingBin.setSelectedIndex(i);
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Set remarks (lineNotes)
+                            txtRemarks.setText(item.getLineNotes() != null ? item.getLineNotes() : "");
+                            
+                            btnUpdateRecieptItem.setEnabled(true);
+                            btnAddToReceipt.setEnabled(false);
                         }
                     }
-                    double remaining = outstanding - alreadyAdded;
-                    txtOrderedQty.setText(String.format("%.2f", remaining));
+                } else {
+                    // Either multiple rows or no rows selected
+                    editingReceiptSummaryIndex = -1;
+                    btnUpdateRecieptItem.setEnabled(false);
                     
-                    // Setup spinner
-                    SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, remaining > 0.0 ? remaining : 0.0, 1.0);
-                    spinReceivedQty.setModel(spinnerModel);
+                    refreshInputsForSelectedPOItem();
                     
-                    // Enable/disable batch management fields
-                    boolean isBatch = item.getIsBatchManaged() != null && item.getIsBatchManaged();
-                    cmbBatch.setEnabled(isBatch);
-                    txtExpiryDate.setEnabled(isBatch);
-                    
-                    if (!isBatch) {
+                    if (selectedRows.length > 1) {
+                        // Multiple rows selected: clear detail input fields to prevent confusion
+                        txtMaterial.setText("");
+                        txtOrderedQty.setText("");
+                        spinReceivedQty.setModel(new SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+                        updateSpinnerColor();
+                        cmbBatch.setEnabled(false);
+                        txtExpiryDate.setEnabled(false);
                         cmbBatch.setSelectedIndex(0);
                         txtExpiryDate.setText("");
+                        cmbQuality.setSelectedIndex(0);
+                        cmbReceivingBin.setSelectedIndex(0);
+                        txtRemarks.setText("");
+                        updateInputsEnabledState(false, null);
                     }
-                } else {
-                    // Clear Receipt Details panel
-                    txtMaterial.setText("");
-                    txtOrderedQty.setText("");
-                    spinReceivedQty.setModel(new SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
-                    cmbBatch.setEnabled(false);
-                    txtExpiryDate.setEnabled(false);
                 }
             }
         });
         
-        // Add Delete key listener to tblReceiptSummary to remove selected row
+        // Add Delete key listener to tblReceiptSummary to remove selected row(s)
         tblReceiptSummary.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DELETE) {
-                    int selectedRow = tblReceiptSummary.getSelectedRow();
-                    if (selectedRow >= 0 && selectedRow < receiptSummaryList.size()) {
-                        receiptSummaryList.remove(selectedRow);
+                    int[] selectedRows = tblReceiptSummary.getSelectedRows();
+                    if (selectedRows.length > 0) {
+                        java.util.Arrays.sort(selectedRows);
+                        for (int i = selectedRows.length - 1; i >= 0; i--) {
+                            if (selectedRows[i] >= 0 && selectedRows[i] < receiptSummaryList.size()) {
+                                receiptSummaryList.remove(selectedRows[i]);
+                            }
+                        }
                         refreshReceiptSummaryTable();
+                        tblReceiptSummary.clearSelection();
                         
                         // Force recalculation of remaining qty for currently selected PO item
                         int currentSelection = tblPOItems.getSelectedRow();
@@ -285,6 +438,46 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    private void setupTableRenderers() {
+        javax.swing.table.TableCellRenderer defaultRenderer = tblPOItems.getDefaultRenderer(Object.class);
+        tblPOItems.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                java.awt.Component c = defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (row >= 0 && row < currentPOItems.size()) {
+                    POItemDTO item = currentPOItems.get(row);
+                    double outstanding = item.getOutstandingQuantity();
+                    double alreadyAdded = 0.0;
+                    for (POReceiptItem summaryItem : receiptSummaryList) {
+                        if (summaryItem.getPoItemId().equals(item.getPoItemId())) {
+                            alreadyAdded += summaryItem.getQuantity();
+                        }
+                    }
+                    double remaining = outstanding - alreadyAdded;
+                    if (remaining <= 0) {
+                        c.setForeground(java.awt.Color.GRAY);
+                        java.awt.Font font = c.getFont();
+                        if (font != null) {
+                            c.setFont(font.deriveFont(java.awt.Font.ITALIC));
+                        }
+                    } else {
+                        if (isSelected) {
+                            c.setForeground(table.getSelectionForeground());
+                        } else {
+                            c.setForeground(table.getForeground());
+                        }
+                        java.awt.Font font = c.getFont();
+                        if (font != null) {
+                            c.setFont(font.deriveFont(java.awt.Font.PLAIN));
+                        }
+                    }
+                }
+                return c;
             }
         });
     }
@@ -334,6 +527,8 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 qualityDisplay
             });
         }
+        updatePOItemsTableQuantities();
+        tblPOItems.repaint();
     }
 
     /**
@@ -345,6 +540,13 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanelActions = new javax.swing.JPanel();
+        btnCompleteReceipt = new javax.swing.JButton();
+        btnPrintGR = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
+        jScrollPaneMain = new javax.swing.JScrollPane();
+        jPanelMain = new javax.swing.JPanel();
         jPanelSearch = new javax.swing.JPanel();
         lblPONumber = new javax.swing.JLabel();
         txtPONumber = new javax.swing.JTextField();
@@ -384,17 +586,71 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         lblRemarks = new javax.swing.JLabel();
         btnAddToReceipt = new javax.swing.JButton();
         txtRemarks = new javax.swing.JTextField();
+        btnRemoveRecieptItem = new javax.swing.JButton();
+        btnUpdateRecieptItem = new javax.swing.JButton();
         jScrollPaneReceiptSummary = new javax.swing.JScrollPane();
         tblReceiptSummary = new javax.swing.JTable();
-        jPanelActions = new javax.swing.JPanel();
-        btnCompleteReceipt = new javax.swing.JButton();
-        btnPrintGR = new javax.swing.JButton();
-        btnCancel = new javax.swing.JButton();
-        txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Goods Receipt - Purchase Order (IN11)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnCompleteReceipt.setText(" Complete Receipt");
+        btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompleteReceiptActionPerformed(evt);
+            }
+        });
+
+        btnPrintGR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrintGR.setText(" Print GR");
+        btnPrintGR.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintGRActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        btnCancel.setText(" Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
+        jPanelActions.setLayout(jPanelActionsLayout);
+        jPanelActionsLayout.setHorizontalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(btnPrintGR, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelActionsLayout.setVerticalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnCompleteReceipt)
+                        .addComponent(btnPrintGR)
+                        .addComponent(btnCancel)))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Purchase Order"));
 
@@ -403,9 +659,14 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         lblVendorFilter.setText("Vendor");
 
         cmbVendor.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- All Vendors --" }));
+        cmbVendor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbVendorActionPerformed(evt);
+            }
+        });
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
-        btnSearch.setText("Search");
+        btnSearch.setText(" Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchActionPerformed(evt);
@@ -511,16 +772,17 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                     .addComponent(lblPODate)
                     .addComponent(txtPODate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(10, 10, 10)
-                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblVendorName)
-                    .addComponent(txtVendorName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblVendorCode)
-                    .addComponent(txtVendorCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblAddress)
                         .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblContactPerson)
-                        .addComponent(txtContactPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtContactPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblVendorName)
+                        .addComponent(txtVendorName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblVendorCode)
+                        .addComponent(txtVendorCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -566,8 +828,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         lblReceivingBin.setText("Receiving Bin");
 
-        cmbReceivingBin.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Bin --" }));
-
         lblQuality.setText("Quality");
 
         cmbQuality.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Quality --", "Accepted", "Partial Damage", "Rejected" }));
@@ -579,6 +839,20 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         btnAddToReceipt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddToReceiptActionPerformed(evt);
+            }
+        });
+
+        btnRemoveRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveRecieptItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveRecieptItemActionPerformed(evt);
+            }
+        });
+
+        btnUpdateRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateRecieptItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateRecieptItemActionPerformed(evt);
             }
         });
 
@@ -619,42 +893,49 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                         .addGap(21, 21, 21)))
                 .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
-                        .addComponent(btnAddToReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
                         .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 77, Short.MAX_VALUE)
                         .addComponent(lblExpiryDate)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
+                        .addComponent(btnAddToReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanelReceiptDetailsLayout.setVerticalGroup(
             jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblMaterial)
-                    .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblOrderedQty)
-                    .addComponent(txtOrderedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblReceivedQty)
-                    .addComponent(spinReceivedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblBatchNumber)
-                    .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblExpiryDate)
-                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblMaterial)
+                        .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblOrderedQty)
+                        .addComponent(txtOrderedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblReceivedQty)
+                        .addComponent(spinReceivedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblBatchNumber)
+                        .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
-                .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblReceivingBin)
-                    .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblQuality)
-                    .addComponent(cmbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnAddToReceipt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblRemarks)
-                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnAddToReceipt)))
+                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblReceivingBin)
+                        .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblQuality)
+                        .addComponent(cmbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
@@ -679,93 +960,51 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         tblReceiptSummary.getTableHeader().setReorderingAllowed(false);
         jScrollPaneReceiptSummary.setViewportView(tblReceiptSummary);
 
-        jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteReceipt.setText("Complete Receipt");
-        btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteReceiptActionPerformed(evt);
-            }
-        });
-
-        btnPrintGR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintGR.setText("Print GR");
-        btnPrintGR.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintGRActionPerformed(evt);
-            }
-        });
-
-        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
-        btnCancel.setText("Cancel");
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelActionPerformed(evt);
-            }
-        });
-
-        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
-        jPanelActions.setLayout(jPanelActionsLayout);
-        jPanelActionsLayout.setHorizontalGroup(
-            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelActionsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnPrintGR, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
-                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 640, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        jPanelActionsLayout.setVerticalGroup(
-            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelActionsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCompleteReceipt)
-                    .addComponent(btnPrintGR)
-                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCancel))
-                .addContainerGap(10, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelMainLayout = new javax.swing.GroupLayout(jPanelMain);
+        jPanelMain.setLayout(jPanelMainLayout);
+        jPanelMainLayout.setHorizontalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanelSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanelPODetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPanePOItems)
                     .addComponent(jPanelReceiptDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPaneReceiptSummary)
-                    .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPaneReceiptSummary))
                 .addContainerGap())
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+        jPanelMainLayout.setVerticalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMainLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanelSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelPODetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPanePOItems, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPanePOItems, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jPanelReceiptDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneReceiptSummary, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPaneReceiptSummary, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+        );
+
+        jScrollPaneMain.setViewportView(jPanelMain);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1255, Short.MAX_VALUE)
+            .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -774,7 +1013,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     private void btnAddToReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToReceiptActionPerformed
         int selectedRow = tblPOItems.getSelectedRow();
         if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(this, "Please select an item from the PO Items table first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please select an item from the PO Items table first.");
             return;
         }
         
@@ -783,7 +1022,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         // Read quantity
         double qty = ((Number) spinReceivedQty.getValue()).doubleValue();
         if (qty <= 0) {
-            JOptionPane.showMessageDialog(this, "Please enter a received quantity greater than 0.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a received quantity greater than 0.");
             return;
         }
         
@@ -797,13 +1036,13 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
         double remaining = outstanding - alreadyAdded;
         if (qty > remaining) {
-            JOptionPane.showMessageDialog(this, String.format("Entered quantity (%.2f) exceeds remaining outstanding quantity (%.2f) for this item.", qty, remaining), "Error", JOptionPane.ERROR_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, String.format("Entered quantity (%.2f) exceeds remaining outstanding quantity (%.2f) for this item.", qty, remaining));
             return;
         }
         
         // Read bin selection
         if (cmbReceivingBin.getSelectedIndex() <= 0) {
-            JOptionPane.showMessageDialog(this, "Please select a destination receiving bin.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination receiving bin.");
             return;
         }
         StorageBinDTO selectedBin = (StorageBinDTO) cmbReceivingBin.getSelectedItem();
@@ -814,7 +1053,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         if (poItem.getIsBatchManaged() != null && poItem.getIsBatchManaged()) {
             Object batchObj = cmbBatch.getSelectedItem();
             if (batchObj == null || batchObj.toString().trim().isEmpty() || batchObj.toString().equals("-- Select Batch --")) {
-                JOptionPane.showMessageDialog(this, "Batch number is required for batch-managed material.", "Warning", JOptionPane.WARNING_MESSAGE);
+                StatusMessageHandler.showWarning(txtStatus, "Batch number is required for batch-managed material.");
                 return;
             }
             batchNum = batchObj.toString().trim();
@@ -876,12 +1115,12 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
     private void btnCompleteReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteReceiptActionPerformed
         if (selectedPO == null) {
-            JOptionPane.showMessageDialog(this, "Please load a Purchase Order first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Purchase Order first.");
             return;
         }
         
         if (receiptSummaryList.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "The receipt summary is empty. Please add items first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "The receipt summary is empty. Please add items first.");
             return;
         }
         
@@ -929,15 +1168,145 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
     private void btnPrintGRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintGRActionPerformed
         if (selectedPO == null) {
-            JOptionPane.showMessageDialog(this, "Please load a Purchase Order first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Purchase Order first.");
             return;
         }
-        JOptionPane.showMessageDialog(this, "Printing Goods Receipt feature is not implemented yet.", "Print", JOptionPane.INFORMATION_MESSAGE);
+        StatusMessageHandler.showInfo(txtStatus, "Printing Goods Receipt feature is not implemented yet.");
     }//GEN-LAST:event_btnPrintGRActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void cmbVendorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbVendorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbVendorActionPerformed
+
+    private void btnUpdateRecieptItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateRecieptItemActionPerformed
+        if (editingReceiptSummaryIndex < 0 || editingReceiptSummaryIndex >= receiptSummaryList.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select an item from the Receipt Summary to update.");
+            return;
+        }
+        
+        int selectedRow = tblPOItems.getSelectedRow();
+        if (selectedRow < 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a matching PO item first.");
+            return;
+        }
+        POItemDTO poItem = currentPOItems.get(selectedRow);
+        
+        // Read quantity
+        double qty = ((Number) spinReceivedQty.getValue()).doubleValue();
+        if (qty <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a received quantity greater than 0.");
+            return;
+        }
+        
+        // Calculate remaining outstanding quantity excluding this item
+        double outstanding = poItem.getOutstandingQuantity();
+        double alreadyAdded = 0.0;
+        for (int k = 0; k < receiptSummaryList.size(); k++) {
+            if (k != editingReceiptSummaryIndex && receiptSummaryList.get(k).getPoItemId().equals(poItem.getPoItemId())) {
+                alreadyAdded += receiptSummaryList.get(k).getQuantity();
+            }
+        }
+        double remaining = outstanding - alreadyAdded;
+        if (qty > remaining) {
+            StatusMessageHandler.showWarning(txtStatus, String.format("Entered quantity (%.2f) exceeds remaining outstanding quantity (%.2f) for this item.", qty, remaining));
+            return;
+        }
+        
+        // Read bin selection
+        if (cmbReceivingBin.getSelectedIndex() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination receiving bin.");
+            return;
+        }
+        StorageBinDTO selectedBin = (StorageBinDTO) cmbReceivingBin.getSelectedItem();
+        
+        // Read batch if managed
+        String batchNum = "";
+        String expiry = "";
+        if (poItem.getIsBatchManaged() != null && poItem.getIsBatchManaged()) {
+            Object batchObj = cmbBatch.getSelectedItem();
+            if (batchObj == null || batchObj.toString().trim().isEmpty() || batchObj.toString().equals("-- Select Batch --")) {
+                StatusMessageHandler.showWarning(txtStatus, "Batch number is required for batch-managed material.");
+                return;
+            }
+            batchNum = batchObj.toString().trim();
+            expiry = txtExpiryDate.getText().trim();
+        }
+        
+        // Quality
+        String qualityStatus = "RELEASED";
+        if (cmbQuality.getSelectedIndex() > 0) {
+            String selectedQuality = cmbQuality.getSelectedItem().toString();
+            if ("Accepted".equalsIgnoreCase(selectedQuality)) {
+                qualityStatus = "RELEASED";
+            } else if ("Partial Damage".equalsIgnoreCase(selectedQuality)) {
+                qualityStatus = "DAMAGED";
+            } else if ("Rejected".equalsIgnoreCase(selectedQuality)) {
+                qualityStatus = "BLOCKED";
+            }
+        }
+        
+        // Remarks / line notes
+        String remarks = txtRemarks.getText().trim();
+        
+        // Update the item
+        POReceiptItem receiptItem = receiptSummaryList.get(editingReceiptSummaryIndex);
+        receiptItem.setQuantity(qty);
+        receiptItem.setToBinId(selectedBin.getBinId());
+        receiptItem.setBatchNumber(batchNum.isEmpty() ? null : batchNum);
+        receiptItem.setExpiryDate(expiry.isEmpty() ? null : expiry);
+        receiptItem.setQualityStatus(qualityStatus);
+        receiptItem.setLineNotes(remarks.isEmpty() ? null : remarks);
+        
+        // Refresh table
+        refreshReceiptSummaryTable();
+        
+        // Clear selection
+        tblReceiptSummary.clearSelection();
+        
+        // Reset inputs
+        spinReceivedQty.setValue(0.0);
+        cmbBatch.setSelectedIndex(0);
+        txtExpiryDate.setText("");
+        txtRemarks.setText("");
+        
+        // Force refresh PO item remaining qty displays
+        tblPOItems.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+        
+        StatusMessageHandler.showSuccess(txtStatus, "Item updated in receipt summary.");
+    }//GEN-LAST:event_btnUpdateRecieptItemActionPerformed
+
+    private void btnRemoveRecieptItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveRecieptItemActionPerformed
+        int[] selectedRows = tblReceiptSummary.getSelectedRows();
+        if (selectedRows.length == 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select item(s) from the Receipt Summary to remove.");
+            return;
+        }
+        
+        java.util.Arrays.sort(selectedRows);
+        for (int i = selectedRows.length - 1; i >= 0; i--) {
+            if (selectedRows[i] >= 0 && selectedRows[i] < receiptSummaryList.size()) {
+                receiptSummaryList.remove(selectedRows[i]);
+            }
+        }
+        
+        // Refresh table
+        refreshReceiptSummaryTable();
+        
+        // Clear selection
+        tblReceiptSummary.clearSelection();
+        
+        // Force recalculation of remaining qty for currently selected PO item
+        int currentSelection = tblPOItems.getSelectedRow();
+        if (currentSelection >= 0) {
+            tblPOItems.getSelectionModel().setSelectionInterval(currentSelection, currentSelection);
+        }
+        
+        StatusMessageHandler.showSuccess(txtStatus, "Selected item(s) removed from receipt summary.");
+    }//GEN-LAST:event_btnRemoveRecieptItemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -971,20 +1340,149 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         });
     }
 
+    private java.awt.Color originalSpinnerForeground;
+    private java.awt.Color originalSpinnerBackground;
+    private java.awt.Color originalSpinnerContainerBackground;
+
+    private final javax.swing.event.DocumentListener spinnerDocListener = new javax.swing.event.DocumentListener() {
+        @Override
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            updateSpinnerColor();
+        }
+
+        @Override
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            updateSpinnerColor();
+        }
+
+        @Override
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            updateSpinnerColor();
+        }
+    };
+
+    private javax.swing.JTextField getSpinnerTextField() {
+        javax.swing.JComponent editor = spinReceivedQty.getEditor();
+        if (editor instanceof javax.swing.JSpinner.DefaultEditor) {
+            return ((javax.swing.JSpinner.DefaultEditor) editor).getTextField();
+        }
+        return null;
+    }
+
+    private void attachDocumentListenerToSpinner() {
+        javax.swing.JTextField textField = getSpinnerTextField();
+        if (textField != null) {
+            textField.getDocument().removeDocumentListener(spinnerDocListener);
+            textField.getDocument().addDocumentListener(spinnerDocListener);
+            
+            if (originalSpinnerForeground == null) {
+                originalSpinnerForeground = textField.getForeground();
+            }
+            if (originalSpinnerBackground == null) {
+                originalSpinnerBackground = textField.getBackground();
+            }
+            if (originalSpinnerContainerBackground == null) {
+                originalSpinnerContainerBackground = spinReceivedQty.getBackground();
+            }
+        }
+    }
+
+    private double parseSpinnerValue(javax.swing.JTextField textField, javax.swing.JSpinner spinner) {
+        String text = textField.getText().trim();
+        if (text.isEmpty()) {
+            Object value = spinner.getValue();
+            return value instanceof Number ? ((Number) value).doubleValue() : 0.0;
+        }
+        
+        if (textField instanceof javax.swing.JFormattedTextField) {
+            javax.swing.JFormattedTextField ftf = (javax.swing.JFormattedTextField) textField;
+            javax.swing.JFormattedTextField.AbstractFormatter formatter = ftf.getFormatter();
+            if (formatter != null) {
+                try {
+                    Object val = formatter.stringToValue(text);
+                    if (val instanceof Number) {
+                        return ((Number) val).doubleValue();
+                    }
+                } catch (java.text.ParseException e) {
+                    // ignore and try fallbacks
+                }
+            }
+        }
+        
+        try {
+            java.text.NumberFormat nf = java.text.NumberFormat.getInstance();
+            return nf.parse(text).doubleValue();
+        } catch (java.text.ParseException e) {
+            // ignore and try fallback
+        }
+        
+        try {
+            return Double.parseDouble(text.replace(",", ""));
+        } catch (NumberFormatException e) {
+            // ignore and try fallback
+        }
+        
+        Object value = spinner.getValue();
+        return value instanceof Number ? ((Number) value).doubleValue() : 0.0;
+    }
+
+    private void updateSpinnerColor() {
+        javax.swing.JTextField textField = getSpinnerTextField();
+        if (textField == null) {
+            return;
+        }
+        
+        int selectedRow = tblPOItems.getSelectedRow();
+        double remaining = 0.0;
+        if (selectedRow >= 0 && selectedRow < currentPOItems.size()) {
+            POItemDTO poItem = currentPOItems.get(selectedRow);
+            double outstanding = poItem.getOutstandingQuantity();
+            double alreadyAdded = 0.0;
+            for (int k = 0; k < receiptSummaryList.size(); k++) {
+                if (k != editingReceiptSummaryIndex && receiptSummaryList.get(k).getPoItemId().equals(poItem.getPoItemId())) {
+                    alreadyAdded += receiptSummaryList.get(k).getQuantity();
+                }
+            }
+            remaining = outstanding - alreadyAdded;
+        }
+        
+        double qty = parseSpinnerValue(textField, spinReceivedQty);
+        
+        if (qty > remaining) {
+            textField.setForeground(java.awt.Color.RED);
+            textField.setBackground(new java.awt.Color(255, 204, 204));
+            spinReceivedQty.setBackground(new java.awt.Color(255, 204, 204));
+        } else {
+            if (originalSpinnerForeground != null) {
+                textField.setForeground(originalSpinnerForeground);
+            }
+            if (originalSpinnerBackground != null) {
+                textField.setBackground(originalSpinnerBackground);
+            }
+            if (originalSpinnerContainerBackground != null) {
+                spinReceivedQty.setBackground(originalSpinnerContainerBackground);
+            }
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToReceipt;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCompleteReceipt;
     private javax.swing.JButton btnPrintGR;
+    private javax.swing.JButton btnRemoveRecieptItem;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdateRecieptItem;
     private javax.swing.JComboBox cmbBatch;
     private javax.swing.JComboBox cmbQuality;
     private javax.swing.JComboBox cmbReceivingBin;
     private javax.swing.JComboBox cmbVendor;
     private javax.swing.JPanel jPanelActions;
+    private javax.swing.JPanel jPanelMain;
     private javax.swing.JPanel jPanelPODetails;
     private javax.swing.JPanel jPanelReceiptDetails;
     private javax.swing.JPanel jPanelSearch;
+    private javax.swing.JScrollPane jScrollPaneMain;
     private javax.swing.JScrollPane jScrollPanePOItems;
     private javax.swing.JScrollPane jScrollPaneReceiptSummary;
     private javax.swing.JLabel lblAddress;

@@ -47,10 +47,10 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jPanelDetails" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jScrollPaneTable" pref="204" max="32767" attributes="0"/>
+              <Component id="jScrollPaneTable" pref="239" max="32767" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jPanelActions" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -74,7 +74,7 @@
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="txtTONumber" min="-2" pref="230" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnLoadTO" min="-2" pref="160" max="-2" attributes="0"/>
+                  <Component id="btnLoadTO" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -106,7 +106,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/btnicn/load-14.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Load Transfer Order"/>
+            <Property name="text" type="java.lang.String" value=" Load"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoadTOActionPerformed"/>
@@ -149,7 +149,7 @@
                       <Component id="txtToWarehouse" alignment="0" min="-2" pref="200" max="-2" attributes="0"/>
                       <Component id="txtActualReceiptDate" alignment="0" min="-2" pref="200" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="40" max="32767" attributes="0"/>
+                  <EmptySpace pref="163" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -271,16 +271,14 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                  <Component id="btnReceiveGoods" min="-2" pref="130" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                  <Component id="btnPartialReceipt" min="-2" pref="130" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                  <Component id="btnCompleteReceipt" min="-2" pref="152" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Component id="btnPartialReceipt" min="-2" pref="130" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="btnCompleteReceipt" min="-2" pref="152" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                   <Component id="btnCancel" min="-2" pref="100" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
-                  <Component id="txtStatus" pref="166" max="32767" attributes="0"/>
+                  <EmptySpace pref="73" max="32767" attributes="0"/>
+                  <Component id="txtStatus" min="-2" pref="400" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -291,7 +289,6 @@
                   <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                          <Component id="btnReceiveGoods" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnPartialReceipt" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnCompleteReceipt" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnCancel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -304,17 +301,12 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="btnReceiveGoods">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Receive Goods"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnReceiveGoodsActionPerformed"/>
-          </Events>
-        </Component>
         <Component class="javax.swing.JButton" name="btnPartialReceipt">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Partial Receipt"/>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/btnicn/incomplete-14.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value=" Partial Receipt"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPartialReceiptActionPerformed"/>
@@ -325,7 +317,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/btnicn/done-14.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Complete Receipt"/>
+            <Property name="text" type="java.lang.String" value=" Complete Receipt"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCompleteReceiptActionPerformed"/>
@@ -336,7 +328,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/btnicn/cancel-14.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Cancel"/>
+            <Property name="text" type="java.lang.String" value=" Cancel"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCancelActionPerformed"/>

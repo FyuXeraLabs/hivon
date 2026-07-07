@@ -408,6 +408,7 @@ sales_orders {
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 }
+
 ```
 
 **Purpose:** Sales orders from sales team (PHP API)

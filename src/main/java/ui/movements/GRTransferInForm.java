@@ -65,14 +65,13 @@ public class GRTransferInForm extends javax.swing.JFrame {
         jScrollPaneTable = new javax.swing.JScrollPane();
         tblTOItems = new javax.swing.JTable();
         jPanelActions = new javax.swing.JPanel();
-        btnReceiveGoods = new javax.swing.JButton();
         btnPartialReceipt = new javax.swing.JButton();
         btnCompleteReceipt = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Goods Receipt - Transfer In");
+        setTitle("Goods Receipt - Transfer In (IN12)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Transfer Order"));
@@ -80,7 +79,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         lblTONumber.setText("Transfer Order Number");
 
         btnLoadTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/load-14.png"))); // NOI18N
-        btnLoadTO.setText("Load Transfer Order");
+        btnLoadTO.setText(" Load");
         btnLoadTO.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLoadTOActionPerformed(evt);
@@ -97,7 +96,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtTONumber, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnLoadTO, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnLoadTO)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelSearchLayout.setVerticalGroup(
@@ -154,7 +153,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtToWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtActualReceiptDate, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(163, Short.MAX_VALUE))
         );
         jPanelDetailsLayout.setVerticalGroup(
             jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,14 +200,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        btnReceiveGoods.setText("Receive Goods");
-        btnReceiveGoods.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnReceiveGoodsActionPerformed(evt);
-            }
-        });
-
-        btnPartialReceipt.setText("Partial Receipt");
+        btnPartialReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/incomplete-14.png"))); // NOI18N
+        btnPartialReceipt.setText(" Partial Receipt");
         btnPartialReceipt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPartialReceiptActionPerformed(evt);
@@ -216,7 +209,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         });
 
         btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteReceipt.setText("Complete Receipt");
+        btnCompleteReceipt.setText(" Complete Receipt");
         btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCompleteReceiptActionPerformed(evt);
@@ -224,7 +217,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         });
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
-        btnCancel.setText("Cancel");
+        btnCancel.setText(" Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelActionPerformed(evt);
@@ -241,16 +234,14 @@ public class GRTransferInForm extends javax.swing.JFrame {
         jPanelActionsLayout.setHorizontalGroup(
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(btnReceiveGoods, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addContainerGap()
                 .addComponent(btnPartialReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(48, 48, 48)
-                .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanelActionsLayout.setVerticalGroup(
@@ -259,7 +250,6 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addGap(10, 10, 10)
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnReceiveGoods)
                         .addComponent(btnPartialReceipt)
                         .addComponent(btnCompleteReceipt)
                         .addComponent(btnCancel))
@@ -288,18 +278,14 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                .addComponent(jScrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnReceiveGoodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReceiveGoodsActionPerformed
-        submitGoodsReceipt(false);
-    }//GEN-LAST:event_btnReceiveGoodsActionPerformed
 
     private void btnPartialReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPartialReceiptActionPerformed
         submitGoodsReceipt(true);
@@ -546,7 +532,6 @@ public class GRTransferInForm extends javax.swing.JFrame {
     private javax.swing.JButton btnCompleteReceipt;
     private javax.swing.JButton btnLoadTO;
     private javax.swing.JButton btnPartialReceipt;
-    private javax.swing.JButton btnReceiveGoods;
     private javax.swing.JPanel jPanelActions;
     private javax.swing.JPanel jPanelDetails;
     private javax.swing.JPanel jPanelSearch;

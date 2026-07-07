@@ -236,6 +236,8 @@ public class GRCustomerReturnsDAO {
         }
         if (json.has("uom") && !json.get("uom").isJsonNull()) {
             dto.setUom(json.get("uom").getAsString());
+        } else if (json.has("base_uom") && !json.get("base_uom").isJsonNull()) {
+            dto.setUom(json.get("base_uom").getAsString());
         }
         if (json.has("is_batch_managed") && !json.get("is_batch_managed").isJsonNull()) {
             dto.setIsBatchManaged(json.get("is_batch_managed").getAsBoolean());
