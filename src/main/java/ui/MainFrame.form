@@ -146,10 +146,12 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" pref="451" max="-2" attributes="0"/>
-                      <Component id="jPanel5" pref="405" max="32767" attributes="0"/>
+                      <Component id="jPanel5" pref="415" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
+                      <Component id="jButton1" min="-2" pref="99" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jButton3" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnUser" min="-2" pref="140" max="-2" attributes="0"/>
@@ -166,7 +168,7 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="btnConfirm" alignment="1" min="-2" pref="28" max="-2" attributes="0"/>
                   <Component id="cmbMovement" alignment="1" min="-2" pref="28" max="-2" attributes="0"/>
@@ -174,6 +176,7 @@
                       <Component id="jButton3" alignment="3" min="-2" pref="28" max="-2" attributes="0"/>
                       <Component id="btnUser" alignment="3" min="-2" pref="28" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="jButton1" min="-2" pref="30" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -294,12 +297,15 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="txtStatus" alignment="0" max="32767" attributes="0"/>
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="txtStatus" min="-2" pref="399" max="-2" attributes="0"/>
+              </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="txtStatus" alignment="1" pref="22" max="32767" attributes="0"/>
+              <Component id="txtStatus" alignment="1" min="-2" pref="22" max="-2" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -466,7 +472,7 @@
               <Color blue="69" green="55" red="47" type="rgb"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="2"/>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt; &lt;div style=&apos;width:250px&apos;&gt; Hivon is a secure, enterprise-grade warehouse management platform designed to optimize daily stock tracking, streamline goods movements, and maintain accurate inventory control across physical locations. &lt;/div&gt; &lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt; &lt;div style=&apos;width:250px&apos;&gt;      Hivon is a secure, enterprise-grade warehouse management platform designed to optimize daily stock tracking, streamline goods movements, and maintain accurate inventory control across physical locations. &lt;/div&gt; &lt;/html&gt;"/>
             <Property name="verticalAlignment" type="int" value="1"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="2"/>
@@ -475,7 +481,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="btnWhatsNewToggle">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;What&apos;s new&lt;/b&gt;&lt;br&gt;&lt;font size=&apos;2&apos; color=&apos;#64748B&apos;&gt;Latest updates in Hivon WMS&lt;/font&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&#xa;&lt;div style=&quot;text-align:center;&quot;&gt;&#xa;    &lt;b&gt;What&apos;s new&lt;/b&gt;&lt;br&gt;&#xa;    &lt;font size=&quot;2&quot; color=&quot;#64748B&quot;&gt;Latest updates in Hivon WMS&lt;/font&gt;&#xa;&lt;/div&gt;&#xa;&lt;/html&gt;"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
           </Properties>
           <Events>
@@ -493,7 +499,7 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblUpdate1Title" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblUpdate1Desc" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -502,7 +508,7 @@
                           <Component id="lblUpdate3Title" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblUpdate3Desc" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="10" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -613,12 +619,12 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblCap1Title" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblCap1Desc" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="10" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -672,12 +678,12 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblCap2Title" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblCap2Desc" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="10" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -731,12 +737,12 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblCap3Title" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblCap3Desc" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="10" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -790,12 +796,12 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblCap4Title" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblCap4Desc" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="10" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -835,5 +841,16 @@
         </Container>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="jButton1">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/btnicn/settings-14.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value=" Settings"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

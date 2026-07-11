@@ -1156,6 +1156,12 @@ public class UserManagementForm extends javax.swing.JFrame {
         userDto.setEmail(txtEmail.getText().trim());
         userDto.setRole(cmbRole.getSelectedItem().toString());
 
+        final List<String> permissions = new ArrayList<>();
+        javax.swing.DefaultListModel<String> assignedModel = (javax.swing.DefaultListModel<String>) lstAssignedPermissions.getModel();
+        for (int i = 0; i < assignedModel.getSize(); i++) {
+            permissions.add(assignedModel.getElementAt(i));
+        }
+
         // create background task
         BackgroundTask task = new BackgroundTask(this, "Creating User") {
 
@@ -1168,7 +1174,7 @@ public class UserManagementForm extends javax.swing.JFrame {
                 UserManagementController controller = new UserManagementController();
 
                 updateProgress("Creating user in database...");
-                userId = controller.createUser(userDto, password);
+                userId = controller.createUser(userDto, password, permissions);
 
                 return userId > 0;
             }
@@ -1489,10 +1495,12 @@ public class UserManagementForm extends javax.swing.JFrame {
 
     private void cmbRoleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbRoleItemStateChanged
         // TODO add your handling code here:
-        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED && isAddMode) {
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
             String selectedRole = (String) cmbRole.getSelectedItem();
             if (selectedRole != null) {
-                populateDefaultPermissionsForRole(selectedRole);
+                if (isAddMode || (selectedUser != null && !selectedRole.equals(selectedUser.getRole()))) {
+                    populateDefaultPermissionsForRole(selectedRole);
+                }
             }
         }
     }//GEN-LAST:event_cmbRoleItemStateChanged

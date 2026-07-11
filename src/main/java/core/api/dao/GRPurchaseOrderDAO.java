@@ -77,11 +77,22 @@ public class GRPurchaseOrderDAO {
         public void setLineNotes(String lineNotes) { this.lineNotes = lineNotes; }
     }
 
-    // GET /api/movements/goods-receipt/po/search?status={status}
+    // GET /api/movements/goods-receipt/po/search?status={status}&q={query}
     public List<PurchaseOrderDTO> searchPurchaseOrders(String status) throws Exception {
+        return searchPurchaseOrders(status, null);
+    }
+
+    public List<PurchaseOrderDTO> searchPurchaseOrders(String status, String query) throws Exception {
         String endpoint = "/movements/goods-receipt/po/search";
+        List<String> queryParams = new ArrayList<>();
         if (status != null && !status.trim().isEmpty()) {
-            endpoint += "?status=" + java.net.URLEncoder.encode(status, "UTF-8");
+            queryParams.add("status=" + java.net.URLEncoder.encode(status, "UTF-8"));
+        }
+        if (query != null && !query.trim().isEmpty()) {
+            queryParams.add("q=" + java.net.URLEncoder.encode(query, "UTF-8"));
+        }
+        if (!queryParams.isEmpty()) {
+            endpoint += "?" + String.join("&", queryParams);
         }
 
         HttpRequest request = apiClient.authRequest(endpoint).GET().build();

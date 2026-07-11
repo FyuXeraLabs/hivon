@@ -38,9 +38,20 @@ public class CustomerDAO {
     }
 
     public List<CustomerDTO> getCustomers(String searchTerm) throws Exception {
+        return getCustomers(searchTerm, false);
+    }
+
+    public List<CustomerDTO> getCustomers(String searchTerm, boolean includeSO) throws Exception {
         String endpoint = ApiConfig.CUSTOMERS;
+        List<String> queryParams = new ArrayList<>();
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            endpoint += "?q=" + java.net.URLEncoder.encode(searchTerm, "UTF-8");
+            queryParams.add("q=" + java.net.URLEncoder.encode(searchTerm, "UTF-8"));
+        }
+        if (includeSO) {
+            queryParams.add("include_so=true");
+        }
+        if (!queryParams.isEmpty()) {
+            endpoint += "?" + String.join("&", queryParams);
         }
 
         HttpRequest request = apiClient.authRequest(endpoint).GET().build();

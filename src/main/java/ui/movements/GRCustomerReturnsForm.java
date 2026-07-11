@@ -16,6 +16,7 @@ import core.api.dao.GRCustomerReturnsDAO.CustomerReturnItem;
 import movements.controllers.GRCustomerReturnsController;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
+import ui.components.AutoSuggestTextField;
 import core.logging.Logger;
 import core.security.UserSession;
 import javax.swing.ImageIcon;
@@ -33,27 +34,63 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     private GRCustomerReturnsController controller;
     private List<SalesOrderItemDTO> currentSOItems = new ArrayList<>();
     private List<CustomerReturnItem> returnSummaryList = new ArrayList<>();
+    private int editingReturnSummaryIndex = -1;
+    private boolean isProgrammaticSelection = false;
 
     /**
      * Creates new form GRCustomerReturnsForm
      */
     public GRCustomerReturnsForm() {
         initComponents();
+        btnUpdateRecieptItem.setEnabled(false); // Disable update button initially
+        tblReturnSummary.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new GRCustomerReturnsController();
         
-        // Add listeners to quality radio buttons to dynamically determine bin
-        rdbQualityStatus.addActionListener(e -> determineBinByQuality());
-        rdbQualityDamaged.addActionListener(e -> determineBinByQuality());
-        rdbQualityPartialDamage.addActionListener(e -> determineBinByQuality());
-        rdbQualityDefective.addActionListener(e -> determineBinByQuality());
+        // Add listener to quality combo box to dynamically determine bin
+        cmbQualityStatus.addActionListener(e -> determineBinByQuality());
         
         initTableSelectionListener();
+        setupTableRenderers();
         loadReceivingBins();
         
-        // Set default return date
+        // set default return date
         txtReturnDate.setText(java.time.LocalDate.now().toString());
+
+        // initialize spinner listeners for color changes
+        attachDocumentListenerToSpinner();
+        spinReturnQty.addChangeListener(e -> updateSpinnerColor());
+        spinReturnQty.addPropertyChangeListener("editor", evt -> attachDocumentListenerToSpinner());
+
+        // Initialize customer name suggestions (includes names from customers & sales_orders tables)
+        AutoSuggestTextField.attach(txtCustomerName, query -> {
+            try {
+                return controller.searchCustomers(query);
+            } catch (Exception e) {
+                Logger.errlog("Failed to load customer suggestions", e);
+                return new ArrayList<>();
+            }
+        });
+
+        // Initialize SO number suggestions
+        AutoSuggestTextField.attach(txtSONumber, query -> {
+            try {
+                List<SalesOrderDTO> sos = controller.searchSalesOrders(query);
+                List<String> suggestions = new ArrayList<>();
+                if (sos != null) {
+                    for (SalesOrderDTO so : sos) {
+                        if (so.getSoNumber() != null) {
+                            suggestions.add(so.getSoNumber());
+                        }
+                    }
+                }
+                return suggestions;
+            } catch (Exception e) {
+                Logger.errlog("Failed to load SO number suggestions", e);
+                return new ArrayList<>();
+            }
+        });
     }
 
     // loads active receiving bins for the user's warehouse
@@ -197,6 +234,57 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         task.executeWithDialog();
     }
 
+    // searches and displays open sales orders for selection
+    private void searchOpenSalesOrders() {
+        BackgroundTask task = new BackgroundTask(this, "Searching Open SOs") {
+            private List<SalesOrderDTO> openSOs;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching for open sales orders...");
+                openSOs = controller.searchSalesOrders("", "OPEN");
+                return openSOs != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (openSOs == null || openSOs.isEmpty()) {
+                    StatusMessageHandler.showInfo(txtStatus, "No open Sales Orders found.");
+                    return;
+                }
+                
+                String[] soNumbers = openSOs.stream().map(SalesOrderDTO::getSoNumber).toArray(String[]::new);
+                
+                javax.swing.JComboBox<String> cmbOpenSOs = new javax.swing.JComboBox<>(soNumbers);
+                cmbOpenSOs.setSelectedIndex(0);
+                
+                javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.BorderLayout(5, 5));
+                panel.add(new javax.swing.JLabel("Select an Open Sales Order:"), java.awt.BorderLayout.NORTH);
+                panel.add(cmbOpenSOs, java.awt.BorderLayout.CENTER);
+                
+                int result = JOptionPane.showConfirmDialog(GRCustomerReturnsForm.this, 
+                    panel, 
+                    "Open Sales Orders", 
+                    JOptionPane.OK_CANCEL_OPTION, 
+                    JOptionPane.QUESTION_MESSAGE);
+                    
+                if (result == JOptionPane.OK_OPTION) {
+                    String selected = (String) cmbOpenSOs.getSelectedItem();
+                    if (selected != null) {
+                        txtSONumber.setText(selected);
+                        loadSalesOrderDetails(selected);
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Search failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
     // loads and displays SO details including items
     private void loadSalesOrderDetails(String soNumber) {
         BackgroundTask task = new BackgroundTask(this, "Loading SO Details") {
@@ -257,48 +345,196 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                 item.getUom()
             });
         }
+        updateSOItemsTableQuantities();
+    }
+
+    private void updateSOItemsTableQuantities() {
+        DefaultTableModel model = (DefaultTableModel) tblSOItems.getModel();
+        for (int i = 0; i < currentSOItems.size(); i++) {
+            SalesOrderItemDTO item = currentSOItems.get(i);
+            double outstanding = item.getOutstandingQuantity();
+            double alreadyAdded = 0.0;
+            for (CustomerReturnItem summaryItem : returnSummaryList) {
+                if (summaryItem.getSoItemId().equals(item.getSoItemId())) {
+                    alreadyAdded += summaryItem.getQuantity();
+                }
+            }
+            double remaining = outstanding - alreadyAdded;
+            model.setValueAt(remaining, i, 3);
+        }
+    }
+
+    private void updateInputsEnabledState(boolean enabled) {
+        spinReturnQty.setEnabled(enabled);
+        cmbReceivingBin.setEnabled(enabled);
+        cmbQualityStatus.setEnabled(enabled);
+        txtRemarks.setEnabled(enabled);
+    }
+
+    private void refreshInputsForSelectedSOItem() {
+        int selectedRow = tblSOItems.getSelectedRow();
+        if (selectedRow >= 0 && selectedRow < currentSOItems.size()) {
+            SalesOrderItemDTO item = currentSOItems.get(selectedRow);
+            double outstanding = item.getOutstandingQuantity();
+            double alreadyAdded = 0.0;
+            for (CustomerReturnItem summaryItem : returnSummaryList) {
+                if (summaryItem.getSoItemId().equals(item.getSoItemId())) {
+                    alreadyAdded += summaryItem.getQuantity();
+                }
+            }
+            double remaining = outstanding - alreadyAdded;
+            
+            txtMaterial.setText(item.getMaterialCode() + " - " + item.getMaterialName());
+            txtUOM.setText(item.getUom() != null ? item.getUom() : "");
+            
+            SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, remaining > 0.0 ? remaining : 0.0, 1.0);
+            spinReturnQty.setModel(spinnerModel);
+            updateSpinnerColor();
+            
+            updateInputsEnabledState(remaining > 0);
+            btnAddToReturn.setEnabled(remaining > 0);
+        } else {
+            txtMaterial.setText("");
+            txtUOM.setText("");
+            spinReturnQty.setModel(new SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+            updateSpinnerColor();
+            
+            updateInputsEnabledState(false);
+            btnAddToReturn.setEnabled(false);
+        }
     }
 
     private void initTableSelectionListener() {
         tblSOItems.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                int selectedRow = tblSOItems.getSelectedRow();
-                if (selectedRow >= 0 && selectedRow < currentSOItems.size()) {
-                    SalesOrderItemDTO item = currentSOItems.get(selectedRow);
-                    
-                    // Populate Return Details panel
-                    txtMaterial.setText(item.getMaterialCode() + " - " + item.getMaterialName());
-                    
-                    // Calculate remaining outstanding quantity taking into account what's already added to return summary
-                    double outstanding = item.getOutstandingQuantity();
-                    double alreadyAdded = 0.0;
-                    for (CustomerReturnItem summaryItem : returnSummaryList) {
-                        if (summaryItem.getSoItemId().equals(item.getSoItemId())) {
-                            alreadyAdded += summaryItem.getQuantity();
+                if (isProgrammaticSelection) {
+                    return;
+                }
+                
+                // Clear selection of return summary when user manually selects SO items to add new items
+                tblReturnSummary.clearSelection();
+                editingReturnSummaryIndex = -1;
+                btnUpdateRecieptItem.setEnabled(false);
+                
+                refreshInputsForSelectedSOItem();
+            }
+        });
+        
+        // Selection listener for return summary to support editing items
+        tblReturnSummary.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int[] selectedRows = tblReturnSummary.getSelectedRows();
+                if (selectedRows.length == 1) {
+                    int selectedRow = selectedRows[0];
+                    if (selectedRow >= 0 && selectedRow < returnSummaryList.size()) {
+                        editingReturnSummaryIndex = selectedRow;
+                        CustomerReturnItem item = returnSummaryList.get(selectedRow);
+                        
+                        // Find matching SO item
+                        int matchingSOItemRow = -1;
+                        for (int i = 0; i < currentSOItems.size(); i++) {
+                            if (currentSOItems.get(i).getSoItemId().equals(item.getSoItemId())) {
+                                matchingSOItemRow = i;
+                                break;
+                            }
+                        }
+                        
+                        if (matchingSOItemRow >= 0) {
+                            isProgrammaticSelection = true;
+                            tblSOItems.setRowSelectionInterval(matchingSOItemRow, matchingSOItemRow);
+                            isProgrammaticSelection = false;
+                            
+                            SalesOrderItemDTO soItem = currentSOItems.get(matchingSOItemRow);
+                            txtMaterial.setText(soItem.getMaterialCode() + " - " + soItem.getMaterialName());
+                            txtUOM.setText(soItem.getUom() != null ? soItem.getUom() : "");
+                            
+                            // Calculate remaining outstanding quantity taking into account what's already added to return summary
+                            double outstanding = soItem.getOutstandingQuantity();
+                            double alreadyAdded = 0.0;
+                            for (int k = 0; k < returnSummaryList.size(); k++) {
+                                if (k != selectedRow && returnSummaryList.get(k).getSoItemId().equals(soItem.getSoItemId())) {
+                                    alreadyAdded += returnSummaryList.get(k).getQuantity();
+                                }
+                            }
+                            double remaining = outstanding - alreadyAdded;
+                            
+                            // Setup spinner
+                            SpinnerNumberModel spinnerModel = new SpinnerNumberModel(item.getQuantity(), 0.0, remaining > 0.0 ? remaining : 0.0, 1.0);
+                            spinReturnQty.setModel(spinnerModel);
+                            updateSpinnerColor();
+                            
+                            updateInputsEnabledState(true);
+                            
+                            // Set Quality Status via combo box
+                            String qStatus = item.getQualityStatus();
+                            if ("RELEASED".equals(qStatus)) {
+                                cmbQualityStatus.setSelectedItem("OK");
+                            } else if ("DAMAGED".equals(qStatus)) {
+                                cmbQualityStatus.setSelectedItem("Damaged");
+                            } else if ("PARTIAL_DAMAGE".equals(qStatus)) {
+                                cmbQualityStatus.setSelectedItem("Partial Damage");
+                            } else if ("DEFECTIVE".equals(qStatus)) {
+                                cmbQualityStatus.setSelectedItem("Defective");
+                            } else {
+                                cmbQualityStatus.setSelectedIndex(0);
+                            }
+                            
+                            // Set receiving bin
+                            for (int i = 1; i < cmbReceivingBin.getItemCount(); i++) {
+                                Object o = cmbReceivingBin.getItemAt(i);
+                                if (o instanceof StorageBinDTO) {
+                                    StorageBinDTO b = (StorageBinDTO) o;
+                                    if (b.getBinId().equals(item.getToBinId())) {
+                                        cmbReceivingBin.setSelectedIndex(i);
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Set remarks
+                            txtRemarks.setText(item.getRemarks() != null ? item.getRemarks() : "");
+                            
+                            btnUpdateRecieptItem.setEnabled(true);
+                            btnAddToReturn.setEnabled(false);
                         }
                     }
-                    double remaining = outstanding - alreadyAdded;
-                    
-                    // Setup spinner
-                    SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, remaining > 0.0 ? remaining : 0.0, 1.0);
-                    spinReturnQty.setModel(spinnerModel);
                 } else {
-                    // Clear Return Details panel
-                    txtMaterial.setText("");
-                    spinReturnQty.setModel(new SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+                    // Either multiple rows or no rows selected
+                    editingReturnSummaryIndex = -1;
+                    btnUpdateRecieptItem.setEnabled(false);
+                    
+                    refreshInputsForSelectedSOItem();
+                    
+                    if (selectedRows.length > 1) {
+                        // Multiple rows selected: clear detail input fields to prevent confusion
+                        txtMaterial.setText("");
+                        txtUOM.setText("");
+                        spinReturnQty.setModel(new SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+                        updateSpinnerColor();
+                        cmbQualityStatus.setSelectedIndex(0);
+                        cmbReceivingBin.setSelectedIndex(0);
+                        txtRemarks.setText("");
+                        updateInputsEnabledState(false);
+                    }
                 }
             }
         });
         
-        // Add Delete key listener to tblReturnSummary to remove selected row
+        // Add Delete key listener to tblReturnSummary to remove selected row(s)
         tblReturnSummary.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DELETE) {
-                    int selectedRow = tblReturnSummary.getSelectedRow();
-                    if (selectedRow >= 0 && selectedRow < returnSummaryList.size()) {
-                        returnSummaryList.remove(selectedRow);
+                    int[] selectedRows = tblReturnSummary.getSelectedRows();
+                    if (selectedRows.length > 0) {
+                        java.util.Arrays.sort(selectedRows);
+                        for (int i = selectedRows.length - 1; i >= 0; i--) {
+                            if (selectedRows[i] >= 0 && selectedRows[i] < returnSummaryList.size()) {
+                                returnSummaryList.remove(selectedRows[i]);
+                            }
+                        }
                         refreshReturnSummaryTable();
+                        tblReturnSummary.clearSelection();
                         
                         // Force recalculation of remaining qty for currently selected SO item
                         int currentSelection = tblSOItems.getSelectedRow();
@@ -307,6 +543,46 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    private void setupTableRenderers() {
+        javax.swing.table.TableCellRenderer defaultRenderer = tblSOItems.getDefaultRenderer(Object.class);
+        tblSOItems.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                java.awt.Component c = defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (row >= 0 && row < currentSOItems.size()) {
+                    SalesOrderItemDTO item = currentSOItems.get(row);
+                    double outstanding = item.getOutstandingQuantity();
+                    double alreadyAdded = 0.0;
+                    for (CustomerReturnItem summaryItem : returnSummaryList) {
+                        if (summaryItem.getSoItemId().equals(item.getSoItemId())) {
+                            alreadyAdded += summaryItem.getQuantity();
+                        }
+                    }
+                    double remaining = outstanding - alreadyAdded;
+                    if (remaining <= 0) {
+                        c.setForeground(java.awt.Color.GRAY);
+                        java.awt.Font font = c.getFont();
+                        if (font != null) {
+                            c.setFont(font.deriveFont(java.awt.Font.ITALIC));
+                        }
+                    } else {
+                        if (isSelected) {
+                            c.setForeground(table.getSelectionForeground());
+                        } else {
+                            c.setForeground(table.getForeground());
+                        }
+                        java.awt.Font font = c.getFont();
+                        if (font != null) {
+                            c.setFont(font.deriveFont(java.awt.Font.PLAIN));
+                        }
+                    }
+                }
+                return c;
             }
         });
     }
@@ -343,16 +619,15 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     }
 
     private String getSelectedQuality() {
-        if (rdbQualityStatus.isSelected()) {
-            return "RELEASED";
-        } else if (rdbQualityDamaged.isSelected()) {
-            return "DAMAGED";
-        } else if (rdbQualityPartialDamage.isSelected()) {
-            return "PARTIAL_DAMAGE";
-        } else if (rdbQualityDefective.isSelected()) {
-            return "DEFECTIVE";
+        String selected = (String) cmbQualityStatus.getSelectedItem();
+        if (selected == null) return null;
+        switch (selected) {
+            case "OK": return "RELEASED";
+            case "Damaged": return "DAMAGED";
+            case "Partial Damage": return "PARTIAL_DAMAGE";
+            case "Defective": return "DEFECTIVE";
+            default: return null;
         }
-        return null;
     }
 
     private void refreshReturnSummaryTable() {
@@ -400,12 +675,16 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                 "Pending"
             });
         }
+        updateSOItemsTableQuantities();
+        tblSOItems.repaint();
     }
 
     private void clearForm() {
         selectedSO = null;
         currentSOItems.clear();
         returnSummaryList.clear();
+        editingReturnSummaryIndex = -1;
+        isProgrammaticSelection = false;
         txtSONumber.setText("");
         txtCustomerName.setText("");
         txtSONumberDisplay.setText("");
@@ -415,8 +694,9 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         txtReturnDate.setText(java.time.LocalDate.now().toString());
         
         txtMaterial.setText("");
+        txtUOM.setText("");
         spinReturnQty.setValue(0.0);
-        buttonGroupQuality.clearSelection();
+        cmbQualityStatus.setSelectedIndex(0);
         cmbReceivingBin.setSelectedIndex(0);
         txtRemarks.setText("");
         
@@ -434,6 +714,13 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     private void initComponents() {
 
         buttonGroupQuality = new javax.swing.ButtonGroup();
+        jPanelActions = new javax.swing.JPanel();
+        btnCompleteReturn = new javax.swing.JButton();
+        btnPrintReturnAuthorization = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
+        jScrollPaneMain = new javax.swing.JScrollPane();
+        jPanelMain = new javax.swing.JPanel();
         jPanelSearch = new javax.swing.JPanel();
         lblSONumber = new javax.swing.JLabel();
         txtSONumber = new javax.swing.JTextField();
@@ -461,27 +748,83 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         lblReturnQty = new javax.swing.JLabel();
         spinReturnQty = new javax.swing.JSpinner();
         lblQualityStatus = new javax.swing.JLabel();
-        rdbQualityStatus = new javax.swing.JRadioButton();
-        rdbQualityDamaged = new javax.swing.JRadioButton();
-        rdbQualityPartialDamage = new javax.swing.JRadioButton();
-        rdbQualityDefective = new javax.swing.JRadioButton();
         lblReceivingBin = new javax.swing.JLabel();
         cmbReceivingBin = new javax.swing.JComboBox();
         lblRemarks = new javax.swing.JLabel();
-        jScrollPaneRemarks = new javax.swing.JScrollPane();
-        txtRemarks = new javax.swing.JTextArea();
         btnAddToReturn = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        txtUOM = new javax.swing.JTextField();
+        btnUpdateRecieptItem = new javax.swing.JButton();
+        btnRemoveRecieptItem = new javax.swing.JButton();
+        txtRemarks = new javax.swing.JTextField();
+        cmbQualityStatus = new javax.swing.JComboBox<>();
         jScrollPaneReturnSummary = new javax.swing.JScrollPane();
         tblReturnSummary = new javax.swing.JTable();
-        jPanelActions = new javax.swing.JPanel();
-        btnCompleteReturn = new javax.swing.JButton();
-        btnPrintReturnAuthorization = new javax.swing.JButton();
-        btnCancel = new javax.swing.JButton();
-        txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Goods Receipt - Customer Returns (IN12)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
-        setTitle("Goods Receipt - Customer Returns");
+
+        jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        btnCompleteReturn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnCompleteReturn.setText("Post");
+        btnCompleteReturn.setToolTipText("Complete Return");
+        btnCompleteReturn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompleteReturnActionPerformed(evt);
+            }
+        });
+
+        btnPrintReturnAuthorization.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrintReturnAuthorization.setText(" Print");
+        btnPrintReturnAuthorization.setToolTipText("Print Return Authorization");
+        btnPrintReturnAuthorization.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintReturnAuthorizationActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        btnCancel.setText(" Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
+        jPanelActions.setLayout(jPanelActionsLayout);
+        jPanelActionsLayout.setHorizontalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(btnCompleteReturn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrintReturnAuthorization)
+                .addGap(33, 33, 33)
+                .addComponent(btnCancel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelActionsLayout.setVerticalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnCompleteReturn)
+                        .addComponent(btnPrintReturnAuthorization)
+                        .addComponent(btnCancel)))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+
+        jScrollPaneMain.setHorizontalScrollBar(null);
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Sales Order"));
 
@@ -490,7 +833,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         lblCustomerName.setText("Customer Name");
 
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
-        btnSearch.setText("Search");
+        btnSearch.setText(" Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchActionPerformed(evt);
@@ -636,37 +979,42 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         lblQualityStatus.setText("Quality Status");
 
-        buttonGroupQuality.add(rdbQualityStatus);
-        rdbQualityStatus.setText("OK");
-
-        buttonGroupQuality.add(rdbQualityDamaged);
-        rdbQualityDamaged.setText("Damaged");
-
-        buttonGroupQuality.add(rdbQualityPartialDamage);
-        rdbQualityPartialDamage.setText("Partial Damage");
-
-        buttonGroupQuality.add(rdbQualityDefective);
-        rdbQualityDefective.setText("Defective");
-
         lblReceivingBin.setText("Receiving Bin");
 
         cmbReceivingBin.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Bin --" }));
 
         lblRemarks.setText("Remarks");
 
-        txtRemarks.setColumns(20);
-        txtRemarks.setLineWrap(true);
-        txtRemarks.setRows(2);
-        txtRemarks.setWrapStyleWord(true);
-        jScrollPaneRemarks.setViewportView(txtRemarks);
-
         btnAddToReturn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
-        btnAddToReturn.setText("Add to Return");
+        btnAddToReturn.setText("Add");
+        btnAddToReturn.setToolTipText("Add to Return");
         btnAddToReturn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddToReturnActionPerformed(evt);
             }
         });
+
+        jLabel1.setText("UOM");
+
+        txtUOM.setEditable(false);
+
+        btnUpdateRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateRecieptItem.setToolTipText("Save Changes");
+        btnUpdateRecieptItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateRecieptItemActionPerformed(evt);
+            }
+        });
+
+        btnRemoveRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveRecieptItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveRecieptItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveRecieptItemActionPerformed(evt);
+            }
+        });
+
+        cmbQualityStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "OK", "Damaged", "Partial Damage", "Defective" }));
 
         javax.swing.GroupLayout jPanelReturnDetailsLayout = new javax.swing.GroupLayout(jPanelReturnDetails);
         jPanelReturnDetails.setLayout(jPanelReturnDetailsLayout);
@@ -674,57 +1022,65 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblMaterial)
-                    .addComponent(lblReturnQty)
-                    .addComponent(lblQualityStatus))
-                .addGap(12, 12, 12)
-                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(spinReturnQty, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
-                        .addComponent(rdbQualityStatus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(rdbQualityDamaged)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(rdbQualityPartialDamage)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(rdbQualityDefective)))
-                .addGap(30, 30, 30)
+                        .addComponent(lblMaterial)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
+                        .addComponent(lblQualityStatus)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbQualityStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
                 .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblReceivingBin)
-                    .addComponent(lblRemarks))
-                .addGap(12, 12, 12)
-                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPaneRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAddToReturn, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblReturnQty)
+                        .addGap(12, 12, 12)
+                        .addComponent(spinReturnQty, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(121, 121, 121)
+                        .addComponent(lblRemarks)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
+                        .addComponent(lblReceivingBin)
+                        .addGap(12, 12, 12)
+                        .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(28, 28, 28)
+                        .addComponent(btnAddToReturn)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(301, Short.MAX_VALUE))
         );
         jPanelReturnDetailsLayout.setVerticalGroup(
             jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelReturnDetailsLayout.createSequentialGroup()
+                .addGap(7, 7, 7)
                 .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblMaterial)
                     .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblReceivingBin)
-                    .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblReturnQty)
                     .addComponent(spinReturnQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblRemarks)
-                    .addComponent(jScrollPaneRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblQualityStatus)
-                    .addComponent(rdbQualityStatus)
-                    .addComponent(rdbQualityDamaged)
-                    .addComponent(rdbQualityPartialDamage)
-                    .addComponent(rdbQualityDefective)
-                    .addComponent(btnAddToReturn))
-                .addGap(10, 10, 10))
+                    .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblQualityStatus)
+                        .addComponent(lblReceivingBin)
+                        .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAddToReturn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cmbQualityStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         jScrollPaneReturnSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Return Summary"));
@@ -748,106 +1104,72 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         tblReturnSummary.getTableHeader().setReorderingAllowed(false);
         jScrollPaneReturnSummary.setViewportView(tblReturnSummary);
 
-        jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
-
-        btnCompleteReturn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteReturn.setText("Complete Return");
-        btnCompleteReturn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteReturnActionPerformed(evt);
-            }
-        });
-
-        btnPrintReturnAuthorization.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintReturnAuthorization.setText("Print Return Authorization");
-        btnPrintReturnAuthorization.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintReturnAuthorizationActionPerformed(evt);
-            }
-        });
-
-        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
-        btnCancel.setText("Cancel");
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelActionPerformed(evt);
-            }
-        });
-
-        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
-        jPanelActions.setLayout(jPanelActionsLayout);
-        jPanelActionsLayout.setHorizontalGroup(
-            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelActionsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(btnCompleteReturn, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnPrintReturnAuthorization, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
-                .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(20, 20, 20)
-                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
-        );
-        jPanelActionsLayout.setVerticalGroup(
-            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelActionsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCompleteReturn)
-                    .addComponent(btnPrintReturnAuthorization)
-                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCancel))
-                .addContainerGap(10, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelMainLayout = new javax.swing.GroupLayout(jPanelMain);
+        jPanelMain.setLayout(jPanelMainLayout);
+        jPanelMainLayout.setHorizontalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanelSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanelAuthorization, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPaneReturnSummary, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanelReturnDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPaneSOItems)
-                    .addComponent(jPanelReturnDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPaneReturnSummary)
-                    .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanelAuthorization, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanelSearch, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+        jPanelMainLayout.setVerticalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMainLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanelSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelAuthorization, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneSOItems, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPaneSOItems, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelReturnDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneReturnSummary, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPaneReturnSummary, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+        );
+
+        jScrollPaneMain.setViewportView(jPanelMain);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPaneMain)
+            .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 595, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        searchSalesOrders();
+        String criteria = txtSONumber.getText().trim();
+        if (criteria.isEmpty()) {
+            criteria = txtCustomerName.getText().trim();
+        }
+        if (criteria.isEmpty()) {
+            searchOpenSalesOrders();
+        } else {
+            searchSalesOrders();
+        }
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void btnAddToReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToReturnActionPerformed
         int selectedRow = tblSOItems.getSelectedRow();
         if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(this, "Please select an item from the Materials in SO table first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please select an item from the Materials in SO table first.");
             return;
         }
         
@@ -856,7 +1178,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         // Read quantity
         double qty = ((Number) spinReturnQty.getValue()).doubleValue();
         if (qty <= 0) {
-            JOptionPane.showMessageDialog(this, "Please enter a return quantity greater than 0.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a return quantity greater than 0.");
             return;
         }
         
@@ -870,19 +1192,19 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         }
         double remaining = outstanding - alreadyAdded;
         if (qty > remaining) {
-            JOptionPane.showMessageDialog(this, String.format("Entered quantity (%.2f) exceeds remaining outstanding quantity (%.2f) for this item.", qty, remaining), "Error", JOptionPane.ERROR_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, String.format("Entered quantity (%.2f) exceeds remaining outstanding quantity (%.2f) for this item.", qty, remaining));
             return;
         }
         
         // Business rule check: cannot exceed shipped quantity
         if (qty > (soItem.getShippedQuantity() - soItem.getReturnedQuantity() - alreadyAdded)) {
-            JOptionPane.showMessageDialog(this, "Return quantity cannot exceed shipped quantity minus previously returned quantity.", "Error", JOptionPane.ERROR_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Return quantity cannot exceed shipped quantity minus previously returned quantity.");
             return;
         }
         
         // Read bin selection
         if (cmbReceivingBin.getSelectedIndex() <= 0) {
-            JOptionPane.showMessageDialog(this, "Please select a destination receiving bin.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination receiving bin.");
             return;
         }
         StorageBinDTO selectedBin = (StorageBinDTO) cmbReceivingBin.getSelectedItem();
@@ -890,7 +1212,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         // Quality
         String qualityStatus = getSelectedQuality();
         if (qualityStatus == null) {
-            JOptionPane.showMessageDialog(this, "Quality status must be selected.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Quality status must be selected.");
             return;
         }
         
@@ -913,7 +1235,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         
         // Reset inputs
         spinReturnQty.setValue(0.0);
-        buttonGroupQuality.clearSelection();
+        cmbQualityStatus.setSelectedIndex(0);
         cmbReceivingBin.setSelectedIndex(0);
         txtRemarks.setText("");
         
@@ -925,12 +1247,12 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
     private void btnCompleteReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteReturnActionPerformed
         if (selectedSO == null) {
-            JOptionPane.showMessageDialog(this, "Please load a Sales Order first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Sales Order first.");
             return;
         }
         
         if (returnSummaryList.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "The return summary is empty. Please add items first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "The return summary is empty. Please add items first.");
             return;
         }
         
@@ -945,11 +1267,11 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         String returnAuthNo = txtReturnAuthNumber.getText().trim();
         String returnDate = txtReturnDate.getText().trim();
         if (returnAuthNo.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Return Authorization Number is required.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Return Authorization Number is required.");
             return;
         }
         if (returnDate.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Return Date is required.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Return Date is required.");
             return;
         }
         
@@ -976,9 +1298,6 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 StatusMessageHandler.showSuccess(txtStatus, "Customer return processed successfully!");
-                JOptionPane.showMessageDialog(GRCustomerReturnsForm.this, 
-                    "Customer return processed successfully. Document generated.", 
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearForm();
             }
 
@@ -992,15 +1311,126 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
     private void btnPrintReturnAuthorizationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintReturnAuthorizationActionPerformed
         if (selectedSO == null) {
-            JOptionPane.showMessageDialog(this, "Please load a Sales Order first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Sales Order first.");
             return;
         }
-        JOptionPane.showMessageDialog(this, "Printing Return Authorization is not implemented yet.", "Print", JOptionPane.INFORMATION_MESSAGE);
+        StatusMessageHandler.showWarning(txtStatus, "Printing Return Authorization is not implemented yet.");
     }//GEN-LAST:event_btnPrintReturnAuthorizationActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnUpdateRecieptItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateRecieptItemActionPerformed
+        if (editingReturnSummaryIndex < 0 || editingReturnSummaryIndex >= returnSummaryList.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select an item from the Return Summary to update.");
+            return;
+        }
+        
+        int selectedRow = tblSOItems.getSelectedRow();
+        if (selectedRow < 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a matching material item first.");
+            return;
+        }
+        SalesOrderItemDTO soItem = currentSOItems.get(selectedRow);
+        
+        // Read quantity
+        double qty = ((Number) spinReturnQty.getValue()).doubleValue();
+        if (qty <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a return quantity greater than 0.");
+            return;
+        }
+        
+        // Calculate remaining returnable quantity excluding this item
+        double outstanding = soItem.getOutstandingQuantity();
+        double alreadyAdded = 0.0;
+        for (int k = 0; k < returnSummaryList.size(); k++) {
+            if (k != editingReturnSummaryIndex && returnSummaryList.get(k).getSoItemId().equals(soItem.getSoItemId())) {
+                alreadyAdded += returnSummaryList.get(k).getQuantity();
+            }
+        }
+        double remaining = outstanding - alreadyAdded;
+        if (qty > remaining) {
+            StatusMessageHandler.showWarning(txtStatus, String.format("Entered quantity (%.2f) exceeds remaining outstanding quantity (%.2f) for this item.", qty, remaining));
+            return;
+        }
+        
+        // Business rule check: cannot exceed shipped quantity
+        if (qty > (soItem.getShippedQuantity() - soItem.getReturnedQuantity() - alreadyAdded)) {
+            StatusMessageHandler.showWarning(txtStatus, "Return quantity cannot exceed shipped quantity minus previously returned quantity.");
+            return;
+        }
+        
+        // Read bin selection
+        if (cmbReceivingBin.getSelectedIndex() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination receiving bin.");
+            return;
+        }
+        StorageBinDTO selectedBin = (StorageBinDTO) cmbReceivingBin.getSelectedItem();
+        
+        // Quality
+        String qualityStatus = getSelectedQuality();
+        if (qualityStatus == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Quality status must be selected.");
+            return;
+        }
+        
+        // Remarks
+        String remarks = txtRemarks.getText().trim();
+        
+        // Update to list
+        CustomerReturnItem returnItem = returnSummaryList.get(editingReturnSummaryIndex);
+        returnItem.setQuantity(qty);
+        returnItem.setToBinId(selectedBin.getBinId());
+        returnItem.setQualityStatus(qualityStatus);
+        returnItem.setRemarks(remarks.isEmpty() ? null : remarks);
+        
+        // Refresh summary table
+        refreshReturnSummaryTable();
+        
+        // Clear selection
+        tblReturnSummary.clearSelection();
+        
+        // Reset inputs
+        spinReturnQty.setValue(0.0);
+        cmbQualityStatus.setSelectedIndex(0);
+        cmbReceivingBin.setSelectedIndex(0);
+        txtRemarks.setText("");
+        
+        // Force refresh current item remaining qty displays
+        tblSOItems.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+        
+        StatusMessageHandler.showSuccess(txtStatus, "Item updated in return summary.");
+    }//GEN-LAST:event_btnUpdateRecieptItemActionPerformed
+
+    private void btnRemoveRecieptItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveRecieptItemActionPerformed
+        int[] selectedRows = tblReturnSummary.getSelectedRows();
+        if (selectedRows.length == 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select item(s) from the Return Summary to remove.");
+            return;
+        }
+        
+        java.util.Arrays.sort(selectedRows);
+        for (int i = selectedRows.length - 1; i >= 0; i--) {
+            if (selectedRows[i] >= 0 && selectedRows[i] < returnSummaryList.size()) {
+                returnSummaryList.remove(selectedRows[i]);
+            }
+        }
+        
+        // Refresh summary table
+        refreshReturnSummaryTable();
+        
+        // Clear selection
+        tblReturnSummary.clearSelection();
+        
+        // Force recalculation of remaining qty for currently selected SO item
+        int currentSelection = tblSOItems.getSelectedRow();
+        if (currentSelection >= 0) {
+            tblSOItems.getSelectionModel().setSelectionInterval(currentSelection, currentSelection);
+        }
+        
+        StatusMessageHandler.showSuccess(txtStatus, "Selected item(s) removed from return summary.");
+    }//GEN-LAST:event_btnRemoveRecieptItemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1034,20 +1464,150 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         });
     }
 
+    private java.awt.Color originalSpinnerForeground;
+    private java.awt.Color originalSpinnerBackground;
+    private java.awt.Color originalSpinnerContainerBackground;
+
+    private final javax.swing.event.DocumentListener spinnerDocListener = new javax.swing.event.DocumentListener() {
+        @Override
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            updateSpinnerColor();
+        }
+
+        @Override
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            updateSpinnerColor();
+        }
+
+        @Override
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            updateSpinnerColor();
+        }
+    };
+
+    private javax.swing.JTextField getSpinnerTextField() {
+        javax.swing.JComponent editor = spinReturnQty.getEditor();
+        if (editor instanceof javax.swing.JSpinner.DefaultEditor) {
+            return ((javax.swing.JSpinner.DefaultEditor) editor).getTextField();
+        }
+        return null;
+    }
+
+    private void attachDocumentListenerToSpinner() {
+        javax.swing.JTextField textField = getSpinnerTextField();
+        if (textField != null) {
+            textField.getDocument().removeDocumentListener(spinnerDocListener);
+            textField.getDocument().addDocumentListener(spinnerDocListener);
+            
+            if (originalSpinnerForeground == null) {
+                originalSpinnerForeground = textField.getForeground();
+            }
+            if (originalSpinnerBackground == null) {
+                originalSpinnerBackground = textField.getBackground();
+            }
+            if (originalSpinnerContainerBackground == null) {
+                originalSpinnerContainerBackground = spinReturnQty.getBackground();
+            }
+        }
+    }
+
+    private double parseSpinnerValue(javax.swing.JTextField textField, javax.swing.JSpinner spinner) {
+        String text = textField.getText().trim();
+        if (text.isEmpty()) {
+            Object value = spinner.getValue();
+            return value instanceof Number ? ((Number) value).doubleValue() : 0.0;
+        }
+        
+        if (textField instanceof javax.swing.JFormattedTextField) {
+            javax.swing.JFormattedTextField ftf = (javax.swing.JFormattedTextField) textField;
+            javax.swing.JFormattedTextField.AbstractFormatter formatter = ftf.getFormatter();
+            if (formatter != null) {
+                try {
+                    Object val = formatter.stringToValue(text);
+                    if (val instanceof Number) {
+                        return ((Number) val).doubleValue();
+                    }
+                } catch (java.text.ParseException e) {
+                    // ignore and try fallbacks
+                }
+            }
+        }
+        
+        try {
+            java.text.NumberFormat nf = java.text.NumberFormat.getInstance();
+            return nf.parse(text).doubleValue();
+        } catch (java.text.ParseException e) {
+            // ignore and try fallback
+        }
+        
+        try {
+            return Double.parseDouble(text.replace(",", ""));
+        } catch (NumberFormatException e) {
+            // ignore and try fallback
+        }
+        
+        Object value = spinner.getValue();
+        return value instanceof Number ? ((Number) value).doubleValue() : 0.0;
+    }
+
+    private void updateSpinnerColor() {
+        javax.swing.JTextField textField = getSpinnerTextField();
+        if (textField == null) {
+            return;
+        }
+        
+        int selectedRow = tblSOItems.getSelectedRow();
+        double remaining = 0.0;
+        if (selectedRow >= 0 && selectedRow < currentSOItems.size()) {
+            SalesOrderItemDTO soItem = currentSOItems.get(selectedRow);
+            double outstanding = soItem.getOutstandingQuantity();
+            double alreadyAdded = 0.0;
+            for (int k = 0; k < returnSummaryList.size(); k++) {
+                if (k != editingReturnSummaryIndex && returnSummaryList.get(k).getSoItemId().equals(soItem.getSoItemId())) {
+                    alreadyAdded += returnSummaryList.get(k).getQuantity();
+                }
+            }
+            remaining = outstanding - alreadyAdded;
+        }
+        
+        double qty = parseSpinnerValue(textField, spinReturnQty);
+        
+        if (qty > remaining) {
+            textField.setForeground(java.awt.Color.RED);
+            textField.setBackground(new java.awt.Color(255, 204, 204));
+            spinReturnQty.setBackground(new java.awt.Color(255, 204, 204));
+        } else {
+            if (originalSpinnerForeground != null) {
+                textField.setForeground(originalSpinnerForeground);
+            }
+            if (originalSpinnerBackground != null) {
+                textField.setBackground(originalSpinnerBackground);
+            }
+            if (originalSpinnerContainerBackground != null) {
+                spinReturnQty.setBackground(originalSpinnerContainerBackground);
+            }
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToReturn;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCompleteReturn;
     private javax.swing.JButton btnPrintReturnAuthorization;
+    private javax.swing.JButton btnRemoveRecieptItem;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdateRecieptItem;
     private javax.swing.ButtonGroup buttonGroupQuality;
+    private javax.swing.JComboBox<String> cmbQualityStatus;
     private javax.swing.JComboBox cmbReceivingBin;
     private javax.swing.JComboBox cmbReturnReason;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanelActions;
     private javax.swing.JPanel jPanelAuthorization;
+    private javax.swing.JPanel jPanelMain;
     private javax.swing.JPanel jPanelReturnDetails;
     private javax.swing.JPanel jPanelSearch;
-    private javax.swing.JScrollPane jScrollPaneRemarks;
+    private javax.swing.JScrollPane jScrollPaneMain;
     private javax.swing.JScrollPane jScrollPaneReturnSummary;
     private javax.swing.JScrollPane jScrollPaneSOItems;
     private javax.swing.JLabel lblCustomerName;
@@ -1063,22 +1623,19 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     private javax.swing.JLabel lblSODate;
     private javax.swing.JLabel lblSONumber;
     private javax.swing.JLabel lblSONumberDisplay;
-    private javax.swing.JRadioButton rdbQualityDamaged;
-    private javax.swing.JRadioButton rdbQualityDefective;
-    private javax.swing.JRadioButton rdbQualityPartialDamage;
-    private javax.swing.JRadioButton rdbQualityStatus;
     private javax.swing.JSpinner spinReturnQty;
     private javax.swing.JTable tblReturnSummary;
     private javax.swing.JTable tblSOItems;
     private javax.swing.JTextField txtCustomerName;
     private javax.swing.JTextField txtCustomerNameDisplay;
     private javax.swing.JTextField txtMaterial;
-    private javax.swing.JTextArea txtRemarks;
+    private javax.swing.JTextField txtRemarks;
     private javax.swing.JTextField txtReturnAuthNumber;
     private javax.swing.JTextField txtReturnDate;
     private javax.swing.JTextField txtSODate;
     private javax.swing.JTextField txtSONumber;
     private javax.swing.JTextField txtSONumberDisplay;
     private javax.swing.JLabel txtStatus;
+    private javax.swing.JTextField txtUOM;
     // End of variables declaration//GEN-END:variables
 }

@@ -13,6 +13,7 @@ import models.dto.TransferOrderItemDTO;
 import movements.controllers.GRTransferInController;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
+import ui.components.AutoSuggestTextField;
 import core.logging.Logger;
 import javax.swing.ImageIcon;
 
@@ -36,6 +37,25 @@ public class GRTransferInForm extends javax.swing.JFrame {
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new GRTransferInController();
         txtActualReceiptDate.setText(java.time.LocalDate.now().toString());
+
+        // Initialize TO number suggestions
+        AutoSuggestTextField.attach(txtTONumber, query -> {
+            try {
+                List<TransferOrderDTO> tos = controller.searchTransferOrders("OPEN", query);
+                List<String> suggestions = new ArrayList<>();
+                if (tos != null) {
+                    for (TransferOrderDTO to : tos) {
+                        if (to.getToNumber() != null) {
+                            suggestions.add(to.getToNumber());
+                        }
+                    }
+                }
+                return suggestions;
+            } catch (Exception e) {
+                Logger.errlog("Failed to load TO suggestions", e);
+                return new ArrayList<>();
+            }
+        });
     }
 
     /**
@@ -65,22 +85,21 @@ public class GRTransferInForm extends javax.swing.JFrame {
         jScrollPaneTable = new javax.swing.JScrollPane();
         tblTOItems = new javax.swing.JTable();
         jPanelActions = new javax.swing.JPanel();
-        btnReceiveGoods = new javax.swing.JButton();
-        btnPartialReceipt = new javax.swing.JButton();
         btnCompleteReceipt = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
+        btnReceiveGoods = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Goods Receipt - Transfer In");
+        setTitle("Goods Receipt - Transfer In (IN13)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Transfer Order"));
 
         lblTONumber.setText("Transfer Order Number");
 
-        btnLoadTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/load-14.png"))); // NOI18N
-        btnLoadTO.setText("Load Transfer Order");
+        btnLoadTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnLoadTO.setText(" Search");
         btnLoadTO.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLoadTOActionPerformed(evt);
@@ -97,7 +116,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtTONumber, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnLoadTO, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnLoadTO)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelSearchLayout.setVerticalGroup(
@@ -154,7 +173,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addGroup(jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtToWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtActualReceiptDate, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(427, Short.MAX_VALUE))
         );
         jPanelDetailsLayout.setVerticalGroup(
             jPanelDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,22 +220,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        btnReceiveGoods.setText("Receive Goods");
-        btnReceiveGoods.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnReceiveGoodsActionPerformed(evt);
-            }
-        });
-
-        btnPartialReceipt.setText("Partial Receipt");
-        btnPartialReceipt.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPartialReceiptActionPerformed(evt);
-            }
-        });
-
         btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteReceipt.setText("Complete Receipt");
+        btnCompleteReceipt.setText(" Receive All");
         btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCompleteReceiptActionPerformed(evt);
@@ -224,7 +229,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         });
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
-        btnCancel.setText("Cancel");
+        btnCancel.setText(" Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelActionPerformed(evt);
@@ -236,21 +241,27 @@ public class GRTransferInForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnReceiveGoods.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnReceiveGoods.setText("Receive Goods");
+        btnReceiveGoods.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReceiveGoodsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
         jPanelActions.setLayout(jPanelActionsLayout);
         jPanelActionsLayout.setHorizontalGroup(
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(btnReceiveGoods, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnPartialReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addContainerGap()
+                .addComponent(btnReceiveGoods, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(48, 48, 48)
-                .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanelActionsLayout.setVerticalGroup(
@@ -259,10 +270,9 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addGap(10, 10, 10)
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnReceiveGoods)
-                        .addComponent(btnPartialReceipt)
                         .addComponent(btnCompleteReceipt)
-                        .addComponent(btnCancel))
+                        .addComponent(btnCancel)
+                        .addComponent(btnReceiveGoods))
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -288,22 +298,14 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                .addComponent(jScrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnReceiveGoodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReceiveGoodsActionPerformed
-        submitGoodsReceipt(false);
-    }//GEN-LAST:event_btnReceiveGoodsActionPerformed
-
-    private void btnPartialReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPartialReceiptActionPerformed
-        submitGoodsReceipt(true);
-    }//GEN-LAST:event_btnPartialReceiptActionPerformed
 
     private void btnCompleteReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteReceiptActionPerformed
         if (currentTO == null) {
@@ -327,8 +329,66 @@ public class GRTransferInForm extends javax.swing.JFrame {
 
     private void btnLoadTOActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadTOActionPerformed
         String toNumber = txtTONumber.getText().trim();
-        loadTransferOrder(toNumber);
+        if (toNumber.isEmpty()) {
+            searchOpenTransferOrders();
+        } else {
+            loadTransferOrder(toNumber);
+        }
     }//GEN-LAST:event_btnLoadTOActionPerformed
+
+    private void btnReceiveGoodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReceiveGoodsActionPerformed
+        submitGoodsReceipt(true);
+    }//GEN-LAST:event_btnReceiveGoodsActionPerformed
+
+    private void searchOpenTransferOrders() {
+        BackgroundTask task = new BackgroundTask(this, "Searching Open TOs") {
+            private List<TransferOrderDTO> openTOs;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching for open transfer orders...");
+                openTOs = controller.searchTransferOrders("OPEN");
+                return openTOs != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (openTOs == null || openTOs.isEmpty()) {
+                    StatusMessageHandler.showInfo(txtStatus, "No open Transfer Orders found.");
+                    return;
+                }
+
+                String[] toNumbers = openTOs.stream().map(TransferOrderDTO::getToNumber).toArray(String[]::new);
+                
+                javax.swing.JComboBox<String> cmbOpenTOs = new javax.swing.JComboBox<>(toNumbers);
+                cmbOpenTOs.setSelectedIndex(0);
+                
+                javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.BorderLayout(5, 5));
+                panel.add(new javax.swing.JLabel("Select an Open Transfer Order:"), java.awt.BorderLayout.NORTH);
+                panel.add(cmbOpenTOs, java.awt.BorderLayout.CENTER);
+
+                int result = JOptionPane.showConfirmDialog(GRTransferInForm.this, 
+                    panel, 
+                    "Open Transfer Orders", 
+                    JOptionPane.OK_CANCEL_OPTION, 
+                    JOptionPane.QUESTION_MESSAGE);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    String selected = (String) cmbOpenTOs.getSelectedItem();
+                    if (selected != null) {
+                        txtTONumber.setText(selected);
+                        loadTransferOrder(selected);
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Search failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
 
     // loads transfer order details and populates the items table
     private void loadTransferOrder(String toNumber) {
@@ -545,7 +605,6 @@ public class GRTransferInForm extends javax.swing.JFrame {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCompleteReceipt;
     private javax.swing.JButton btnLoadTO;
-    private javax.swing.JButton btnPartialReceipt;
     private javax.swing.JButton btnReceiveGoods;
     private javax.swing.JPanel jPanelActions;
     private javax.swing.JPanel jPanelDetails;

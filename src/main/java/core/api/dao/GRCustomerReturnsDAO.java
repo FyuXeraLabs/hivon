@@ -69,11 +69,22 @@ public class GRCustomerReturnsDAO {
         public void setRemarks(String remarks) { this.remarks = remarks; }
     }
 
-    // GET /api/movements/customer-returns/so/search?criteria={criteria}
+    // GET /api/movements/customer-returns/so/search?criteria={criteria}&status={status}
     public List<SalesOrderDTO> searchSalesOrders(String criteria) throws Exception {
+        return searchSalesOrders(criteria, null);
+    }
+
+    public List<SalesOrderDTO> searchSalesOrders(String criteria, String status) throws Exception {
         String endpoint = "/movements/customer-returns/so/search";
+        List<String> queryParams = new ArrayList<>();
         if (criteria != null && !criteria.trim().isEmpty()) {
-            endpoint += "?criteria=" + java.net.URLEncoder.encode(criteria, "UTF-8");
+            queryParams.add("criteria=" + java.net.URLEncoder.encode(criteria, "UTF-8"));
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            queryParams.add("status=" + java.net.URLEncoder.encode(status, "UTF-8"));
+        }
+        if (!queryParams.isEmpty()) {
+            endpoint += "?" + String.join("&", queryParams);
         }
 
         HttpRequest request = apiClient.authRequest(endpoint).GET().build();
@@ -236,6 +247,8 @@ public class GRCustomerReturnsDAO {
         }
         if (json.has("uom") && !json.get("uom").isJsonNull()) {
             dto.setUom(json.get("uom").getAsString());
+        } else if (json.has("base_uom") && !json.get("base_uom").isJsonNull()) {
+            dto.setUom(json.get("base_uom").getAsString());
         }
         if (json.has("is_batch_managed") && !json.get("is_batch_managed").isJsonNull()) {
             dto.setIsBatchManaged(json.get("is_batch_managed").getAsBoolean());

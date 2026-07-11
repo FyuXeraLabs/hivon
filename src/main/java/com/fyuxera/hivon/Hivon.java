@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
+import core.config.SettingsManager;
 
 /**
  *
@@ -34,10 +35,17 @@ public class Hivon {
     }
 
     public static void main(String[] args) {
+        // Load config
+        SettingsManager.init();
+
         try {
-            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatIntelliJLaf");
+            UIManager.setLookAndFeel(SettingsManager.getTheme());
         } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                UIManager.setLookAndFeel("com.formdev.flatlaf.FlatIntelliJLaf");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
         // Check internet connection with retry support
