@@ -111,8 +111,8 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Material Master");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
 
@@ -208,7 +208,9 @@ public class MaterialMasterForm extends javax.swing.JFrame {
 
         jLabel15.setText("Storage Conditions");
 
+        chkIsActive.setSelected(true);
         chkIsActive.setText("Active");
+        chkIsActive.setEnabled(false);
 
         cmbMaterialCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Raw Material", "Finished Goods", "Packaging", "Consumable" }));
         cmbMaterialCategory.setSelectedIndex(-1);
