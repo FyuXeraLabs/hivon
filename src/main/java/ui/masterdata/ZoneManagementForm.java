@@ -103,8 +103,8 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Zone Management");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
 

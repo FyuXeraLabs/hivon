@@ -40,7 +40,7 @@ public class UserManagementController {
     }
 
     // create new user
-    public int createUser(UserDTO userDto, String initialPassword) {
+    public int createUser(UserDTO userDto, String initialPassword, List<String> permissions) {
         // validate input
         if (userDto == null || userDto.getUsername() == null || userDto.getUsername().trim().isEmpty()) {
             Logger.errlog("create user failed: invalid user data", new IllegalArgumentException("Invalid user data"));
@@ -49,7 +49,7 @@ public class UserManagementController {
 
         try {
             int userId = RetryHelper.executeWithRetry(
-                () -> UserDAO.getInstance().createUser(userDto, initialPassword, null),
+                () -> UserDAO.getInstance().createUser(userDto, initialPassword, permissions),
                 "create user failed"
             );
 

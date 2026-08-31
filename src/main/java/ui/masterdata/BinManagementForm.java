@@ -168,8 +168,8 @@ public class BinManagementForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Bin Management");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Warehouse Selection & Filters"));
 
@@ -272,7 +272,8 @@ public class BinManagementForm extends javax.swing.JFrame {
         cmbBinType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "RECEIVING", "STORAGE", "PICKING", "STAGING", "DAMAGE", "QUARANTINE" }));
 
         chkActive.setSelected(true);
-        chkActive.setText("Is Active");
+        chkActive.setText("Active");
+        chkActive.setEnabled(false);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);

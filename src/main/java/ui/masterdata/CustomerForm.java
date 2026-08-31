@@ -97,8 +97,8 @@ public class CustomerForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         setTitle("Customer Management");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
@@ -191,7 +191,9 @@ public class CustomerForm extends javax.swing.JFrame {
 
         jLabel6.setText("Email");
 
+        chkIsActive.setSelected(true);
         chkIsActive.setText("Active");
+        chkIsActive.setEnabled(false);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
