@@ -2,12 +2,15 @@ package movements.controllers;
 
 import core.api.dao.GRCustomerReturnsDAO;
 import core.api.dao.GRCustomerReturnsDAO.CustomerReturnItem;
+import core.api.dao.CustomerDAO;
+import models.dto.CustomerDTO;
 import core.logging.Logger;
 import core.security.UserSession;
 import models.dto.SalesOrderDTO;
 import models.dto.StorageBinDTO;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import core.utils.RetryHelper;
 
@@ -28,6 +31,14 @@ public class GRCustomerReturnsController {
     public List<SalesOrderDTO> searchSalesOrders(String criteria) throws Exception {
         return RetryHelper.executeWithRetry(
             () -> GRCustomerReturnsDAO.getInstance().searchSalesOrders(criteria),
+            "failed to search sales orders"
+        );
+    }
+
+    // searches sales orders by the given criteria and status
+    public List<SalesOrderDTO> searchSalesOrders(String criteria, String status) throws Exception {
+        return RetryHelper.executeWithRetry(
+            () -> GRCustomerReturnsDAO.getInstance().searchSalesOrders(criteria, status),
             "failed to search sales orders"
         );
     }
@@ -69,5 +80,39 @@ public class GRCustomerReturnsController {
             Logger.log(username, "customer return completed successfully for sales order: " + soNumber);
         }
         return success;
+    }
+
+    // searches customer names matching query (customers table only, no SO data)
+    public List<String> searchCustomerNames(String query) throws Exception {
+        List<CustomerDTO> customers = RetryHelper.executeWithRetry(
+            () -> CustomerDAO.getInstance().getCustomers(query, false),
+            "failed to search customers"
+        );
+        List<String> names = new ArrayList<>();
+        if (customers != null) {
+            for (CustomerDTO customer : customers) {
+                if (customer.getCustomerName() != null) {
+                    names.add(customer.getCustomerName());
+                }
+            }
+        }
+        return names;
+    }
+
+    // searches customer names matching query (includes SO customer_name column)
+    public List<String> searchCustomers(String query) throws Exception {
+        List<CustomerDTO> customers = RetryHelper.executeWithRetry(
+            () -> CustomerDAO.getInstance().getCustomers(query, true),
+            "failed to search customers"
+        );
+        List<String> names = new ArrayList<>();
+        if (customers != null) {
+            for (CustomerDTO customer : customers) {
+                if (customer.getCustomerName() != null) {
+                    names.add(customer.getCustomerName());
+                }
+            }
+        }
+        return names;
     }
 }

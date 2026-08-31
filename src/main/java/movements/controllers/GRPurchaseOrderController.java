@@ -26,8 +26,13 @@ public class GRPurchaseOrderController {
 
     // searches purchase orders by the given status
     public List<PurchaseOrderDTO> searchPurchaseOrders(String status) throws Exception {
+        return searchPurchaseOrders(status, null);
+    }
+
+    // searches purchase orders by the given status and search query
+    public List<PurchaseOrderDTO> searchPurchaseOrders(String status, String query) throws Exception {
         return RetryHelper.executeWithRetry(
-            () -> GRPurchaseOrderDAO.getInstance().searchPurchaseOrders(status),
+            () -> GRPurchaseOrderDAO.getInstance().searchPurchaseOrders(status, query),
             "failed to search purchase orders"
         );
     }
@@ -69,5 +74,39 @@ public class GRPurchaseOrderController {
             Logger.log(username, "goods receipt from purchase order completed successfully: " + poNumber);
         }
         return success;
+    }
+
+    // searches vendor names matching query (vendors table only, no PO data)
+    public List<String> searchVendorNames(String query) throws Exception {
+        List<models.dto.VendorDTO> vendors = RetryHelper.executeWithRetry(
+            () -> core.api.dao.VendorDAO.getInstance().getVendors(query, false),
+            "failed to search vendors"
+        );
+        List<String> names = new java.util.ArrayList<>();
+        if (vendors != null) {
+            for (models.dto.VendorDTO vendor : vendors) {
+                if (vendor.getVendorName() != null) {
+                    names.add(vendor.getVendorName());
+                }
+            }
+        }
+        return names;
+    }
+
+    // searches vendor names matching query (includes PO vendor_name column)
+    public List<String> searchVendors(String query) throws Exception {
+        List<models.dto.VendorDTO> vendors = RetryHelper.executeWithRetry(
+            () -> core.api.dao.VendorDAO.getInstance().getVendors(query, true),
+            "failed to search vendors"
+        );
+        List<String> names = new java.util.ArrayList<>();
+        if (vendors != null) {
+            for (models.dto.VendorDTO vendor : vendors) {
+                if (vendor.getVendorName() != null) {
+                    names.add(vendor.getVendorName());
+                }
+            }
+        }
+        return names;
     }
 }

@@ -43,6 +43,43 @@ public class TransferOrderDAO {
         return instance;
     }
 
+    // GET /api/movements/transfer-in/search?status={status}&q={query}
+    public List<TransferOrderDTO> searchTransferOrders(String status) throws Exception {
+        return searchTransferOrders(status, null);
+    }
+
+    public List<TransferOrderDTO> searchTransferOrders(String status, String query) throws Exception {
+        String endpoint = "/movements/transfer-in/search";
+        List<String> queryParams = new ArrayList<>();
+        if (status != null && !status.trim().isEmpty()) {
+            queryParams.add("status=" + java.net.URLEncoder.encode(status, "UTF-8"));
+        }
+        if (query != null && !query.trim().isEmpty()) {
+            queryParams.add("q=" + java.net.URLEncoder.encode(query, "UTF-8"));
+        }
+        if (!queryParams.isEmpty()) {
+            endpoint += "?" + String.join("&", queryParams);
+        }
+
+        HttpRequest request = apiClient.authRequest(endpoint).GET().build();
+        JsonObject response = apiClient.executeWithAuth(request);
+
+        if (response == null || !"success".equals(response.get("status").getAsString())) {
+            throw new Exception("Failed to search transfer orders.");
+        }
+
+        List<TransferOrderDTO> list = new ArrayList<>();
+        JsonArray dataArray = response.getAsJsonArray("data");
+        if (dataArray != null) {
+            for (JsonElement elem : dataArray) {
+                if (elem.isJsonObject()) {
+                    list.add(jsonToTransferOrderDTO(elem.getAsJsonObject()));
+                }
+            }
+        }
+        return list;
+    }
+
     // GET /api/movements/transfer-in/load/{toNumber}
     public TransferOrderDTO loadTransferOrder(String toNumber) throws Exception {
         String endpoint = "/movements/transfer-in/load/" + java.net.URLEncoder.encode(toNumber, "UTF-8");

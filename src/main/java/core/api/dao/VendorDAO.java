@@ -45,9 +45,20 @@ public class VendorDAO {
 
     // GET /api/vendors or GET /api/vendors?q={searchTerm}
     public List<VendorDTO> getVendors(String searchTerm) throws Exception {
+        return getVendors(searchTerm, false);
+    }
+
+    public List<VendorDTO> getVendors(String searchTerm, boolean includePO) throws Exception {
         String endpoint = ApiConfig.VENDORS;
+        List<String> queryParams = new ArrayList<>();
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            endpoint += "?q=" + java.net.URLEncoder.encode(searchTerm, "UTF-8");
+            queryParams.add("q=" + java.net.URLEncoder.encode(searchTerm, "UTF-8"));
+        }
+        if (includePO) {
+            queryParams.add("include_po=true");
+        }
+        if (!queryParams.isEmpty()) {
+            endpoint += "?" + String.join("&", queryParams);
         }
 
         HttpRequest request = apiClient.authRequest(endpoint).GET().build();

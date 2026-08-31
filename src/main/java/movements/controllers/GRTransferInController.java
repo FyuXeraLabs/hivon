@@ -23,6 +23,19 @@ public class GRTransferInController {
     public GRTransferInController() {
     }
 
+    // searches transfer orders by status
+    public List<TransferOrderDTO> searchTransferOrders(String status) throws Exception {
+        return searchTransferOrders(status, null);
+    }
+
+    // searches transfer orders by status and query
+    public List<TransferOrderDTO> searchTransferOrders(String status, String query) throws Exception {
+        return RetryHelper.executeWithRetry(
+            () -> TransferOrderDAO.getInstance().searchTransferOrders(status, query),
+            "failed to search transfer orders"
+        );
+    }
+
     // loads transfer order details by TO number
     public TransferOrderDTO loadTransferOrder(String toNumber) throws Exception {
         if (toNumber == null || toNumber.trim().isEmpty()) {
