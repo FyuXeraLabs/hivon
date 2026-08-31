@@ -2,15 +2,14 @@ package ui.components;
 
 import javax.sound.sampled.*;
 import java.net.URL;
+import core.config.SettingsManager;
 
 public final class SoundPlayer {
-
-    private static boolean soundEnabled = true;
 
     private SoundPlayer() {}
 
     public static void play(String resourcePath) {
-        if (!soundEnabled || resourcePath == null) return;
+        if (!SettingsManager.isSoundEnabled() || resourcePath == null) return;
 
         new Thread(() -> {
             try {
@@ -20,6 +19,26 @@ public final class SoundPlayer {
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioIn);
+
+                // adjust volume using MASTER_GAIN control if supported
+                if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                    FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                    // map volume from 0-100 scale to log scale decibels (0.0 to 1.0)
+                    float volume = SettingsManager.getSoundVolume() / 100.0f;
+                    // logarithmic calculation for volume level
+                    float dB = (float) (Math.log(volume == 0 ? 0.0001f : volume) / Math.log(10.0) * 20.0);
+
+                    // clamp dB to gainControl limits
+                    float min = gainControl.getMinimum();
+                    float max = gainControl.getMaximum();
+                    if (dB < min) {
+                        dB = min;
+                    } else if (dB > max) {
+                        dB = max;
+                    }
+                    gainControl.setValue(dB);
+                }
+
                 clip.start();
             } catch (Exception ignored) {
                 
@@ -28,10 +47,10 @@ public final class SoundPlayer {
     }
 
     public static void setSoundEnabled(boolean enabled) {
-        soundEnabled = enabled;
+        SettingsManager.setSoundEnabled(enabled);
     }
 
     public static boolean isSoundEnabled() {
-        return soundEnabled;
+        return SettingsManager.isSoundEnabled();
     }
 }
