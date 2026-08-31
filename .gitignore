@@ -1,2 +1,13 @@
+.gitignore
 /target/
 .env
+/errlog/
+/logs/
+git gph-ssh.txt
+issues_list.txt
+ps-gh-commands.txt
+/src/test/
+readme.txt
+*.md
+/tmp/
+.vscode/settings.json
