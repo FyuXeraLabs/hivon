@@ -1,20 +1,47 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package ui.reports;
 
+import javax.swing.table.DefaultTableModel;
+
+import javax.swing.JFileChooser;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import models.dto.DailyActivityReportDTO;
+import models.dto.DailyActivityReportDTO.ActivityLogItem;
+import models.dto.DailyActivityReportDTO.WorkerProductivityItem;
+import models.dto.WarehouseDTO;
+import reports.controllers.DailyActivityController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import core.utils.ReportExportUtils;
+import javax.swing.ImageIcon;
+
 /**
+ * User Interface for REP61 - Daily Activity Report.
+ * Displays receipts, issues, transfers, adjustments, worker productivity,
+ * exceptions, and activity log for a selected date.
  *
  * @author Sanod
  */
 public class DailyActivityForm extends javax.swing.JFrame {
+
+    private DailyActivityController controller;
+    private DailyActivityReportDTO currentReportData;
+    private static final DecimalFormat currencyFmt = new DecimalFormat("#,##0.00");
+    private static final DecimalFormat qtyFmt = new DecimalFormat("#,##0");
 
     /**
      * Creates new form DailyActivityForm
      */
     public DailyActivityForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new DailyActivityController();
+        initCustomLogic();
     }
 
     /**
@@ -26,21 +53,983 @@ public class DailyActivityForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        popupExportBtn = new javax.swing.JPopupMenu();
+        menuitemPDF = new javax.swing.JMenuItem();
+        menuitemXLSX = new javax.swing.JMenuItem();
+        jPanelMain = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        datepickerDate = new com.toedter.calendar.JDateChooser();
+        cmbWarehouse = new ui.components.CheckedComboBox<>();
+        jLabel2 = new javax.swing.JLabel();
+        cmbActivity = new ui.components.CheckedComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        btnGenerate = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        pnlIssuesSummary = new javax.swing.JPanel();
+        jLabel10 = new javax.swing.JLabel();
+        lblTotalGICount = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        lblTotalIssueQty = new javax.swing.JLabel();
+        lblTotalIssueQtyUOM = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        lblTotalIssueValue = new javax.swing.JLabel();
+        lblTotalIssueValueCurrency = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        lblSalesOrder = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        lblInternalConsumption = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        lblTransferOut = new javax.swing.JLabel();
+        pnlExceptionSummary = new javax.swing.JPanel();
+        jLabel24 = new javax.swing.JLabel();
+        lblShortPicks = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        lblDamagedItems = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        jLabel27 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblWorkerProductivity = new javax.swing.JTable();
+        jLabel28 = new javax.swing.JLabel();
+        lblTotalActiveWorkers = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        lblAverageTasksPerWorker = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblActivityLog = new javax.swing.JTable();
+        txtStatus = new javax.swing.JLabel();
+        jPanel11 = new javax.swing.JPanel();
+        pnlReceiptsSummary = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        lblTotalGRCount = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        lblTotalReceiptQty = new javax.swing.JLabel();
+        lblTotalReceiptQtyUOM = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        lblTotalReceiptValue = new javax.swing.JLabel();
+        lblTotalReceiptValueCurrency = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        lblReceiptPO = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        lblReceiptCustomerReturns = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        lblReceiptTransferIn = new javax.swing.JLabel();
+        pnlTransfersSummary = new javax.swing.JPanel();
+        jLabel16 = new javax.swing.JLabel();
+        lblBintoBinTransfers = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        lblTotalTransferQty = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        lblTotalTransferValueCurrency = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        pnlAdjustmentsSummary = new javax.swing.JPanel();
+        jLabel20 = new javax.swing.JLabel();
+        lblCycleCountAdjustments = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        lblInventoryAdjustments = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        lblNetAdjustmentValueCurrency = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png"))); // NOI18N
+        menuitemPDF.setText("  Export as PDF");
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemPDFActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png"))); // NOI18N
+        menuitemXLSX.setText("  Export as XLSX");
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemXLSX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemXLSXActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemXLSX);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Reports - Daily Activity (REP61)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setText("Date");
+
+        jLabel2.setText("Warehouse");
+
+        cmbActivity.setEditable(false);
+        cmbActivity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Receipts", "Issues", "Transfers", "Adjustments" }));
+
+        jLabel3.setText("Activity Type");
+
+        btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
+        btnGenerate.setText("Generate");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanelMainLayout = new javax.swing.GroupLayout(jPanelMain);
+        jPanelMain.setLayout(jPanelMainLayout);
+        jPanelMainLayout.setHorizontalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMainLayout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(datepickerDate, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbActivity, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelMainLayout.setVerticalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMainLayout.createSequentialGroup()
+                .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelMainLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(jLabel1)
+                            .addComponent(datepickerDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanelMainLayout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)
+                            .addComponent(cmbActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3)
+                            .addComponent(btnGenerate)
+                            .addComponent(btnClear)
+                            .addComponent(btnExport))))
+                .addGap(12, 12, 12))
+        );
+
+        pnlIssuesSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Issues Summary"));
+
+        jLabel10.setText("Total GI Count:");
+
+        lblTotalGICount.setText("0000");
+
+        jLabel11.setText("Total Issue Qty:");
+
+        lblTotalIssueQty.setText("0000");
+
+        lblTotalIssueQtyUOM.setText("[UOM]");
+
+        jLabel12.setText("Total Issue Value:");
+
+        lblTotalIssueValue.setText("000,000.00");
+
+        lblTotalIssueValueCurrency.setText("CUR");
+
+        jLabel13.setText("Sales Order:");
+
+        lblSalesOrder.setText("0000");
+
+        jLabel14.setText("Internal Consumption:");
+
+        lblInternalConsumption.setText("0000");
+
+        jLabel15.setText("Transfer Out:");
+
+        lblTransferOut.setText("0000");
+
+        javax.swing.GroupLayout pnlIssuesSummaryLayout = new javax.swing.GroupLayout(pnlIssuesSummary);
+        pnlIssuesSummary.setLayout(pnlIssuesSummaryLayout);
+        pnlIssuesSummaryLayout.setHorizontalGroup(
+            pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalGICount))
+                    .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalIssueQty)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalIssueQtyUOM))
+                    .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalIssueValueCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalIssueValue)))
+                .addGap(51, 51, 51)
+                .addGroup(pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTransferOut))
+                    .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel14)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblInternalConsumption))
+                    .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblSalesOrder)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlIssuesSummaryLayout.setVerticalGroup(
+            pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlIssuesSummaryLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(lblTotalGICount)
+                    .addComponent(jLabel13)
+                    .addComponent(lblSalesOrder))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(lblTotalIssueQty)
+                    .addComponent(lblTotalIssueQtyUOM)
+                    .addComponent(jLabel14)
+                    .addComponent(lblInternalConsumption))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlIssuesSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(lblTotalIssueValue)
+                    .addComponent(lblTotalIssueValueCurrency)
+                    .addComponent(jLabel15)
+                    .addComponent(lblTransferOut))
+                .addContainerGap(25, Short.MAX_VALUE))
+        );
+
+        pnlExceptionSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Exception Summary"));
+
+        jLabel24.setText("Short Picks:");
+
+        lblShortPicks.setText("0000");
+
+        jLabel25.setText("Damaged Items:");
+
+        lblDamagedItems.setText("0000");
+
+        jLabel26.setText("Variances:");
+
+        jLabel27.setText("0000");
+
+        javax.swing.GroupLayout pnlExceptionSummaryLayout = new javax.swing.GroupLayout(pnlExceptionSummary);
+        pnlExceptionSummary.setLayout(pnlExceptionSummaryLayout);
+        pnlExceptionSummaryLayout.setHorizontalGroup(
+            pnlExceptionSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlExceptionSummaryLayout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addGroup(pnlExceptionSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlExceptionSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel26)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel27))
+                    .addGroup(pnlExceptionSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel25)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblDamagedItems))
+                    .addGroup(pnlExceptionSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel24)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblShortPicks)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlExceptionSummaryLayout.setVerticalGroup(
+            pnlExceptionSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlExceptionSummaryLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(pnlExceptionSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel24)
+                    .addComponent(lblShortPicks))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlExceptionSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel25)
+                    .addComponent(lblDamagedItems))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlExceptionSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel26)
+                    .addComponent(jLabel27))
+                .addContainerGap(38, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Worker Productivity"));
+
+        jScrollPane1.setBorder(null);
+
+        tblWorkerProductivity.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Worker Name", "Tasks Completed", "Quantities Handled", "Hours Active"
+            }
+        ));
+        jScrollPane1.setViewportView(tblWorkerProductivity);
+
+        jLabel28.setText("Total Active Workers:");
+
+        lblTotalActiveWorkers.setText("000");
+
+        jLabel29.setText("Average Tasks per Worker:");
+
+        lblAverageTasksPerWorker.setText("000");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel28)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTotalActiveWorkers)
+                .addGap(50, 50, 50)
+                .addComponent(jLabel29)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblAverageTasksPerWorker)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel28)
+                    .addComponent(lblTotalActiveWorkers)
+                    .addComponent(jLabel29)
+                    .addComponent(lblAverageTasksPerWorker))
+                .addGap(7, 7, 7))
+        );
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Activity Log"));
+
+        tblActivityLog.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Time", "User", "Activity Type", "Material", "Quantity", "From/To", "Status"
+            }
+        ));
+        jScrollPane2.setViewportView(tblActivityLog);
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 558, Short.MAX_VALUE)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        pnlReceiptsSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Receipts Summary"));
+
+        jLabel4.setText("Total GR Count:");
+
+        lblTotalGRCount.setText("0000");
+
+        jLabel5.setText("Total Receipt Qty:");
+
+        lblTotalReceiptQty.setText("0000");
+
+        lblTotalReceiptQtyUOM.setText("[UOM]");
+
+        jLabel6.setText("Total Receipt Value:");
+
+        lblTotalReceiptValue.setText("000,000.00");
+
+        lblTotalReceiptValueCurrency.setText("CUR");
+
+        jLabel7.setText("PO:");
+
+        lblReceiptPO.setText("000");
+
+        jLabel8.setText("Customer Returns:");
+
+        lblReceiptCustomerReturns.setText("000");
+
+        jLabel9.setText("Transfer In:");
+
+        lblReceiptTransferIn.setText("000");
+
+        javax.swing.GroupLayout pnlReceiptsSummaryLayout = new javax.swing.GroupLayout(pnlReceiptsSummary);
+        pnlReceiptsSummary.setLayout(pnlReceiptsSummaryLayout);
+        pnlReceiptsSummaryLayout.setHorizontalGroup(
+            pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblTotalGRCount))
+                    .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalReceiptQty)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalReceiptQtyUOM))
+                    .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalReceiptValueCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalReceiptValue)))
+                .addGap(50, 50, 50)
+                .addGroup(pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblReceiptTransferIn))
+                    .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblReceiptCustomerReturns))
+                    .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblReceiptPO)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlReceiptsSummaryLayout.setVerticalGroup(
+            pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlReceiptsSummaryLayout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(lblTotalGRCount)
+                    .addComponent(jLabel7)
+                    .addComponent(lblReceiptPO))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(lblTotalReceiptQty)
+                    .addComponent(lblTotalReceiptQtyUOM)
+                    .addComponent(jLabel8)
+                    .addComponent(lblReceiptCustomerReturns))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlReceiptsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(lblTotalReceiptValue)
+                    .addComponent(lblTotalReceiptValueCurrency)
+                    .addComponent(jLabel9)
+                    .addComponent(lblReceiptTransferIn))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pnlTransfersSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfers Summary"));
+
+        jLabel16.setText("Bin-to-Bin Transfers:");
+
+        lblBintoBinTransfers.setText("0000");
+
+        jLabel17.setText("Total Transfer Qty:");
+
+        lblTotalTransferQty.setText("0000");
+
+        jLabel18.setText("Total Transfer Value:");
+
+        lblTotalTransferValueCurrency.setText("CUR");
+
+        jLabel19.setText("000,000.00");
+
+        javax.swing.GroupLayout pnlTransfersSummaryLayout = new javax.swing.GroupLayout(pnlTransfersSummary);
+        pnlTransfersSummary.setLayout(pnlTransfersSummaryLayout);
+        pnlTransfersSummaryLayout.setHorizontalGroup(
+            pnlTransfersSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTransfersSummaryLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlTransfersSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlTransfersSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel16)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblBintoBinTransfers))
+                    .addGroup(pnlTransfersSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel17)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalTransferQty))
+                    .addGroup(pnlTransfersSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalTransferValueCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel19)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlTransfersSummaryLayout.setVerticalGroup(
+            pnlTransfersSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTransfersSummaryLayout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(pnlTransfersSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel16)
+                    .addComponent(lblBintoBinTransfers))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlTransfersSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel17)
+                    .addComponent(lblTotalTransferQty))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlTransfersSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel18)
+                    .addComponent(lblTotalTransferValueCurrency)
+                    .addComponent(jLabel19))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pnlAdjustmentsSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Adjustments Summary"));
+
+        jLabel20.setText("Cycle Count Adjustments:");
+
+        lblCycleCountAdjustments.setText("0000");
+
+        jLabel21.setText("Inventory Adjustments:");
+
+        lblInventoryAdjustments.setText("0000");
+
+        jLabel22.setText("Net Adjustment Value:");
+
+        lblNetAdjustmentValueCurrency.setText("CUR");
+
+        jLabel23.setText("000,000.00");
+
+        javax.swing.GroupLayout pnlAdjustmentsSummaryLayout = new javax.swing.GroupLayout(pnlAdjustmentsSummary);
+        pnlAdjustmentsSummary.setLayout(pnlAdjustmentsSummaryLayout);
+        pnlAdjustmentsSummaryLayout.setHorizontalGroup(
+            pnlAdjustmentsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAdjustmentsSummaryLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlAdjustmentsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlAdjustmentsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel20)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCycleCountAdjustments))
+                    .addGroup(pnlAdjustmentsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel21)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblInventoryAdjustments))
+                    .addGroup(pnlAdjustmentsSummaryLayout.createSequentialGroup()
+                        .addComponent(jLabel22)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblNetAdjustmentValueCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel23)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlAdjustmentsSummaryLayout.setVerticalGroup(
+            pnlAdjustmentsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAdjustmentsSummaryLayout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addGroup(pnlAdjustmentsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel20)
+                    .addComponent(lblCycleCountAdjustments))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlAdjustmentsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel21)
+                    .addComponent(lblInventoryAdjustments))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlAdjustmentsSummaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel22)
+                    .addComponent(lblNetAdjustmentValueCurrency)
+                    .addComponent(jLabel23))
+                .addContainerGap(39, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addComponent(pnlTransfersSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlAdjustmentsSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(pnlReceiptsSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
+                .addComponent(pnlReceiptsSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlTransfersSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlAdjustmentsSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanelMain, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pnlIssuesSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlExceptionSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanelMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlIssuesSummary, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlExceptionSummary, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void initCustomLogic() {
+        datepickerDate.setDate(new Date());
+
+        // Setup Warehouses combo
+        loadWarehouses();
+
+        // Reset display
+        resetFormDisplay();
+    }
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = controller.getWarehouses();
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.addItem("All");
+                if (warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        if (wh.getWarehouseName() != null) {
+                            cmbWarehouse.addItem(wh.getWarehouseName());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load warehouses in DailyActivityForm", e);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private String getSelectedReportDate() {
+        Date selectedDate = datepickerDate.getDate();
+        if (selectedDate == null) {
+            return null;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedWarehouseFilter() {
+        Object item = cmbWarehouse.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private String getSelectedActivityFilter() {
+        Object item = cmbActivity.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private void generateReport() {
+        String reportDate = getSelectedReportDate();
+        if (reportDate == null) {
+            StatusMessageHandler.showError(txtStatus, "Please select a valid report date.");
+            return;
+        }
+
+        String warehouseFilter = getSelectedWarehouseFilter();
+        String activityFilter = getSelectedActivityFilter();
+
+        BackgroundTask task = new BackgroundTask(this, "Generating Report") {
+            private DailyActivityReportDTO dto;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Querying daily activity data for " + reportDate + "...");
+                dto = controller.generateDailyActivityReport(reportDate, warehouseFilter, activityFilter);
+                return dto != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentReportData = dto;
+                populateReportData(dto);
+                StatusMessageHandler.showSuccess(txtStatus, "Report generated successfully.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to generate report: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateReportData(DailyActivityReportDTO dto) {
+        if (dto == null) return;
+
+        // Receipts Summary
+        lblTotalGRCount.setText(String.format("%04d", dto.getTotalGRCount()));
+        lblTotalReceiptQty.setText(qtyFmt.format(dto.getTotalReceiptQty()));
+        lblTotalReceiptValue.setText(currencyFmt.format(dto.getTotalReceiptValue()));
+        lblReceiptPO.setText(String.format("%03d", dto.getReceiptPO()));
+        lblReceiptCustomerReturns.setText(String.format("%03d", dto.getReceiptCustomerReturns()));
+        lblReceiptTransferIn.setText(String.format("%03d", dto.getReceiptTransferIn()));
+
+        // Issues Summary
+        lblTotalGICount.setText(String.format("%04d", dto.getTotalGICount()));
+        lblTotalIssueQty.setText(qtyFmt.format(dto.getTotalIssueQty()));
+        lblTotalIssueValue.setText(currencyFmt.format(dto.getTotalIssueValue()));
+        lblSalesOrder.setText(String.format("%04d", dto.getSalesOrder()));
+        lblInternalConsumption.setText(String.format("%04d", dto.getInternalConsumption()));
+        lblTransferOut.setText(String.format("%04d", dto.getTransferOut()));
+
+        // Transfers Summary
+        lblBintoBinTransfers.setText(String.format("%04d", dto.getBintoBinTransfers()));
+        lblTotalTransferQty.setText(qtyFmt.format(dto.getTotalTransferQty()));
+        jLabel19.setText(currencyFmt.format(dto.getTotalTransferValue()));
+
+        // Adjustments Summary
+        lblCycleCountAdjustments.setText(String.format("%04d", dto.getCycleCountAdjustments()));
+        lblInventoryAdjustments.setText(String.format("%04d", dto.getInventoryAdjustments()));
+        jLabel23.setText(currencyFmt.format(dto.getNetAdjustmentValue()));
+
+        // Exception Summary
+        lblShortPicks.setText(String.format("%04d", dto.getShortPicks()));
+        lblDamagedItems.setText(String.format("%04d", dto.getDamagedItems()));
+        jLabel27.setText(String.format("%04d", dto.getVariances()));
+
+        // Worker Productivity Summary
+        lblTotalActiveWorkers.setText(String.format("%03d", dto.getTotalActiveWorkers()));
+        lblAverageTasksPerWorker.setText(String.format("%.1f", dto.getAverageTasksPerWorker()));
+
+        // Worker Productivity Table
+        DefaultTableModel workerModel = (DefaultTableModel) tblWorkerProductivity.getModel();
+        workerModel.setRowCount(0);
+        if (dto.getWorkerList() != null) {
+            for (WorkerProductivityItem w : dto.getWorkerList()) {
+                workerModel.addRow(new Object[]{
+                    w.getWorkerName(),
+                    w.getTasksCompleted(),
+                    qtyFmt.format(w.getQuantitiesHandled()),
+                    w.getHoursActive()
+                });
+            }
+        }
+
+        // Activity Log Table
+        DefaultTableModel logModel = (DefaultTableModel) tblActivityLog.getModel();
+        logModel.setRowCount(0);
+        if (dto.getActivityLogList() != null) {
+            for (ActivityLogItem log : dto.getActivityLogList()) {
+                logModel.addRow(new Object[]{
+                    log.getTime(),
+                    log.getUser(),
+                    log.getActivityType(),
+                    log.getMaterial(),
+                    qtyFmt.format(log.getQuantity()),
+                    log.getFromTo(),
+                    log.getStatus()
+                });
+            }
+        }
+    }
+
+    private void resetFormDisplay() {
+        currentReportData = null;
+
+        lblTotalGRCount.setText("0000");
+        lblTotalReceiptQty.setText("0");
+        lblTotalReceiptValue.setText("0.00");
+        lblReceiptPO.setText("000");
+        lblReceiptCustomerReturns.setText("000");
+        lblReceiptTransferIn.setText("000");
+
+        lblTotalGICount.setText("0000");
+        lblTotalIssueQty.setText("0");
+        lblTotalIssueValue.setText("0.00");
+        lblSalesOrder.setText("0000");
+        lblInternalConsumption.setText("0000");
+        lblTransferOut.setText("0000");
+
+        lblBintoBinTransfers.setText("0000");
+        lblTotalTransferQty.setText("0");
+        jLabel19.setText("0.00");
+
+        lblCycleCountAdjustments.setText("0000");
+        lblInventoryAdjustments.setText("0000");
+        jLabel23.setText("0.00");
+
+        lblShortPicks.setText("0000");
+        lblDamagedItems.setText("0000");
+        jLabel27.setText("0000");
+
+        lblTotalActiveWorkers.setText("000");
+        lblAverageTasksPerWorker.setText("0");
+
+        DefaultTableModel workerModel = (DefaultTableModel) tblWorkerProductivity.getModel();
+        workerModel.setRowCount(0);
+
+        DefaultTableModel logModel = (DefaultTableModel) tblActivityLog.getModel();
+        logModel.setRowCount(0);
+    }
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void menuitemPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemPDFActionPerformed
+        exportReport("PDF");
+    }//GEN-LAST:event_menuitemPDFActionPerformed
+
+    private void menuitemXLSXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemXLSXActionPerformed
+        exportReport("XLSX");
+    }//GEN-LAST:event_menuitemXLSXActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        generateReport();
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        datepickerDate.setDate(new Date());
+        if (cmbWarehouse.getItemCount() > 0) cmbWarehouse.setSelectedIndex(0);
+        if (cmbActivity.getItemCount() > 0) cmbActivity.setSelectedIndex(0);
+        resetFormDisplay();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void exportReport(String format) {
+        if (currentReportData == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please generate a report first before exporting.");
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save " + format + " Report");
+        String defaultFileName = "DailyActivityReport_" + currentReportData.getReportDate() + ("XLSX".equalsIgnoreCase(format) ? ".xlsx" : ".pdf");
+        fileChooser.setSelectedFile(new File(defaultFileName));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            final File fileToSave = fileChooser.getSelectedFile();
+            BackgroundTask task = new BackgroundTask(this, "Exporting Report as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " report file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        ReportExportUtils.exportToXLSX(currentReportData, fileToSave);
+                    } else {
+                        ReportExportUtils.exportToPDF(currentReportData, fileToSave);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " report exported: " + fileToSave.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export report as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +1067,83 @@ public class DailyActivityForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnGenerate;
+    private ui.components.CheckedComboBox<String> cmbActivity;
+    private ui.components.CheckedComboBox<String> cmbWarehouse;
+    private com.toedter.calendar.JDateChooser datepickerDate;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanelMain;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblAverageTasksPerWorker;
+    private javax.swing.JLabel lblBintoBinTransfers;
+    private javax.swing.JLabel lblCycleCountAdjustments;
+    private javax.swing.JLabel lblDamagedItems;
+    private javax.swing.JLabel lblInternalConsumption;
+    private javax.swing.JLabel lblInventoryAdjustments;
+    private javax.swing.JLabel lblNetAdjustmentValueCurrency;
+    private javax.swing.JLabel lblReceiptCustomerReturns;
+    private javax.swing.JLabel lblReceiptPO;
+    private javax.swing.JLabel lblReceiptTransferIn;
+    private javax.swing.JLabel lblSalesOrder;
+    private javax.swing.JLabel lblShortPicks;
+    private javax.swing.JLabel lblTotalActiveWorkers;
+    private javax.swing.JLabel lblTotalGICount;
+    private javax.swing.JLabel lblTotalGRCount;
+    private javax.swing.JLabel lblTotalIssueQty;
+    private javax.swing.JLabel lblTotalIssueQtyUOM;
+    private javax.swing.JLabel lblTotalIssueValue;
+    private javax.swing.JLabel lblTotalIssueValueCurrency;
+    private javax.swing.JLabel lblTotalReceiptQty;
+    private javax.swing.JLabel lblTotalReceiptQtyUOM;
+    private javax.swing.JLabel lblTotalReceiptValue;
+    private javax.swing.JLabel lblTotalReceiptValueCurrency;
+    private javax.swing.JLabel lblTotalTransferQty;
+    private javax.swing.JLabel lblTotalTransferValueCurrency;
+    private javax.swing.JLabel lblTransferOut;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
+    private javax.swing.JPanel pnlAdjustmentsSummary;
+    private javax.swing.JPanel pnlExceptionSummary;
+    private javax.swing.JPanel pnlIssuesSummary;
+    private javax.swing.JPanel pnlReceiptsSummary;
+    private javax.swing.JPanel pnlTransfersSummary;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JTable tblActivityLog;
+    private javax.swing.JTable tblWorkerProductivity;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
