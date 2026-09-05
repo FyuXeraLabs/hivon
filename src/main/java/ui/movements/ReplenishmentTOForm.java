@@ -4,17 +4,98 @@
  */
 package ui.movements;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+import javax.swing.SpinnerNumberModel;
+import java.util.ArrayList;
+import java.util.List;
+import movements.controllers.ReplenishmentTOController;
+import core.api.dao.ReplenishmentTODAO.ReplenishmentRequirement;
+import core.api.dao.ReplenishmentTODAO.ReplenishSource;
+import models.dto.StorageBinDTO;
+import models.dto.MaterialDTO;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import core.security.UserSession;
+import javax.swing.ImageIcon;
+
 /**
  *
- * @author Navodya
+ * @author Sanod
  */
 public class ReplenishmentTOForm extends javax.swing.JFrame {
+
+    private ReplenishmentTOController controller;
+    private List<ReplenishmentRequirement> loadedRequirements = new ArrayList<>();
+    private List<ReplenishmentSummaryItem> summaryList = new ArrayList<>();
+    private int selectedRequirementIndex = -1;
+    private int editingSummaryIndex = -1;
+
+    public static class ReplenishmentSummaryItem {
+        private int materialId;
+        private String materialCode;
+        private String materialName;
+        private int fromBinId;
+        private String fromBinCode;
+        private int toBinId;
+        private String toBinCode;
+        private Integer batchId;
+        private String batchNumber;
+        private double quantity;
+        private String uom;
+        private int sequence;
+
+        public ReplenishmentSummaryItem() {}
+
+        public int getMaterialId() { return materialId; }
+        public void setMaterialId(int materialId) { this.materialId = materialId; }
+
+        public String getMaterialCode() { return materialCode; }
+        public void setMaterialCode(String materialCode) { this.materialCode = materialCode; }
+
+        public String getMaterialName() { return materialName; }
+        public void setMaterialName(String materialName) { this.materialName = materialName; }
+
+        public int getFromBinId() { return fromBinId; }
+        public void setFromBinId(int fromBinId) { this.fromBinId = fromBinId; }
+
+        public String getFromBinCode() { return fromBinCode; }
+        public void setFromBinCode(String fromBinCode) { this.fromBinCode = fromBinCode; }
+
+        public int getToBinId() { return toBinId; }
+        public void setToBinId(int toBinId) { this.toBinId = toBinId; }
+
+        public String getToBinCode() { return toBinCode; }
+        public void setToBinCode(String toBinCode) { this.toBinCode = toBinCode; }
+
+        public Integer getBatchId() { return batchId; }
+        public void setBatchId(Integer batchId) { this.batchId = batchId; }
+
+        public String getBatchNumber() { return batchNumber; }
+        public void setBatchNumber(String batchNumber) { this.batchNumber = batchNumber; }
+
+        public double getQuantity() { return quantity; }
+        public void setQuantity(double quantity) { this.quantity = quantity; }
+
+        public String getUom() { return uom; }
+        public void setUom(String uom) { this.uom = uom; }
+
+        public int getSequence() { return sequence; }
+        public void setSequence(int sequence) { this.sequence = sequence; }
+    }
 
     /**
      * Creates new form ReplenishmentTOForm
      */
     public ReplenishmentTOForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new ReplenishmentTOController();
+        initTableSelectionListener();
+        clearPlanningInputs();
+        loadFilters();
     }
 
     /**
@@ -26,21 +107,929 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jPanelActions = new javax.swing.JPanel();
+        btnCreateTO = new javax.swing.JButton();
+        btnAutoPlan = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        btnPrintTO = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
+        jScrollPaneMain = new javax.swing.JScrollPane();
+        jPanelMain = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        cmbPickingBin = new javax.swing.JComboBox<>();
+        jLabel2 = new javax.swing.JLabel();
+        cmbMaterial = new javax.swing.JComboBox<>();
+        btnSearch = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblReplenishmentRequirements = new javax.swing.JTable();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        txtMaterial = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        txtCurrentQty = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        txtMinLevel = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        txtSourceBin = new javax.swing.JTextField();
+        txtReplenishQty = new javax.swing.JSpinner();
+        jLabel8 = new javax.swing.JLabel();
+        cmbDestBin = new javax.swing.JComboBox<>();
+        jLabel9 = new javax.swing.JLabel();
+        txtSequence = new javax.swing.JTextField();
+        btnAddtoTO = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblReplenishmentSummary = new javax.swing.JTable();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Transfer - Replenishment TO (TR24)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        btnCreateTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/create-14.png"))); // NOI18N
+        btnCreateTO.setText("Create TO");
+        btnCreateTO.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateTOActionPerformed(evt);
+            }
+        });
+
+        btnAutoPlan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/auto-14.png"))); // NOI18N
+        btnAutoPlan.setText("Auto-Plan");
+        btnAutoPlan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAutoPlanActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        btnPrintTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrintTO.setText("Print TO");
+        btnPrintTO.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintTOActionPerformed(evt);
+            }
+        });
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
+        jPanelActions.setLayout(jPanelActionsLayout);
+        jPanelActionsLayout.setHorizontalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnCreateTO)
+                .addGap(41, 41, 41)
+                .addComponent(btnAutoPlan)
+                .addGap(70, 70, 70)
+                .addComponent(btnPrintTO)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCancel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelActionsLayout.setVerticalGroup(
+            jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelActionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnCreateTO)
+                        .addComponent(btnAutoPlan)
+                        .addComponent(btnCancel)
+                        .addComponent(btnPrintTO)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
+
+        jLabel1.setText("Picking Bin");
+
+        cmbPickingBin.setEditable(true);
+
+        jLabel2.setText("Material");
+
+        cmbMaterial.setEditable(true);
+
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbPickingBin, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(46, 46, 46)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnSearch)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(cmbPickingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2)
+                    .addComponent(cmbMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch))
+                .addContainerGap())
+        );
+
+        tblReplenishmentRequirements.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Material Code", "Current Qty", "Min Level", "Max Level", "Suggested Replenish Qty"
+            }
+        ));
+        jScrollPane1.setViewportView(tblReplenishmentRequirements);
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Replenishment Planning"));
+
+        jLabel3.setText("Material");
+
+        txtMaterial.setEditable(false);
+
+        jLabel4.setText("Current Qty");
+
+        txtCurrentQty.setEditable(false);
+
+        jLabel5.setText("Min Level");
+
+        txtMinLevel.setEditable(false);
+
+        jLabel6.setText("Replenish Qty");
+
+        jLabel7.setText("Source Bin");
+
+        txtSourceBin.setEditable(false);
+
+        jLabel8.setText("Dest Bin");
+
+        jLabel9.setText("Sequence");
+
+        btnAddtoTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAddtoTO.setText("Add to TO");
+        btnAddtoTO.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddtoTOActionPerformed(evt);
+            }
+        });
+
+        btnEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(16, 16, 16)
+                        .addComponent(txtReplenishQty, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(28, 28, 28)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(38, 38, 38)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtMinLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(39, 39, 39)
+                        .addComponent(jLabel7))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbDestBin, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(37, 37, 37)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(76, 76, 76)
+                        .addComponent(btnAddtoTO)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtMinLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel9)
+                                .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel8)
+                                .addComponent(cmbDestBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel6)
+                                .addComponent(txtReplenishQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnAddtoTO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnDelete, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+
+        tblReplenishmentSummary.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Material", "From Bin", "To Bin", "Qty", "Sequence"
+            }
+        ));
+        jScrollPane2.setViewportView(tblReplenishmentSummary);
+
+        javax.swing.GroupLayout jPanelMainLayout = new javax.swing.GroupLayout(jPanelMain);
+        jPanelMain.setLayout(jPanelMainLayout);
+        jPanelMainLayout.setHorizontalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMainLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2))
+                .addContainerGap())
+        );
+        jPanelMainLayout.setVerticalGroup(
+            jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelMainLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jScrollPaneMain.setViewportView(jPanelMain);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPaneMain)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPaneMain)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void loadFilters() {
+        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Filters") {
+            private List<models.dto.StorageBinDTO> bins;
+            private List<models.dto.MaterialDTO> materials;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                bins = core.api.dao.BinDAO.getInstance().getBins("");
+                materials = core.api.dao.MaterialDAO.getInstance().getMaterials("");
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbPickingBin.removeAllItems();
+                cmbPickingBin.addItem("-- All Bins --");
+                if (bins != null) {
+                    for (models.dto.StorageBinDTO bin : bins) {
+                        if ("PICKING".equals(bin.getBinType())) {
+                            cmbPickingBin.addItem(bin.getBinCode());
+                        }
+                    }
+                }
+
+                cmbMaterial.removeAllItems();
+                cmbMaterial.addItem("-- All Materials --");
+                if (materials != null) {
+                    for (models.dto.MaterialDTO mat : materials) {
+                        cmbMaterial.addItem(mat.getMaterialCode());
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                core.logging.Logger.errlog("Failed to load search filters", e);
+            }
+        };
+        task.execute();
+    }
+
+    private void initTableSelectionListener() {
+        tblReplenishmentRequirements.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = tblReplenishmentRequirements.getSelectedRow();
+                if (selectedRow >= 0 && selectedRow < loadedRequirements.size()) {
+                    selectedRequirementIndex = selectedRow;
+                    ReplenishmentRequirement req = loadedRequirements.get(selectedRow);
+
+                    txtMaterial.setText(req.getMaterialCode() + " - " + req.getMaterialName());
+                    txtCurrentQty.setText(String.valueOf(req.getCurrentPickingQty()));
+                    txtMinLevel.setText(String.valueOf(req.getMinStockLevel()));
+                    
+                    double suggested = req.getReplenishQuantity();
+                    double alreadyAdded = 0.0;
+                    for (ReplenishmentSummaryItem sumItem : summaryList) {
+                        if (sumItem.getMaterialId() == req.getMaterialId() && sumItem.getToBinId() == req.getToBinId()) {
+                            alreadyAdded += sumItem.getQuantity();
+                        }
+                    }
+                    double remaining = Math.max(0.0, suggested - alreadyAdded);
+
+                    ReplenishSource nextSource = null;
+                    for (ReplenishSource src : req.getSources()) {
+                        double takenFromSrc = 0.0;
+                        for (ReplenishmentSummaryItem sumItem : summaryList) {
+                            if (sumItem.getMaterialId() == req.getMaterialId()
+                                    && sumItem.getFromBinId() == src.getFromBinId()
+                                    && ((sumItem.getBatchId() == null && src.getBatchId() == null)
+                                        || (sumItem.getBatchId() != null && sumItem.getBatchId().equals(src.getBatchId())))) {
+                                takenFromSrc += sumItem.getQuantity();
+                            }
+                        }
+                        if (src.getQuantity() > takenFromSrc) {
+                            nextSource = src;
+                            break;
+                        }
+                    }
+
+                    if (nextSource != null) {
+                        txtSourceBin.setText(nextSource.getFromBinCode());
+                        double availFromSrc = nextSource.getQuantity();
+                        double takenFromSrc = 0.0;
+                        for (ReplenishmentSummaryItem sumItem : summaryList) {
+                            if (sumItem.getMaterialId() == req.getMaterialId()
+                                    && sumItem.getFromBinId() == nextSource.getFromBinId()
+                                    && ((sumItem.getBatchId() == null && nextSource.getBatchId() == null)
+                                        || (sumItem.getBatchId() != null && sumItem.getBatchId().equals(nextSource.getBatchId())))) {
+                                takenFromSrc += sumItem.getQuantity();
+                            }
+                        }
+                        double srcRemaining = availFromSrc - takenFromSrc;
+                        double defaultQty = Math.min(remaining, srcRemaining);
+
+                        txtReplenishQty.setModel(new javax.swing.SpinnerNumberModel(defaultQty, 0.0, srcRemaining, 1.0));
+                    } else {
+                        txtSourceBin.setText("");
+                        txtReplenishQty.setModel(new javax.swing.SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+                    }
+
+                    cmbDestBin.removeAllItems();
+                    cmbDestBin.addItem(req.getToBinCode());
+                    cmbDestBin.setSelectedIndex(0);
+
+                    txtSequence.setText(String.valueOf(summaryList.size() + 1));
+                } else {
+                    clearPlanningInputs();
+                }
+            }
+        });
+
+        tblReplenishmentSummary.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = tblReplenishmentSummary.getSelectedRow();
+                if (selectedRow >= 0 && selectedRow < summaryList.size()) {
+                    editingSummaryIndex = selectedRow;
+                    ReplenishmentSummaryItem item = summaryList.get(selectedRow);
+
+                    txtMaterial.setText(item.getMaterialCode() + " - " + item.getMaterialName());
+                    double currentQty = 0;
+                    double minLevel = 0;
+                    for (ReplenishmentRequirement r : loadedRequirements) {
+                        if (r.getMaterialId() == item.getMaterialId()) {
+                            currentQty = r.getCurrentPickingQty();
+                            minLevel = r.getMinStockLevel();
+                            break;
+                        }
+                    }
+                    txtCurrentQty.setText(String.valueOf(currentQty));
+                    txtMinLevel.setText(String.valueOf(minLevel));
+
+                    txtSourceBin.setText(item.getFromBinCode());
+                    cmbDestBin.removeAllItems();
+                    cmbDestBin.addItem(item.getToBinCode());
+                    cmbDestBin.setSelectedIndex(0);
+                    txtSequence.setText(String.valueOf(item.getSequence()));
+
+                    double maxAvail = item.getQuantity();
+                    for (ReplenishmentRequirement r : loadedRequirements) {
+                        if (r.getMaterialId() == item.getMaterialId()) {
+                            for (ReplenishSource src : r.getSources()) {
+                                if (src.getFromBinId() == item.getFromBinId() &&
+                                    ((src.getBatchId() == null && item.getBatchId() == null) || 
+                                     (src.getBatchId() != null && src.getBatchId().equals(item.getBatchId())))) {
+                                    double otherUsage = 0.0;
+                                    for (int k = 0; k < summaryList.size(); k++) {
+                                        if (k != selectedRow) {
+                                            ReplenishmentSummaryItem other = summaryList.get(k);
+                                            if (other.getMaterialId() == item.getMaterialId() &&
+                                                other.getFromBinId() == item.getFromBinId() &&
+                                                ((other.getBatchId() == null && item.getBatchId() == null) ||
+                                                 (other.getBatchId() != null && other.getBatchId().equals(item.getBatchId())))) {
+                                                otherUsage += other.getQuantity();
+                                            }
+                                        }
+                                    }
+                                    maxAvail = src.getQuantity() - otherUsage;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    txtReplenishQty.setModel(new javax.swing.SpinnerNumberModel(item.getQuantity(), 0.0, maxAvail, 1.0));
+                }
+            }
+        });
+    }
+
+    private void performSearch() {
+        Integer warehouseId = null;
+        try {
+            if (core.security.UserSession.getInstance().getCurrentUser() != null) {
+                warehouseId = core.security.UserSession.getInstance().getCurrentUser().getWarehouseId();
+            }
+        } catch (Exception e) {
+            core.logging.Logger.errlog("Could not read warehouse ID from session", e);
+        }
+        if (warehouseId == null) {
+            warehouseId = 1;
+        }
+
+        final int whId = warehouseId;
+        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Searching low-stock items") {
+            private List<ReplenishmentRequirement> reqs;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching replenishment requirements...");
+                reqs = controller.getLowStockReplenishments(whId);
+                return reqs != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedRequirements.clear();
+                if (reqs != null) {
+                    loadedRequirements.addAll(reqs);
+                }
+                refreshRequirementsTable();
+                if (loadedRequirements.isEmpty()) {
+                    ui.components.StatusMessageHandler.showInfo(txtStatus, "No low-stock items requiring replenishment found.");
+                } else {
+                    ui.components.StatusMessageHandler.showInfo(txtStatus, "Found " + loadedRequirements.size() + " low-stock item(s).");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                ui.components.StatusMessageHandler.showError(txtStatus, "Failed to load requirements: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void refreshRequirementsTable() {
+        DefaultTableModel model = (DefaultTableModel) tblReplenishmentRequirements.getModel();
+        model.setRowCount(0);
+
+        String binFilter = "";
+        if (cmbPickingBin.getSelectedItem() != null) {
+            binFilter = cmbPickingBin.getSelectedItem().toString().trim();
+        }
+        String materialFilter = "";
+        if (cmbMaterial.getSelectedItem() != null) {
+            materialFilter = cmbMaterial.getSelectedItem().toString().trim();
+        }
+
+        for (ReplenishmentRequirement req : loadedRequirements) {
+            if (!binFilter.isEmpty() && !binFilter.equals("-- All Bins --") && !req.getToBinCode().toLowerCase().contains(binFilter.toLowerCase())) {
+                continue;
+            }
+            if (!materialFilter.isEmpty() && !materialFilter.equals("-- All Materials --") && !req.getMaterialCode().toLowerCase().contains(materialFilter.toLowerCase()) && !req.getMaterialName().toLowerCase().contains(materialFilter.toLowerCase())) {
+                continue;
+            }
+
+            model.addRow(new Object[]{
+                req.getMaterialCode() + " - " + req.getMaterialName(),
+                req.getCurrentPickingQty(),
+                req.getMinStockLevel(),
+                req.getMaxStockLevel(),
+                req.getReplenishQuantity()
+            });
+        }
+    }
+
+    private void addToTO() {
+        int selectedRow = tblReplenishmentRequirements.getSelectedRow();
+        if (selectedRow < 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a requirement item first.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        ReplenishmentRequirement req = loadedRequirements.get(selectedRow);
+        double qty = (Double) txtReplenishQty.getValue();
+        if (qty <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please enter a valid quantity greater than 0.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String srcBinCode = txtSourceBin.getText().trim();
+        if (srcBinCode.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "No source reserve bin available for this requirement.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        ReplenishSource matchedSrc = null;
+        for (ReplenishSource src : req.getSources()) {
+            if (src.getFromBinCode().equals(srcBinCode)) {
+                matchedSrc = src;
+                break;
+            }
+        }
+
+        if (matchedSrc == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Invalid source bin selected.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        ReplenishmentSummaryItem item = new ReplenishmentSummaryItem();
+        item.setMaterialId(req.getMaterialId());
+        item.setMaterialCode(req.getMaterialCode());
+        item.setMaterialName(req.getMaterialName());
+        item.setFromBinId(matchedSrc.getFromBinId());
+        item.setFromBinCode(matchedSrc.getFromBinCode());
+        item.setToBinId(req.getToBinId());
+        item.setToBinCode(req.getToBinCode());
+        item.setBatchId(matchedSrc.getBatchId());
+        item.setBatchNumber(matchedSrc.getBatchNumber());
+        item.setQuantity(qty);
+        item.setUom(req.getUom());
+        
+        int seqVal = 1;
+        try {
+            seqVal = Integer.parseInt(txtSequence.getText().trim());
+        } catch (Exception ex) {
+            seqVal = summaryList.size() + 1;
+        }
+        item.setSequence(seqVal);
+
+        summaryList.add(item);
+        refreshSummaryTable();
+        
+        tblReplenishmentRequirements.getSelectionModel().clearSelection();
+        tblReplenishmentRequirements.setRowSelectionInterval(selectedRow, selectedRow);
+        ui.components.StatusMessageHandler.showInfo(txtStatus, "Added item to transfer order plan.");
+    }
+
+    private void editSummaryItem() {
+        if (editingSummaryIndex < 0 || editingSummaryIndex >= summaryList.size()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select an item from the summary table to update.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        ReplenishmentSummaryItem item = summaryList.get(editingSummaryIndex);
+        double qty = (Double) txtReplenishQty.getValue();
+        if (qty <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Quantity must be greater than 0.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int seqVal = 1;
+        try {
+            seqVal = Integer.parseInt(txtSequence.getText().trim());
+        } catch (Exception ex) {
+            seqVal = item.getSequence();
+        }
+
+        item.setQuantity(qty);
+        item.setSequence(seqVal);
+        refreshSummaryTable();
+        
+        tblReplenishmentSummary.clearSelection();
+        editingSummaryIndex = -1;
+        ui.components.StatusMessageHandler.showInfo(txtStatus, "Updated transfer order item.");
+    }
+
+    private void deleteSummaryItem() {
+        if (editingSummaryIndex >= 0 && editingSummaryIndex < summaryList.size()) {
+            summaryList.remove(editingSummaryIndex);
+            refreshSummaryTable();
+            tblReplenishmentSummary.clearSelection();
+            editingSummaryIndex = -1;
+            ui.components.StatusMessageHandler.showInfo(txtStatus, "Removed item from plan.");
+        } else {
+            int selectedRow = tblReplenishmentSummary.getSelectedRow();
+            if (selectedRow >= 0 && selectedRow < summaryList.size()) {
+                summaryList.remove(selectedRow);
+                refreshSummaryTable();
+                tblReplenishmentSummary.clearSelection();
+                ui.components.StatusMessageHandler.showInfo(txtStatus, "Removed item from plan.");
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Please select a summary item to delete.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void clearForm() {
+        tblReplenishmentRequirements.clearSelection();
+        tblReplenishmentSummary.clearSelection();
+        summaryList.clear();
+        refreshSummaryTable();
+        clearPlanningInputs();
+        selectedRequirementIndex = -1;
+        editingSummaryIndex = -1;
+        ui.components.StatusMessageHandler.showInfo(txtStatus, "Form cleared.");
+    }
+
+    private void clearPlanningInputs() {
+        txtMaterial.setText("");
+        txtCurrentQty.setText("");
+        txtMinLevel.setText("");
+        txtSourceBin.setText("");
+        cmbDestBin.removeAllItems();
+        txtReplenishQty.setModel(new javax.swing.SpinnerNumberModel(0.0, 0.0, 0.0, 1.0));
+        txtSequence.setText("");
+    }
+
+    private void autoPlan() {
+        if (loadedRequirements.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No requirements loaded. Please search first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        BackgroundTask task = new BackgroundTask(this, "Auto-Planning") {
+            private List<ReplenishmentSummaryItem> planned;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Generating replenishment plan...");
+                planned = new ArrayList<>();
+                int seq = 1;
+                for (ReplenishmentRequirement req : loadedRequirements) {
+                    double suggested = req.getReplenishQuantity();
+                    double allocated = 0.0;
+                    for (ReplenishSource src : req.getSources()) {
+                        double take = Math.min(src.getQuantity(), suggested - allocated);
+                        if (take > 0) {
+                            ReplenishmentSummaryItem item = new ReplenishmentSummaryItem();
+                            item.setMaterialId(req.getMaterialId());
+                            item.setMaterialCode(req.getMaterialCode());
+                            item.setMaterialName(req.getMaterialName());
+                            item.setFromBinId(src.getFromBinId());
+                            item.setFromBinCode(src.getFromBinCode());
+                            item.setToBinId(req.getToBinId());
+                            item.setToBinCode(req.getToBinCode());
+                            item.setBatchId(src.getBatchId());
+                            item.setBatchNumber(src.getBatchNumber());
+                            item.setQuantity(take);
+                            item.setUom(req.getUom());
+                            item.setSequence(seq++);
+                            planned.add(item);
+                            allocated += take;
+                        }
+                        if (allocated >= suggested) {
+                            break;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                summaryList.clear();
+                summaryList.addAll(planned);
+                refreshSummaryTable();
+                StatusMessageHandler.showInfo(txtStatus, "Auto-planning completed. Generated " + summaryList.size() + " task(s).");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Auto-planning failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void createTO() {
+        if (summaryList.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please add items to replenish.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+            "Create replenishment TO? Stock will be reserved from reserve to picking areas.",
+            "Confirm Transfer Order",
+            javax.swing.JOptionPane.YES_NO_OPTION);
+
+        if (confirm != javax.swing.JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        List<com.google.gson.JsonObject> items = new java.util.ArrayList<>();
+        for (ReplenishmentSummaryItem item : summaryList) {
+            com.google.gson.JsonObject obj = new com.google.gson.JsonObject();
+            obj.addProperty("material_id", item.getMaterialId());
+            if (item.getBatchId() != null) {
+                obj.addProperty("batch_id", item.getBatchId());
+            }
+            obj.addProperty("from_bin_id", item.getFromBinId());
+            obj.addProperty("to_bin_id", item.getToBinId());
+            obj.addProperty("required_quantity", item.getQuantity());
+            obj.addProperty("uom", item.getUom());
+            items.add(obj);
+        }
+
+        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Creating Replenishment TO") {
+            private com.google.gson.JsonObject result;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Submitting replenishment request...");
+                result = controller.createReplenishmentTransferOrder(items, "Replenishment TO");
+                return result != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                String toNumber = "N/A";
+                if (result != null && result.has("to_number")) {
+                    toNumber = result.get("to_number").getAsString();
+                }
+                javax.swing.JOptionPane.showMessageDialog(ReplenishmentTOForm.this,
+                    "Replenishment TO created successfully. TO Number: " + toNumber,
+                    "Success",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+                int printConfirm = javax.swing.JOptionPane.showConfirmDialog(ReplenishmentTOForm.this,
+                    "Print replenishment list?",
+                    "Print TO",
+                    javax.swing.JOptionPane.YES_NO_OPTION);
+                if (printConfirm == javax.swing.JOptionPane.YES_OPTION) {
+                    ui.components.StatusMessageHandler.showInfo(txtStatus, "Printing Transfer Order feature is not implemented yet.");
+                }
+                clearForm();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                ui.components.StatusMessageHandler.showError(txtStatus, "Failed to create Replenishment TO: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void refreshSummaryTable() {
+        DefaultTableModel model = (DefaultTableModel) tblReplenishmentSummary.getModel();
+        model.setRowCount(0);
+        for (ReplenishmentSummaryItem item : summaryList) {
+            String materialDisplay = item.getMaterialCode() + " - " + item.getMaterialName();
+            model.addRow(new Object[]{
+                materialDisplay,
+                item.getFromBinCode(),
+                item.getToBinCode(),
+                item.getQuantity(),
+                item.getSequence()
+            });
+        }
+    }
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {
+        performSearch();
+    }
+
+    private void btnCreateTOActionPerformed(java.awt.event.ActionEvent evt) {
+        createTO();
+    }
+
+    private void btnAutoPlanActionPerformed(java.awt.event.ActionEvent evt) {
+        autoPlan();
+    }
+
+    private void btnPrintTOActionPerformed(java.awt.event.ActionEvent evt) {
+        ui.components.StatusMessageHandler.showInfo(txtStatus, "Printing Transfer Order feature is not implemented yet.");
+    }
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {
+        this.dispose();
+    }
+
+    private void btnAddtoTOActionPerformed(java.awt.event.ActionEvent evt) {
+        addToTO();
+    }
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {
+        editSummaryItem();
+    }
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
+        deleteSummaryItem();
+    }
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {
+        clearForm();
+    }
+
+
 
     /**
      * @param args the command line arguments
@@ -78,5 +1067,42 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddtoTO;
+    private javax.swing.JButton btnAutoPlan;
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnCreateTO;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnPrintTO;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<String> cmbDestBin;
+    private javax.swing.JComboBox<String> cmbMaterial;
+    private javax.swing.JComboBox<String> cmbPickingBin;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanelActions;
+    private javax.swing.JPanel jPanelMain;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPaneMain;
+    private javax.swing.JTable tblReplenishmentRequirements;
+    private javax.swing.JTable tblReplenishmentSummary;
+    private javax.swing.JTextField txtCurrentQty;
+    private javax.swing.JTextField txtMaterial;
+    private javax.swing.JTextField txtMinLevel;
+    private javax.swing.JSpinner txtReplenishQty;
+    private javax.swing.JTextField txtSequence;
+    private javax.swing.JTextField txtSourceBin;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
