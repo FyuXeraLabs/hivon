@@ -101,8 +101,6 @@ public class VendorDAO {
         if (vendorDto.getAddress() != null) {
             payload.addProperty("address", vendorDto.getAddress());
         }
-        payload.addProperty("is_active", vendorDto.getIsActive() != null ? vendorDto.getIsActive() : true);
-
         HttpRequest request = apiClient.authRequest(ApiConfig.VENDORS)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -130,10 +128,6 @@ public class VendorDAO {
         if (vendorDto.getAddress() != null) {
             payload.addProperty("address", vendorDto.getAddress());
         }
-        if (vendorDto.getIsActive() != null) {
-            payload.addProperty("is_active", vendorDto.getIsActive());
-        }
-
         HttpRequest request = apiClient.authRequest(ApiConfig.VENDORS + "/" + vendorDto.getVendorId())
                 .PUT(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -175,9 +169,6 @@ public class VendorDAO {
         }
         if (json.has("address") && !json.get("address").isJsonNull()) {
             dto.setAddress(json.get("address").getAsString());
-        }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
         }
         if (json.has("created_date") && !json.get("created_date").isJsonNull()) {
             dto.setCreatedDate(parseDateTime(json.get("created_date").getAsString()));

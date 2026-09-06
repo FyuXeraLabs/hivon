@@ -11,17 +11,15 @@ public class UOMDTO {
     private String paramValue;
     private String description;
     private String category;
-    private Boolean isActive;
 
     public UOMDTO() {
     }
 
-    public UOMDTO(String paramKey, String paramValue, String description, String category, Boolean isActive) {
+    public UOMDTO(String paramKey, String paramValue, String description, String category) {
         this.paramKey = paramKey;
         this.paramValue = paramValue;
         this.description = description;
         this.category = category;
-        this.isActive = isActive;
     }
 
     public String getParamKey() {
@@ -54,18 +52,6 @@ public class UOMDTO {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public boolean isActive() {
-        return isActive != null && isActive;
     }
 
     @Override

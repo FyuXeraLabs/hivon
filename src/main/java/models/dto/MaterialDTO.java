@@ -21,7 +21,6 @@ public class MaterialDTO {
     private Double maxStockLevel;
     private Double reorderPoint;
     private Double unitCost;
-    private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
@@ -134,14 +133,6 @@ public class MaterialDTO {
 
     private String storageCondition;
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
@@ -156,10 +147,6 @@ public class MaterialDTO {
 
     public void setModifiedDate(LocalDateTime modifiedDate) {
         this.modifiedDate = modifiedDate;
-    }
-
-    public boolean isActive() {
-        return isActive != null && isActive;
     }
 
     public boolean isBatchManaged() {

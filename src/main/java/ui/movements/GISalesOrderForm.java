@@ -208,9 +208,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
                 cmbCustomer.removeAllItems();
                 cmbCustomer.addItem("-- All Customers --");
                 for (CustomerDTO c : customerList) {
-                    if (c.getIsActive() == null || c.getIsActive()) {
-                        cmbCustomer.addItem(c.getCustomerCode() + " - " + c.getCustomerName());
-                    }
+                    cmbCustomer.addItem(c.getCustomerCode() + " - " + c.getCustomerName());
                 }
                 StatusMessageHandler.showSuccess(txtStatus, "Customers loaded successfully.");
             }
@@ -645,7 +643,6 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         item.setUom(selectedSoItem.getUom() != null ? selectedSoItem.getUom() : "PCS");
         item.setBatchId(selectedBatchId);
         item.setBatchNumber(selectedBatchNumber);
-        item.setLineNotes(txtRemarks.getText().trim());
 
         shipmentSummaryList.add(item);
         refreshShipmentSummaryTable();
@@ -679,7 +676,6 @@ public class GISalesOrderForm extends javax.swing.JFrame {
             txtShipQty.setText(String.valueOf(item.getQuantity()));
             txtShipQty.setEditable(true);
             cmbPickingBin.setText(item.getBinCode());
-            txtRemarks.setText(item.getLineNotes() != null ? item.getLineNotes() : "");
 
             selectedFromBinId = item.getFromBinId();
             selectedFromBinCode = item.getBinCode();
@@ -736,7 +732,6 @@ public class GISalesOrderForm extends javax.swing.JFrame {
 
             GISalesOrderItem item = shipmentSummaryList.get(editingSummaryIndex);
             item.setQuantity(shipQty);
-            item.setLineNotes(txtRemarks.getText().trim());
 
             refreshShipmentSummaryTable();
             clearShipmentDetailsInputs();
@@ -794,7 +789,6 @@ public class GISalesOrderForm extends javax.swing.JFrame {
 
         String soNumber = currentSalesOrder.getSoNumber();
         String refDate = txtSoDate.getText().trim();
-        String notes = "GI for Sales Order " + soNumber;
 
         BackgroundTask task = new BackgroundTask(this, "Completing Goods Issue") {
             private String movementNumber;
@@ -802,7 +796,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Posting goods issue to server...");
-                movementNumber = controller.completeGISalesOrder(soNumber, refDate, notes, shipmentSummaryList);
+                movementNumber = controller.completeGISalesOrder(soNumber, refDate, shipmentSummaryList);
                 return movementNumber != null;
             }
 

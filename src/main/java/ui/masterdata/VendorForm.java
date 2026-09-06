@@ -75,7 +75,6 @@ public class VendorForm extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        chkIsActive = new javax.swing.JCheckBox();
         txtCode = new javax.swing.JTextField();
         txtName = new javax.swing.JTextField();
         txtContact = new javax.swing.JTextField();
@@ -159,11 +158,11 @@ public class VendorForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Code", "Name", "Contact", "Phone", "Active"
+                "Code", "Name", "Contact", "Phone"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -191,10 +190,6 @@ public class VendorForm extends javax.swing.JFrame {
 
         jLabel6.setText("Email");
 
-        chkIsActive.setSelected(true);
-        chkIsActive.setText("Active");
-        chkIsActive.setEnabled(false);
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -214,13 +209,10 @@ public class VendorForm extends javax.swing.JFrame {
                             .addComponent(jLabel6))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtName)
+                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
                             .addComponent(txtContact)
                             .addComponent(txtPhone)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
-                                .addComponent(chkIsActive)))))
+                            .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(555, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -245,8 +237,7 @@ public class VendorForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkIsActive))
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(60, Short.MAX_VALUE))
         );
 
@@ -441,7 +432,6 @@ public class VendorForm extends javax.swing.JFrame {
                 txtPhone.setText(selectedVendor.getPhone());
                 txtEmail.setText(selectedVendor.getEmail());
                 txtAddress.setText(selectedVendor.getAddress());
-                chkIsActive.setSelected(selectedVendor.getIsActive() != null && selectedVendor.getIsActive());
                 txtCode.setEditable(false);
                 isAddMode = false;
                 updateButtonStates();
@@ -470,7 +460,6 @@ public class VendorForm extends javax.swing.JFrame {
         dto.setPhone(txtPhone.getText().trim());
         dto.setEmail(txtEmail.getText().trim());
         dto.setAddress(txtAddress.getText().trim());
-        dto.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Saving Vendor") {
             private int vendorId;
@@ -515,7 +504,6 @@ public class VendorForm extends javax.swing.JFrame {
         selectedVendor.setPhone(txtPhone.getText().trim());
         selectedVendor.setEmail(txtEmail.getText().trim());
         selectedVendor.setAddress(txtAddress.getText().trim());
-        selectedVendor.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Updating Vendor") {
 
@@ -689,8 +677,7 @@ public class VendorForm extends javax.swing.JFrame {
                     v.getVendorCode(),
                     v.getVendorName(),
                     v.getContactPerson(),
-                    v.getPhone(),
-                    v.getIsActive() != null && v.getIsActive() ? "Yes" : "No"
+                    v.getPhone()
                 });
             }
         }
@@ -715,7 +702,6 @@ public class VendorForm extends javax.swing.JFrame {
         txtPhone.setText("");
         txtEmail.setText("");
         txtAddress.setText("");
-        chkIsActive.setSelected(false);
         txtCode.setEditable(true);
         selectedVendor = null;
         tblVendors.clearSelection();
@@ -849,7 +835,6 @@ public class VendorForm extends javax.swing.JFrame {
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnViewPOs;
     private javax.swing.JButton btnViewReceipts;
-    private javax.swing.JCheckBox chkIsActive;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

@@ -924,7 +924,6 @@ public class UserManagementForm extends javax.swing.JFrame {
 
         chkIsActive.setSelected(true);
         chkIsActive.setText("Active");
-        chkIsActive.setEnabled(false);
 
         txtUsername.setNextFocusableComponent(txtFullName);
 

@@ -95,8 +95,6 @@ public class BinDAO {
         }
         payload.addProperty("max_capacity", binDto.getMaxCapacity());
         payload.addProperty("used_capacity", binDto.getUsedCapacity());
-        payload.addProperty("is_active", binDto.getIsActive() != null ? binDto.getIsActive() : true);
-
         HttpRequest request = apiClient.authRequest(ApiConfig.BINS)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -116,10 +114,6 @@ public class BinDAO {
         }
         payload.addProperty("max_capacity", binDto.getMaxCapacity());
         payload.addProperty("used_capacity", binDto.getUsedCapacity());
-        if (binDto.getIsActive() != null) {
-            payload.addProperty("is_active", binDto.getIsActive());
-        }
-
         HttpRequest request = apiClient.authRequest(ApiConfig.BINS + "/" + binDto.getBinId())
                 .PUT(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -190,9 +184,6 @@ public class BinDAO {
         }
         if (json.has("used_capacity") && !json.get("used_capacity").isJsonNull()) {
             dto.setUsedCapacity(json.get("used_capacity").getAsDouble());
-        }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
         }
         if (json.has("created_date") && !json.get("created_date").isJsonNull()) {
             dto.setCreatedDate(parseDateTime(json.get("created_date").getAsString()));

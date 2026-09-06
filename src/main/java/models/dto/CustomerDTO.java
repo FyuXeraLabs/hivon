@@ -16,7 +16,6 @@ public class CustomerDTO {
     private String email;
     private String address;
     private String shippingAddress;
-    private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
@@ -87,14 +86,6 @@ public class CustomerDTO {
         this.shippingAddress = shippingAddress;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
@@ -109,10 +100,6 @@ public class CustomerDTO {
 
     public void setModifiedDate(LocalDateTime modifiedDate) {
         this.modifiedDate = modifiedDate;
-    }
-
-    public boolean isActive() {
-        return isActive != null && isActive;
     }
 
     @Override

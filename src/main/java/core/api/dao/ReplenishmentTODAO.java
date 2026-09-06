@@ -133,16 +133,13 @@ public class ReplenishmentTODAO {
     }
 
     // POST /api/transfer-orders/replenishment
-    public JsonObject createReplenishmentTransferOrder(List<JsonObject> items, String notes) throws Exception {
+    public JsonObject createReplenishmentTransferOrder(List<JsonObject> items) throws Exception {
         JsonObject payload = new JsonObject();
         JsonArray itemsArray = new JsonArray();
         for (JsonObject item : items) {
             itemsArray.add(item);
         }
         payload.add("items", itemsArray);
-        if (notes != null && !notes.trim().isEmpty()) {
-            payload.addProperty("notes", notes);
-        }
 
         HttpRequest request = apiClient.authRequest("/transfer-orders/replenishment")
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))

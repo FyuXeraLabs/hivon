@@ -71,7 +71,6 @@ public class UOMForm extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        chkIsActive = new javax.swing.JCheckBox();
         txtCode = new javax.swing.JTextField();
         txtName = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
@@ -141,11 +140,11 @@ public class UOMForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "UOM Code", "UOM Name", "Active"
+                "UOM Code", "UOM Name"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -167,10 +166,6 @@ public class UOMForm extends javax.swing.JFrame {
 
         jLabel3.setText("UOM Name *");
 
-        chkIsActive.setSelected(true);
-        chkIsActive.setText("Active");
-        chkIsActive.setEnabled(false);
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -185,10 +180,8 @@ public class UOMForm extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(18, 18, 18)
-                        .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(26, 26, 26)
-                        .addComponent(chkIsActive)))
-                .addContainerGap(473, Short.MAX_VALUE))
+                        .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(555, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -200,8 +193,7 @@ public class UOMForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkIsActive))
+                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(40, Short.MAX_VALUE))
         );
 
@@ -341,7 +333,6 @@ public class UOMForm extends javax.swing.JFrame {
             if (selectedUOM != null) {
                 txtCode.setText(selectedUOM.getParamKey());
                 txtName.setText(selectedUOM.getParamValue());
-                chkIsActive.setSelected(selectedUOM.isActive());
                 txtCode.setEditable(false);
                 isAddMode = false;
                 updateButtonStates();
@@ -367,7 +358,6 @@ public class UOMForm extends javax.swing.JFrame {
         dto.setParamKey(txtCode.getText().trim());
         dto.setParamValue(txtName.getText().trim());
         dto.setDescription(txtName.getText().trim());
-        dto.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Saving UOM") {
 
@@ -407,7 +397,6 @@ public class UOMForm extends javax.swing.JFrame {
         selectedUOM.setParamKey(txtCode.getText().trim());
         selectedUOM.setParamValue(txtName.getText().trim());
         selectedUOM.setDescription(txtName.getText().trim());
-        selectedUOM.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Updating UOM") {
 
@@ -566,8 +555,7 @@ public class UOMForm extends javax.swing.JFrame {
             for (UOMDTO u : uoms) {
                 model.addRow(new Object[]{
                     u.getParamKey(),
-                    u.getParamValue(),
-                    u.isActive() ? "Yes" : "No"
+                    u.getParamValue()
                 });
             }
         }
@@ -588,7 +576,6 @@ public class UOMForm extends javax.swing.JFrame {
     private void clearForm() {
         txtCode.setText("");
         txtName.setText("");
-        chkIsActive.setSelected(false);
         txtCode.setEditable(true);
         selectedUOM = null;
         tblUOMs.clearSelection();
@@ -720,7 +707,6 @@ public class UOMForm extends javax.swing.JFrame {
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;
-    private javax.swing.JCheckBox chkIsActive;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

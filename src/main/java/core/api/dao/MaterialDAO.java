@@ -111,8 +111,6 @@ public class MaterialDAO {
         if (materialDto.getUnitCost() != null) {
             payload.addProperty("unit_cost", materialDto.getUnitCost());
         }
-        payload.addProperty("is_active", materialDto.getIsActive() != null ? materialDto.getIsActive() : true);
-
         HttpRequest request = apiClient.authRequest(ApiConfig.MATERIALS)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -161,10 +159,6 @@ public class MaterialDAO {
         if (materialDto.getUnitCost() != null) {
             payload.addProperty("unit_cost", materialDto.getUnitCost());
         }
-        if (materialDto.getIsActive() != null) {
-            payload.addProperty("is_active", materialDto.getIsActive());
-        }
-
         HttpRequest request = apiClient.authRequest(ApiConfig.MATERIALS + "/" + materialDto.getMaterialId())
                 .PUT(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -212,9 +206,6 @@ public class MaterialDAO {
         }
         if (json.has("is_batch_managed") && !json.get("is_batch_managed").isJsonNull()) {
             dto.setIsBatchManaged(json.get("is_batch_managed").getAsBoolean());
-        }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
         }
         if (json.has("min_stock_level") && !json.get("min_stock_level").isJsonNull()) {
             dto.setMinStockLevel(json.get("min_stock_level").getAsDouble());

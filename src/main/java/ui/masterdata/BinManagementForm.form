@@ -273,7 +273,6 @@
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
                               <Component id="spinMaxCapacity" pref="250" max="32767" attributes="0"/>
                               <Component id="cmbBinType" pref="250" max="32767" attributes="0"/>
-                              <Component id="chkActive" pref="250" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -314,9 +313,7 @@
                       <Component id="jLabelBinType" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="cmbBinType" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
-                  <Component id="chkActive" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="15" max="32767" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -378,13 +375,6 @@
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
           </AuxValues>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkActive">
-          <Properties>
-            <Property name="selected" type="boolean" value="true"/>
-            <Property name="text" type="java.lang.String" value="Active"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
         </Component>
       </SubComponents>
     </Container>

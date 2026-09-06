@@ -69,8 +69,6 @@ public class SystemParameterDAO {
         } else {
             payload.addProperty("category", "uom");
         }
-        payload.addProperty("is_active", uomDto.getIsActive() != null ? uomDto.getIsActive() : true);
-
         HttpRequest request = apiClient.authRequest(ApiConfig.SYSTEM_PARAMETERS)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -90,10 +88,6 @@ public class SystemParameterDAO {
         if (uomDto.getCategory() != null) {
             payload.addProperty("category", uomDto.getCategory());
         }
-        if (uomDto.getIsActive() != null) {
-            payload.addProperty("is_active", uomDto.getIsActive());
-        }
-
         HttpRequest request = apiClient.authRequest(ApiConfig.SYSTEM_PARAMETERS + "/" + uomDto.getParamKey())
                 .PUT(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -127,10 +121,6 @@ public class SystemParameterDAO {
         if (json.has("category") && !json.get("category").isJsonNull()) {
             dto.setCategory(json.get("category").getAsString());
         }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
-        }
-
         return dto;
     }
 }

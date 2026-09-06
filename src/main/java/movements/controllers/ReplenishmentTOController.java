@@ -33,9 +33,9 @@ public class ReplenishmentTOController {
     }
 
     // submits the planned replenishment items and optional notes to create a replenishment TO
-    public JsonObject createReplenishmentTransferOrder(List<JsonObject> items, String notes) throws Exception {
+    public JsonObject createReplenishmentTransferOrder(List<JsonObject> items) throws Exception {
         JsonObject result = RetryHelper.executeWithRetry(
-            () -> ReplenishmentTODAO.getInstance().createReplenishmentTransferOrder(items, notes),
+            () -> ReplenishmentTODAO.getInstance().createReplenishmentTransferOrder(items),
             "failed to create replenishment transfer order"
         );
         if (result != null && result.has("to_number")) {

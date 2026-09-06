@@ -33,13 +33,11 @@ public class MovementItem implements Serializable {
 
     private BigDecimal processedQuantity;
 
-    private String lineNotes;
-
     private LocalDateTime createdDate;
 
     public MovementItem(int movementItemId, int movementId, int materialId, Integer batchId, Integer fromBinId, 
             Integer toBinId, BigDecimal quantity, String uom, BigDecimal unitPrice, LineStatus lineStatus, 
-            BigDecimal processedQuantity, String lineNotes, LocalDateTime createdDate) {
+            BigDecimal processedQuantity, LocalDateTime createdDate) {
         this.movementItemId = movementItemId;
         this.movementId = movementId;
         this.materialId = materialId;
@@ -51,7 +49,6 @@ public class MovementItem implements Serializable {
         this.unitPrice = unitPrice;
         this.lineStatus = lineStatus;
         this.processedQuantity = processedQuantity;
-        this.lineNotes = lineNotes;
         this.createdDate = createdDate;
     }
 
@@ -144,14 +141,6 @@ public class MovementItem implements Serializable {
 
     public void setProcessedQuantity(BigDecimal processedQuantity) {
         this.processedQuantity = processedQuantity;
-    }
-
-    public String getLineNotes() {
-        return lineNotes;
-    }
-
-    public void setLineNotes(String lineNotes) {
-        this.lineNotes = lineNotes;
     }
 
     public LocalDateTime getCreatedDate() {

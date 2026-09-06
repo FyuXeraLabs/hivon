@@ -18,7 +18,6 @@ public class BatchDTO {
     private LocalDate manufactureDate;
     private LocalDate expiryDate;
     private String qualityStatus;
-    private Integer parentBatchId;
     private LocalDateTime createdDate;
 
     public BatchDTO() {
@@ -94,14 +93,6 @@ public class BatchDTO {
 
     public void setQualityStatus(String qualityStatus) {
         this.qualityStatus = qualityStatus;
-    }
-
-    public Integer getParentBatchId() {
-        return parentBatchId;
-    }
-
-    public void setParentBatchId(Integer parentBatchId) {
-        this.parentBatchId = parentBatchId;
     }
 
     public LocalDateTime getCreatedDate() {

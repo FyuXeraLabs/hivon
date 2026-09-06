@@ -16,7 +16,6 @@ public class StorageBinDTO {
     private String zoneCode;
     private String binType;
     private Boolean isFrozen;
-    private Boolean isActive;
     private String warehouseCode;
     private String warehouseName;
     private Double maxCapacity;
@@ -90,14 +89,6 @@ public class StorageBinDTO {
 
     public void setIsFrozen(Boolean isFrozen) {
         this.isFrozen = isFrozen;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
     }
 
     public String getWarehouseCode() {

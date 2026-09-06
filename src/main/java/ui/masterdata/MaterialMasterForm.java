@@ -78,7 +78,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
-        chkIsActive = new javax.swing.JCheckBox();
         txtCode = new javax.swing.JTextField();
         txtDescription = new javax.swing.JTextField();
         txtBaseUOM = new javax.swing.JTextField();
@@ -168,11 +167,11 @@ public class MaterialMasterForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Code", "Description", "UOM", "Batch Managed", "Active", "Last Modified"
+                "Code", "Description", "UOM", "Batch Managed", "Last Modified"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -208,10 +207,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
 
         jLabel15.setText("Storage Conditions");
 
-        chkIsActive.setSelected(true);
-        chkIsActive.setText("Active");
-        chkIsActive.setEnabled(false);
-
         cmbMaterialCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Raw Material", "Finished Goods", "Packaging", "Consumable" }));
         cmbMaterialCategory.setSelectedIndex(-1);
 
@@ -239,10 +234,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                             .addComponent(jLabel13))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(chkIsActive))
+                            .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(txtBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(30, 30, 30)
@@ -270,8 +262,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                 .addGap(9, 9, 9)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkIsActive))
+                    .addComponent(txtDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -542,7 +533,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                 txtReorderPoint.setText(selectedMaterial.getReorderPoint() != null ? String.valueOf(selectedMaterial.getReorderPoint()) : "");
                 txtUnitCost.setText(selectedMaterial.getUnitCost() != null ? String.valueOf(selectedMaterial.getUnitCost()) : "");
                 chkBatchManaged.setSelected(selectedMaterial.getIsBatchManaged() != null && selectedMaterial.getIsBatchManaged());
-                chkIsActive.setSelected(selectedMaterial.getIsActive() != null && selectedMaterial.getIsActive());
                 txtCode.setEditable(false);
                 isAddMode = false;
                 updateButtonStates();
@@ -594,7 +584,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
             try { dto.setUnitCost(Double.parseDouble(txtUnitCost.getText().trim())); } catch (NumberFormatException e) {}
         }
         dto.setIsBatchManaged(chkBatchManaged.isSelected());
-        dto.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Saving Material") {
             private int materialId;
@@ -672,7 +661,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
             selectedMaterial.setUnitCost(null);
         }
         selectedMaterial.setIsBatchManaged(chkBatchManaged.isSelected());
-        selectedMaterial.setIsActive(chkIsActive.isSelected());
 
         BackgroundTask task = new BackgroundTask(this, "Updating Material") {
 
@@ -951,7 +939,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                     m.getMaterialCode(),
                     m.getMaterialDescription(),
                     m.getUnitOfMeasure(),
-                    m.getIsActive() != null && m.getIsActive() ? "Yes" : "No",
+                    m.isBatchManaged(),
                     m.getModifiedDate()
                 });
             }
@@ -985,7 +973,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         txtUnitCost.setText("");
         cmbMaterialCategory.setSelectedIndex(-1);
         cmbStorageConditions.setSelectedIndex(-1);
-        chkIsActive.setSelected(false);
         chkBatchManaged.setSelected(false);
         txtCode.setEditable(true);
         selectedMaterial = null;
@@ -1011,7 +998,6 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JCheckBox chkBatchManaged;
-    private javax.swing.JCheckBox chkIsActive;
     private javax.swing.JComboBox<String> cmbMaterialCategory;
     private javax.swing.JComboBox<String> cmbStorageConditions;
     private javax.swing.JLabel jLabel1;

@@ -794,7 +794,6 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
             ReturnToVendorDAO.ReturnItem item = returnItemList.get(editingIndex);
             item.setQuantity(qty);
             item.setReturnReason((String) cmbReturnReason.getSelectedItem());
-            item.setLineNotes((String) cmbReturnReason.getSelectedItem());
 
             refreshSummaryTable();
             clearMaterialSelectionInputs();
@@ -858,7 +857,6 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         item.setBatchId(selectedBatchId);
         item.setBatchNumber(selectedBatchNumber);
         item.setReturnReason((String) cmbReturnReason.getSelectedItem());
-        item.setLineNotes((String) cmbReturnReason.getSelectedItem());
 
         returnItemList.add(item);
         refreshSummaryTable();
@@ -886,7 +884,6 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         String vendorSelection = (String) cmbVendor.getSelectedItem();
         String vendorCode = vendorSelection.split(" - ")[0].trim();
         String refDate = dateReturnDate.getText().trim();
-        String notes = "Return to Vendor " + vendorCode;
 
         BackgroundTask task = new BackgroundTask(this, "Posting Goods Return") {
             private boolean success = false;
@@ -894,7 +891,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Posting Return to Vendor to server...");
-                success = controller.completeReturnToVendor(vendorCode, "RTV-" + System.currentTimeMillis(), refDate, notes, returnItemList);
+                success = controller.completeReturnToVendor(vendorCode, "RTV-" + System.currentTimeMillis(), refDate, returnItemList);
                 return success;
             }
 

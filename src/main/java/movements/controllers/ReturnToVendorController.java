@@ -52,7 +52,7 @@ public class ReturnToVendorController {
     }
 
     // Completes and submits Return to Vendor
-    public boolean completeReturnToVendor(String vendorCode, String referenceDoc, String referenceDate, String notes, List<ReturnItem> items) throws Exception {
+    public boolean completeReturnToVendor(String vendorCode, String referenceDoc, String referenceDate, List<ReturnItem> items) throws Exception {
         if (vendorCode == null || vendorCode.trim().isEmpty()) {
             throw new IllegalArgumentException("Vendor code cannot be empty.");
         }
@@ -61,7 +61,7 @@ public class ReturnToVendorController {
         }
 
         boolean success = RetryHelper.executeWithRetry(
-            () -> ReturnToVendorDAO.getInstance().completeReturnToVendor(vendorCode, referenceDoc, referenceDate, notes, items),
+            () -> ReturnToVendorDAO.getInstance().completeReturnToVendor(vendorCode, referenceDoc, referenceDate, items),
             "failed to process return to vendor"
         );
 

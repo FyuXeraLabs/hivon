@@ -281,9 +281,6 @@ public class GRCustomerReturnsDAO {
         if (json.has("is_frozen") && !json.get("is_frozen").isJsonNull()) {
             dto.setIsFrozen(json.get("is_frozen").getAsBoolean());
         }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
-        }
         if (json.has("warehouse_code") && !json.get("warehouse_code").isJsonNull()) {
             dto.setWarehouseCode(json.get("warehouse_code").getAsString());
         }

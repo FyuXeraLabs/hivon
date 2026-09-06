@@ -50,8 +50,6 @@ public class GISalesOrderDAO {
         private String uom;
         private Integer batchId;
         private String batchNumber;
-        private String lineNotes;
-
         public GISalesOrderItem() {}
 
         public Integer getSoItemId() { return soItemId; }
@@ -84,8 +82,6 @@ public class GISalesOrderDAO {
         public String getBatchNumber() { return batchNumber; }
         public void setBatchNumber(String batchNumber) { this.batchNumber = batchNumber; }
 
-        public String getLineNotes() { return lineNotes; }
-        public void setLineNotes(String lineNotes) { this.lineNotes = lineNotes; }
     }
 
     // Batch suggestion model for FIFO/FEFO picking
@@ -223,7 +219,7 @@ public class GISalesOrderDAO {
     }
 
     // POST /api/movements/goods-issue/sales-order
-    public String createGISalesOrder(String soNumber, String refDate, String notes, List<GISalesOrderItem> items) throws Exception {
+    public String createGISalesOrder(String soNumber, String refDate, List<GISalesOrderItem> items) throws Exception {
         if (soNumber == null || soNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("Sales Order number is required.");
         }
@@ -236,10 +232,6 @@ public class GISalesOrderDAO {
         if (refDate != null && !refDate.trim().isEmpty()) {
             payload.addProperty("reference_date", refDate.trim());
         }
-        if (notes != null && !notes.trim().isEmpty()) {
-            payload.addProperty("notes", notes.trim());
-        }
-
         JsonArray itemsArray = new JsonArray();
         for (GISalesOrderItem item : items) {
             JsonObject itemObj = new JsonObject();
@@ -255,10 +247,6 @@ public class GISalesOrderDAO {
             if (item.getBatchNumber() != null && !item.getBatchNumber().isEmpty()) {
                 itemObj.addProperty("batch_number", item.getBatchNumber());
             }
-            if (item.getLineNotes() != null && !item.getLineNotes().trim().isEmpty()) {
-                itemObj.addProperty("line_notes", item.getLineNotes());
-            }
-
             itemsArray.add(itemObj);
         }
         payload.add("items", itemsArray);

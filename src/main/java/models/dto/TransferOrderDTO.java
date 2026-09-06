@@ -19,10 +19,7 @@ public class TransferOrderDTO {
     private Integer toWarehouseId;
     private String createdBy;
     private LocalDateTime createdDate;
-    private LocalDateTime startedDate;
     private LocalDateTime completedDate;
-    private String assignedTo;
-    private String notes;
     private List<TransferOrderItemDTO> items;
 
     public TransferOrderDTO() {
@@ -93,36 +90,12 @@ public class TransferOrderDTO {
         this.createdDate = createdDate;
     }
 
-    public LocalDateTime getStartedDate() {
-        return startedDate;
-    }
-
-    public void setStartedDate(LocalDateTime startedDate) {
-        this.startedDate = startedDate;
-    }
-
     public LocalDateTime getCompletedDate() {
         return completedDate;
     }
 
     public void setCompletedDate(LocalDateTime completedDate) {
         this.completedDate = completedDate;
-    }
-
-    public String getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(String assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
     }
 
     public List<TransferOrderItemDTO> getItems() {

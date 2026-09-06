@@ -47,8 +47,6 @@ public class ReturnToVendorDAO {
         private String batchNumber;
         private String returnReason;
         private Integer poItemId;
-        private String lineNotes;
-
         public ReturnItem() {}
 
         public int getMaterialId() { return materialId; }
@@ -84,12 +82,10 @@ public class ReturnToVendorDAO {
         public Integer getPoItemId() { return poItemId; }
         public void setPoItemId(Integer poItemId) { this.poItemId = poItemId; }
 
-        public String getLineNotes() { return lineNotes; }
-        public void setLineNotes(String lineNotes) { this.lineNotes = lineNotes; }
     }
 
     // POST /api/movements/goods-issue/rtv
-    public boolean completeReturnToVendor(String vendorCode, String referenceDoc, String referenceDate, String notes, List<ReturnItem> items) throws Exception {
+    public boolean completeReturnToVendor(String vendorCode, String referenceDoc, String referenceDate, List<ReturnItem> items) throws Exception {
         if (vendorCode == null || vendorCode.trim().isEmpty()) {
             throw new IllegalArgumentException("Vendor code is required.");
         }
@@ -105,10 +101,6 @@ public class ReturnToVendorDAO {
         if (referenceDate != null && !referenceDate.trim().isEmpty()) {
             payload.addProperty("reference_date", referenceDate);
         }
-        if (notes != null && !notes.trim().isEmpty()) {
-            payload.addProperty("notes", notes);
-        }
-
         JsonArray itemsArray = new JsonArray();
         for (ReturnItem item : items) {
             JsonObject itemObj = new JsonObject();
@@ -124,12 +116,9 @@ public class ReturnToVendorDAO {
                 itemObj.addProperty("po_item_id", item.getPoItemId());
             }
             
-            String lineNote = item.getLineNotes();
-            if (lineNote == null || lineNote.trim().isEmpty()) {
-                lineNote = item.getReturnReason();
-            }
-            if (lineNote != null && !lineNote.trim().isEmpty()) {
-                itemObj.addProperty("line_notes", lineNote);
+            String returnReason = item.getReturnReason();
+            if (returnReason != null && !returnReason.trim().isEmpty()) {
+                itemObj.addProperty("return_reason", returnReason);
             }
 
             itemsArray.add(itemObj);

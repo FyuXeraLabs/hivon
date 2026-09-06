@@ -68,14 +68,13 @@ public class ZoneBinViewForm extends javax.swing.JDialog {
                         
                         model.addRow(new Object[]{
                             bin.getBinCode(),
-                            bin.getZone(),
+                            zone.getZoneCode(),
                             aisle,
                             rack,
                             level,
                             bin.getBinType(),
                             bin.getMaxCapacity(),
-                            bin.getUsedCapacity(),
-                            (bin.getIsActive() != null && bin.getIsActive()) ? "Active" : "Inactive"
+                            bin.getUsedCapacity()
                         });
                     }
                     lblTitle.setText("Bins in Zone: " + zone.getZoneCode() + " (" + bins.size() + " bins)");
@@ -228,11 +227,11 @@ public class ZoneBinViewForm extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Max Capacity", "Used Capacity", "Status"
+                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Max Capacity", "Used Capacity"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

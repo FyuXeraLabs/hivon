@@ -145,7 +145,6 @@ public class BinManagementForm extends javax.swing.JFrame {
         txtLevelNumber = new javax.swing.JTextField();
         spinMaxCapacity = new javax.swing.JSpinner();
         cmbBinType = new javax.swing.JComboBox<>();
-        chkActive = new javax.swing.JCheckBox();
         jPanelBulk = new javax.swing.JPanel();
         jLabelBulkZone = new javax.swing.JLabel();
         jLabelBulkAisles = new javax.swing.JLabel();
@@ -235,11 +234,11 @@ public class BinManagementForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Capacity", "Current Stock", "Status"
+                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Capacity", "Current Stock"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -271,10 +270,6 @@ public class BinManagementForm extends javax.swing.JFrame {
 
         cmbBinType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "RECEIVING", "STORAGE", "PICKING", "STAGING", "DAMAGE", "QUARANTINE" }));
 
-        chkActive.setSelected(true);
-        chkActive.setText("Active");
-        chkActive.setEnabled(false);
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -301,8 +296,7 @@ public class BinManagementForm extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(spinMaxCapacity, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                            .addComponent(cmbBinType, 0, 250, Short.MAX_VALUE)
-                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE))))
+                            .addComponent(cmbBinType, 0, 250, Short.MAX_VALUE))))
                 .addContainerGap(136, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -332,9 +326,7 @@ public class BinManagementForm extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelBinType)
                     .addComponent(cmbBinType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addComponent(chkActive)
-                .addGap(15, 15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanelBulk.setBorder(javax.swing.BorderFactory.createTitledBorder("Bulk Operations (Generate Bins)"));
@@ -579,7 +571,6 @@ public class BinManagementForm extends javax.swing.JFrame {
 
                 spinMaxCapacity.setValue(selectedBin.getMaxCapacity() != null ? selectedBin.getMaxCapacity().intValue() : 0);
                 cmbBinType.setSelectedItem(selectedBin.getBinType());
-                chkActive.setSelected(selectedBin.getIsActive() != null ? selectedBin.getIsActive() : true);
                 
                 updateButtonStates();
             }
@@ -623,7 +614,6 @@ public class BinManagementForm extends javax.swing.JFrame {
             bin.setMaxCapacity(Double.valueOf(((Number) spinMaxCapacity.getValue()).doubleValue()));
             bin.setUsedCapacity(0.0);
             bin.setBinType((String) cmbBinType.getSelectedItem());
-            bin.setIsActive(chkActive.isSelected());
 
             String zone = "";
             if (binCode.contains("-")) {
@@ -673,7 +663,6 @@ public class BinManagementForm extends javax.swing.JFrame {
         selectedBin.setBinCode(txtBinCode.getText().trim());
         selectedBin.setMaxCapacity(Double.valueOf(((Number) spinMaxCapacity.getValue()).doubleValue()));
         selectedBin.setBinType((String) cmbBinType.getSelectedItem());
-        selectedBin.setIsActive(chkActive.isSelected());
 
         String zone = "";
         if (selectedBin.getBinCode().contains("-")) {
@@ -1117,8 +1106,7 @@ public class BinManagementForm extends javax.swing.JFrame {
                 level,
                 bin.getBinType(),
                 bin.getMaxCapacity(),
-                bin.getUsedCapacity(),
-                (bin.getIsActive() != null && bin.getIsActive()) ? "Active" : "Inactive"
+                bin.getUsedCapacity()
             });
         }
     }
@@ -1138,7 +1126,6 @@ public class BinManagementForm extends javax.swing.JFrame {
         txtLevelNumber.setText("");
         spinMaxCapacity.setValue(0);
         cmbBinType.setSelectedIndex(0);
-        chkActive.setSelected(true);
         selectedBin = null;
         tblBins.clearSelection();
     }
@@ -1282,7 +1269,6 @@ public class BinManagementForm extends javax.swing.JFrame {
     private javax.swing.JButton btnPrintLabel;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnViewStock;
-    private javax.swing.JCheckBox chkActive;
     private javax.swing.JComboBox<String> cmbBinType;
     private ui.components.CheckedComboBox<String> cmbFilterBinType;
     private ui.components.CheckedComboBox<String> cmbFilterUtilization;

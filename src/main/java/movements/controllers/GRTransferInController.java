@@ -49,7 +49,7 @@ public class GRTransferInController {
     }
 
     // submits received quantities for a transfer order goods receipt
-    public boolean receiveGoods(String toNumber, List<TransferOrderItemDTO> items, String actualReceiptDate, String notes) throws Exception {
+    public boolean receiveGoods(String toNumber, List<TransferOrderItemDTO> items, String actualReceiptDate) throws Exception {
         if (toNumber == null || toNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("Transfer Order number cannot be empty.");
         }
@@ -58,7 +58,7 @@ public class GRTransferInController {
         }
 
         boolean success = RetryHelper.executeWithRetry(
-            () -> TransferOrderDAO.getInstance().receiveGoods(toNumber, items, actualReceiptDate, notes),
+            () -> TransferOrderDAO.getInstance().receiveGoods(toNumber, items, actualReceiptDate),
             "failed to process goods receipt for transfer order " + toNumber
         );
         if (success) {

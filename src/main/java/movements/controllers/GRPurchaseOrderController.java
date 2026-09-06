@@ -58,7 +58,7 @@ public class GRPurchaseOrderController {
     }
 
     // submits received quantities and items for a purchase order goods receipt
-    public boolean receiveGoods(String poNumber, String referenceDate, String notes, List<POReceiptItem> items) throws Exception {
+    public boolean receiveGoods(String poNumber, String referenceDate, List<POReceiptItem> items) throws Exception {
         if (poNumber == null || poNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("Purchase Order number cannot be empty.");
         }
@@ -67,7 +67,7 @@ public class GRPurchaseOrderController {
         }
 
         boolean success = RetryHelper.executeWithRetry(
-            () -> GRPurchaseOrderDAO.getInstance().createGRPurchaseOrder(poNumber, referenceDate, notes, items),
+            () -> GRPurchaseOrderDAO.getInstance().createGRPurchaseOrder(poNumber, referenceDate, items),
             "failed to process goods receipt for purchase order " + poNumber
         );
         if (success) {

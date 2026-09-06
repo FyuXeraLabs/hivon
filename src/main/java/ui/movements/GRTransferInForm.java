@@ -539,7 +539,6 @@ public class GRTransferInForm extends javax.swing.JFrame {
         }
 
         String actualDate = txtActualReceiptDate.getText().trim();
-        String notes = "GR from Transfer Order " + currentTO.getToNumber();
 
         BackgroundTask task = new BackgroundTask(this, "Submitting Goods Receipt") {
             private boolean success = false;
@@ -547,7 +546,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Posting Goods Receipt to database...");
-                success = controller.receiveGoods(currentTO.getToNumber(), itemsToSubmit, actualDate, notes);
+                success = controller.receiveGoods(currentTO.getToNumber(), itemsToSubmit, actualDate);
                 return success;
             }
 

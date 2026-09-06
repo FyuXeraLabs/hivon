@@ -945,7 +945,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Submitting replenishment request...");
-                result = controller.createReplenishmentTransferOrder(items, "Replenishment TO");
+                result = controller.createReplenishmentTransferOrder(items);
                 return result != null;
             }
 

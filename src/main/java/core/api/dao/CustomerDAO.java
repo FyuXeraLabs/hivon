@@ -95,8 +95,6 @@ public class CustomerDAO {
         if (customerDto.getShippingAddress() != null) {
             payload.addProperty("shipping_address", customerDto.getShippingAddress());
         }
-        payload.addProperty("is_active", customerDto.getIsActive() != null ? customerDto.getIsActive() : true);
-
         HttpRequest request = apiClient.authRequest(ApiConfig.CUSTOMERS)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -126,10 +124,6 @@ public class CustomerDAO {
         if (customerDto.getShippingAddress() != null) {
             payload.addProperty("shipping_address", customerDto.getShippingAddress());
         }
-        if (customerDto.getIsActive() != null) {
-            payload.addProperty("is_active", customerDto.getIsActive());
-        }
-
         HttpRequest request = apiClient.authRequest(ApiConfig.CUSTOMERS + "/" + customerDto.getCustomerId())
                 .PUT(HttpRequest.BodyPublishers.ofString(payload.toString()))
                 .build();
@@ -172,9 +166,6 @@ public class CustomerDAO {
         }
         if (json.has("shipping_address") && !json.get("shipping_address").isJsonNull()) {
             dto.setShippingAddress(json.get("shipping_address").getAsString());
-        }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
         }
         if (json.has("created_date") && !json.get("created_date").isJsonNull()) {
             dto.setCreatedDate(parseDateTime(json.get("created_date").getAsString()));

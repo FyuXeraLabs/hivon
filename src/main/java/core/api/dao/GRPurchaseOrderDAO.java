@@ -48,8 +48,6 @@ public class GRPurchaseOrderDAO {
         private String batchNumber;
         private String expiryDate;
         private String qualityStatus;
-        private String lineNotes;
-
         public POReceiptItem() {}
 
         public Integer getPoItemId() { return poItemId; }
@@ -73,8 +71,6 @@ public class GRPurchaseOrderDAO {
         public String getQualityStatus() { return qualityStatus; }
         public void setQualityStatus(String qualityStatus) { this.qualityStatus = qualityStatus; }
 
-        public String getLineNotes() { return lineNotes; }
-        public void setLineNotes(String lineNotes) { this.lineNotes = lineNotes; }
     }
 
     // GET /api/movements/goods-receipt/po/search?status={status}&q={query}
@@ -163,14 +159,11 @@ public class GRPurchaseOrderDAO {
     }
 
     // POST /api/movements/goods-receipt/po
-    public boolean createGRPurchaseOrder(String poNumber, String referenceDate, String notes, List<POReceiptItem> items) throws Exception {
+    public boolean createGRPurchaseOrder(String poNumber, String referenceDate, List<POReceiptItem> items) throws Exception {
         JsonObject payload = new JsonObject();
         payload.addProperty("po_number", poNumber);
         if (referenceDate != null && !referenceDate.trim().isEmpty()) {
             payload.addProperty("reference_date", referenceDate);
-        }
-        if (notes != null && !notes.trim().isEmpty()) {
-            payload.addProperty("notes", notes);
         }
 
         JsonArray itemsArray = new JsonArray();
@@ -190,10 +183,6 @@ public class GRPurchaseOrderDAO {
             if (item.getQualityStatus() != null && !item.getQualityStatus().trim().isEmpty()) {
                 itemObj.addProperty("quality_status", item.getQualityStatus());
             }
-            if (item.getLineNotes() != null && !item.getLineNotes().trim().isEmpty()) {
-                itemObj.addProperty("line_notes", item.getLineNotes());
-            }
-
             itemsArray.add(itemObj);
         }
         payload.add("items", itemsArray);
@@ -316,9 +305,6 @@ public class GRPurchaseOrderDAO {
         }
         if (json.has("is_frozen") && !json.get("is_frozen").isJsonNull()) {
             dto.setIsFrozen(json.get("is_frozen").getAsBoolean());
-        }
-        if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
-            dto.setIsActive(json.get("is_active").getAsBoolean());
         }
         if (json.has("warehouse_code") && !json.get("warehouse_code").isJsonNull()) {
             dto.setWarehouseCode(json.get("warehouse_code").getAsString());

@@ -417,9 +417,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                                 }
                             }
                             
-                            // Set remarks (lineNotes)
-                            txtRemarks.setText(item.getLineNotes() != null ? item.getLineNotes() : "");
-                            
                             btnUpdateRecieptItem.setEnabled(true);
                             btnAddToReceipt.setEnabled(false);
                         }
@@ -1119,7 +1116,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         receiptItem.setBatchNumber(batchNum.isEmpty() ? null : batchNum);
         receiptItem.setExpiryDate(expiry.isEmpty() ? null : expiry);
         receiptItem.setQualityStatus(qualityStatus);
-        receiptItem.setLineNotes(remarks.isEmpty() ? null : remarks);
         
         receiptSummaryList.add(receiptItem);
         
@@ -1178,7 +1174,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         
         String poNumber = selectedPO.getPoNumber();
         String actualDate = java.time.LocalDate.now().toString();
-        String notes = "GR against PO " + poNumber;
         
         BackgroundTask task = new BackgroundTask(this, "Posting Goods Receipt") {
             private boolean success = false;
@@ -1186,7 +1181,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Posting Goods Receipt to server...");
-                success = controller.receiveGoods(poNumber, actualDate, notes, receiptSummaryList);
+                success = controller.receiveGoods(poNumber, actualDate, receiptSummaryList);
                 return success;
             }
 
@@ -1293,7 +1288,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         receiptItem.setBatchNumber(batchNum.isEmpty() ? null : batchNum);
         receiptItem.setExpiryDate(expiry.isEmpty() ? null : expiry);
         receiptItem.setQualityStatus(qualityStatus);
-        receiptItem.setLineNotes(remarks.isEmpty() ? null : remarks);
         
         // Refresh table
         refreshReceiptSummaryTable();

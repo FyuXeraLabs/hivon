@@ -15,7 +15,6 @@ public class VendorDTO {
     private String phone;
     private String email;
     private String address;
-    private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
@@ -78,14 +77,6 @@ public class VendorDTO {
         this.address = address;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
@@ -100,10 +91,6 @@ public class VendorDTO {
 
     public void setModifiedDate(LocalDateTime modifiedDate) {
         this.modifiedDate = modifiedDate;
-    }
-
-    public boolean isActive() {
-        return isActive != null && isActive;
     }
 
     @Override

@@ -58,9 +58,9 @@ public class GISalesOrderController {
         );
     }
 
-    public String completeGISalesOrder(String soNumber, String refDate, String notes, List<GISalesOrderItem> items) throws Exception {
+    public String completeGISalesOrder(String soNumber, String refDate, List<GISalesOrderItem> items) throws Exception {
         return RetryHelper.executeWithRetry(
-            () -> GISalesOrderDAO.getInstance().createGISalesOrder(soNumber, refDate, notes, items),
+            () -> GISalesOrderDAO.getInstance().createGISalesOrder(soNumber, refDate, items),
             "Failed to complete Goods Issue for Sales Order"
         );
     }

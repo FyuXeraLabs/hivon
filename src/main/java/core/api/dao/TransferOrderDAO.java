@@ -99,14 +99,11 @@ public class TransferOrderDAO {
     }
 
     // POST /api/movements/transfer-in
-    public boolean receiveGoods(String toNumber, List<TransferOrderItemDTO> items, String actualReceiptDate, String notes) throws Exception {
+    public boolean receiveGoods(String toNumber, List<TransferOrderItemDTO> items, String actualReceiptDate) throws Exception {
         JsonObject payload = new JsonObject();
         payload.addProperty("to_number", toNumber);
         if (actualReceiptDate != null && !actualReceiptDate.trim().isEmpty()) {
             payload.addProperty("reference_date", actualReceiptDate);
-        }
-        if (notes != null && !notes.trim().isEmpty()) {
-            payload.addProperty("notes", notes);
         }
 
         JsonArray itemsArray = new JsonArray();
@@ -155,17 +152,8 @@ public class TransferOrderDAO {
         if (json.has("created_date") && !json.get("created_date").isJsonNull()) {
             dto.setCreatedDate(parseDateTime(json.get("created_date").getAsString()));
         }
-        if (json.has("started_date") && !json.get("started_date").isJsonNull()) {
-            dto.setStartedDate(parseDateTime(json.get("started_date").getAsString()));
-        }
         if (json.has("completed_date") && !json.get("completed_date").isJsonNull()) {
             dto.setCompletedDate(parseDateTime(json.get("completed_date").getAsString()));
-        }
-        if (json.has("assigned_to") && !json.get("assigned_to").isJsonNull()) {
-            dto.setAssignedTo(json.get("assigned_to").getAsString());
-        }
-        if (json.has("notes") && !json.get("notes").isJsonNull()) {
-            dto.setNotes(json.get("notes").getAsString());
         }
 
         if (json.has("items") && json.get("items").isJsonArray()) {
