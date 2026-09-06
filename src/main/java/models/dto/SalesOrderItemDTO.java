@@ -2,9 +2,9 @@ package models.dto;
 
 /**
  * Data Transfer Object representing an item line inside a Sales Order.
- * Used for customer returns.
+ * Used for Goods Issue and customer returns.
  *
- * @author Sanod
+ * @author Sanod / Navodya
  */
 public class SalesOrderItemDTO {
 
@@ -86,6 +86,10 @@ public class SalesOrderItemDTO {
         this.returnedQuantity = returnedQuantity;
     }
 
+    public double getOutstandingQuantity() {
+        return Math.max(0.0, orderedQuantity - shippedQuantity);
+    }
+
     public String getUom() {
         return uom;
     }
@@ -100,14 +104,5 @@ public class SalesOrderItemDTO {
 
     public void setIsBatchManaged(Boolean isBatchManaged) {
         this.isBatchManaged = isBatchManaged;
-    }
-
-    /**
-     * Calculates the outstanding quantity that can be returned.
-     * Calculated as shippedQuantity - returnedQuantity.
-     */
-    public double getOutstandingQuantity() {
-        double diff = shippedQuantity - returnedQuantity;
-        return diff < 0.0 ? 0.0 : diff;
     }
 }
