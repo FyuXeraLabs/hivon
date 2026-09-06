@@ -66,4 +66,8 @@ public class InventoryDAO {
         }
         return stockRows;
     }
+
+    public List<Object[]> getStockByMaterialId(int materialId) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
