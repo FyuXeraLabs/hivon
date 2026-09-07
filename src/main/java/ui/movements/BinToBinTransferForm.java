@@ -4,17 +4,364 @@
  */
 package ui.movements;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+import core.api.dao.BinToBinTransferDAO.MaterialSearchResult;
+import core.api.dao.BinToBinTransferDAO.SourceBinInfo;
+import core.api.dao.BinToBinTransferDAO.DestBinInfo;
+import core.api.dao.BinToBinTransferDAO.BinTransferItem;
+import movements.controllers.BinToBinTransferController;
+import models.dto.WarehouseDTO;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author Ishani
  */
 public class BinToBinTransferForm extends javax.swing.JFrame {
 
+    private BinToBinTransferController controller;
+    private List<BinTransferItem> transferSummaryList = new ArrayList<>();
+    private List<MaterialSearchResult> currentMaterialResults = new ArrayList<>();
+    private List<SourceBinInfo> currentSourceBins = new ArrayList<>();
+    private List<DestBinInfo> currentDestBins = new ArrayList<>();
+    private List<WarehouseDTO> loadedWarehouses = new ArrayList<>();
+    private MaterialSearchResult selectedMaterial = null;
+    private javax.swing.JLabel txtStatus;
+
+    private WarehouseDTO getSelectedWarehouse() {
+        int idx = cmbSourceWarehouse.getSelectedIndex();
+        if (idx > 0 && (idx - 1) < loadedWarehouses.size()) {
+            return loadedWarehouses.get(idx - 1);
+        }
+        return null;
+    }
+
     /**
      * Creates new form BinToBinTransferForm
      */
     public BinToBinTransferForm() {
         initComponents();
+        this.controller = new BinToBinTransferController();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.setTitle("Bin-to-Bin Transfer (INT-BIN)");
+        try {
+            this.setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+        } catch (Exception e) {
+            // icon not found, skip
+        }
+
+        // add status label programmatically at the bottom
+        txtStatus = new javax.swing.JLabel();
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.add(txtStatus);
+
+        setupWarehouseCombo();
+        setupTransferReasonCombo();
+        setupTransferDateSpinner();
+        setupMaterialSearchTable();
+        setupTransferSummaryTable();
+        setupSourceBinListener();
+        setupDestBinListener();
+        setupMaterialTableListener();
+        loadWarehouses();
+    }
+
+    // populate transfer reason dropdown
+    private void setupTransferReasonCombo() {
+        cmbTransferReason.removeAllItems();
+        cmbTransferReason.addItem("-- Select Reason --");
+        cmbTransferReason.addItem("Consolidation");
+        cmbTransferReason.addItem("Relocation");
+        cmbTransferReason.addItem("Damage Recovery");
+        cmbTransferReason.addItem("Optimization");
+        cmbTransferReason.addItem("Other");
+    }
+
+    // setup warehouse combo placeholder
+    private void setupWarehouseCombo() {
+        cmbSourceWarehouse.removeAllItems();
+        cmbSourceWarehouse.addItem("-- Select Warehouse --");
+    }
+
+    // configure transfer date spinner as date
+    private void setupTransferDateSpinner() {
+        dtTransferDate.setModel(new javax.swing.SpinnerDateModel());
+        dtTransferDate.setEditor(new javax.swing.JSpinner.DateEditor(dtTransferDate, "yyyy-MM-dd"));
+    }
+
+    // setup material search results table (jTable1)
+    private void setupMaterialSearchTable() {
+        DefaultTableModel model = new DefaultTableModel(
+            new String[]{"Code", "Description", "UOM", "Batch?", "Available Qty"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
+        jTable1.setModel(model);
+        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jTable1.getTableHeader().setReorderingAllowed(false);
+    }
+
+    // setup transfer summary table (jTable2)
+    private void setupTransferSummaryTable() {
+        DefaultTableModel model = new DefaultTableModel(
+            new String[]{"Material", "From Bin", "To Bin", "Qty", "Batch", "Status"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
+        jTable2.setModel(model);
+        jTable2.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jTable2.getTableHeader().setReorderingAllowed(false);
+
+        // delete key to remove row from transfer summary
+        jTable2.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DELETE) {
+                    int selectedRow = jTable2.getSelectedRow();
+                    if (selectedRow >= 0 && selectedRow < transferSummaryList.size()) {
+                        transferSummaryList.remove(selectedRow);
+                        refreshTransferSummaryTable();
+                        StatusMessageHandler.showInfo(txtStatus, "Item removed from transfer list.");
+                    }
+                }
+            }
+        });
+    }
+
+    // when user selects a material in jTable1, load source bins
+    private void setupMaterialTableListener() {
+        jTable1.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = jTable1.getSelectedRow();
+                if (row >= 0 && row < currentMaterialResults.size()) {
+                    selectedMaterial = currentMaterialResults.get(row);
+                    onMaterialSelected();
+                } else {
+                    selectedMaterial = null;
+                }
+            }
+        });
+    }
+
+    // when user selects source bin, populate current qty, batch info
+    private void setupSourceBinListener() {
+        cmbSourceBin.addActionListener(e -> {
+            int idx = cmbSourceBin.getSelectedIndex();
+            if (idx > 0 && (idx - 1) < currentSourceBins.size()) {
+                SourceBinInfo src = currentSourceBins.get(idx - 1);
+                lblCurrentQty.setText(String.format("%.2f", src.getQuantity()));
+                lblAvailableQty.setText(String.format("%.2f", src.getAvailableQty()));
+
+                if (src.getBatchNumber() != null && !src.getBatchNumber().isEmpty()) {
+                    txtBatchNumber.setText(src.getBatchNumber());
+                    String details = src.getBatchStatus() != null ? src.getBatchStatus() : "";
+                    if (src.getExpiryDate() != null) {
+                        details += (details.isEmpty() ? "" : " | ") + "Exp: " + src.getExpiryDate();
+                    }
+                    txtBatchDetails.setText(details);
+                } else {
+                    txtBatchNumber.setText("N/A");
+                    txtBatchDetails.setText("Not batch-managed");
+                }
+            } else {
+                lblCurrentQty.setText("");
+                lblAvailableQty.setText("");
+                txtBatchNumber.setText("");
+                txtBatchDetails.setText("");
+            }
+        });
+    }
+
+    // when user selects destination bin, show zone and capacity
+    private void setupDestBinListener() {
+        cmbDestinationWarehouse.addActionListener(e -> {
+            int idx = cmbDestinationWarehouse.getSelectedIndex();
+            if (idx > 0 && (idx - 1) < currentDestBins.size()) {
+                DestBinInfo dest = currentDestBins.get(idx - 1);
+                cmbDestinationZone.setText(dest.getZoneCode() != null ? dest.getZoneCode() : "");
+                double remaining = (dest.getMaxCapacity() != null ? dest.getMaxCapacity() : 0)
+                                 - (dest.getUsedCapacity() != null ? dest.getUsedCapacity() : 0);
+                lblBinCapacity.setText(String.format("%.0f / %.0f", dest.getUsedCapacity(), dest.getMaxCapacity()));
+            } else {
+                cmbDestinationZone.setText("");
+                lblBinCapacity.setText("");
+            }
+        });
+    }
+
+    // called when material is selected from search results
+    private void onMaterialSelected() {
+        if (selectedMaterial == null) return;
+
+        WarehouseDTO wh = getSelectedWarehouse();
+        if (wh == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first.");
+            return;
+        }
+
+        loadSourceBins(wh.getWarehouseId(), selectedMaterial.getMaterialId());
+    }
+
+    // load warehouses into combo
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = controller.getWarehouses();
+                return warehouses != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedWarehouses = warehouses != null ? warehouses : new ArrayList<>();
+                cmbSourceWarehouse.removeAllItems();
+                cmbSourceWarehouse.addItem("-- Select Warehouse --");
+                for (WarehouseDTO wh : loadedWarehouses) {
+                    cmbSourceWarehouse.addItem(wh.getWarehouseCode() + " - " + wh.getWarehouseName());
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    // load source bins for selected material in selected warehouse
+    private void loadSourceBins(int warehouseId, int materialId) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Source Bins") {
+            private List<SourceBinInfo> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching bins with stock...");
+                bins = controller.getSourceBins(warehouseId, materialId);
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentSourceBins = bins != null ? bins : new ArrayList<>();
+                cmbSourceBin.removeAllItems();
+                cmbSourceBin.addItem("-- Select Source Bin --");
+                for (SourceBinInfo bin : currentSourceBins) {
+                    String label = bin.getBinCode();
+                    if (bin.getBatchNumber() != null && !bin.getBatchNumber().isEmpty()) {
+                        label += " (" + bin.getBatchNumber() + " - Avail: " + String.format("%.2f", bin.getAvailableQty()) + ")";
+                    } else {
+                        label += " (Avail: " + String.format("%.2f", bin.getAvailableQty()) + ")";
+                    }
+                    if (bin.getIsFrozen() != null && bin.getIsFrozen()) {
+                        label += " [FROZEN]";
+                    }
+                    cmbSourceBin.addItem(label);
+                }
+
+                if (currentSourceBins.isEmpty()) {
+                    StatusMessageHandler.showInfo(txtStatus, "No bins with stock found for this material.");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load source bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    // load destination bins for a warehouse
+    private void loadDestinationBins(int warehouseId) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Destination Bins") {
+            private List<DestBinInfo> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching destination bins...");
+                bins = controller.getDestinationBins(warehouseId);
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentDestBins = bins != null ? bins : new ArrayList<>();
+                cmbDestinationWarehouse.removeAllItems();
+                cmbDestinationWarehouse.addItem("-- Select Dest Bin --");
+                for (DestBinInfo bin : currentDestBins) {
+                    String label = bin.getBinCode();
+                    if (bin.getZoneCode() != null && !bin.getZoneCode().isEmpty()) {
+                        label += " [" + bin.getZoneCode() + "]";
+                    }
+                    cmbDestinationWarehouse.addItem(label);
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load destination bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    // refresh transfer summary table (jTable2)
+    private void refreshTransferSummaryTable() {
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        model.setRowCount(0);
+
+        for (BinTransferItem item : transferSummaryList) {
+            model.addRow(new Object[]{
+                item.getMaterialCode() + " - " + item.getMaterialDescription(),
+                item.getFromBinCode(),
+                item.getToBinCode(),
+                String.format("%.2f", item.getQuantity()),
+                item.getBatchNumber() != null ? item.getBatchNumber() : "N/A",
+                item.getStatus() != null ? item.getStatus() : "Pending"
+            });
+        }
+    }
+
+    // clear the entire form
+    private void clearForm() {
+        selectedMaterial = null;
+        transferSummaryList.clear();
+        currentMaterialResults.clear();
+        currentSourceBins.clear();
+        currentDestBins.clear();
+
+        txtMaterialSearch.setText("");
+        lblCurrentQty.setText("");
+        lblAvailableQty.setText("");
+        txtBatchNumber.setText("");
+        txtBatchDetails.setText("");
+        cmbDestinationZone.setText("");
+        lblBinCapacity.setText("");
+        spinTransferQty.setText("");
+        txtaRemarks.setText("");
+
+        cmbSourceBin.removeAllItems();
+        cmbSourceBin.addItem("-- Select Source Bin --");
+        cmbDestinationWarehouse.removeAllItems();
+        cmbDestinationWarehouse.addItem("-- Select Dest Bin --");
+
+        DefaultTableModel m1 = (DefaultTableModel) jTable1.getModel();
+        m1.setRowCount(0);
+        refreshTransferSummaryTable();
     }
 
     /**
@@ -544,59 +891,280 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchMaterialActionPerformed
-        // TODO add your handling code here:
+        WarehouseDTO wh = getSelectedWarehouse();
+        if (wh == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first.");
+            return;
+        }
+        String query = txtMaterialSearch.getText().trim();
+
+        BackgroundTask task = new BackgroundTask(this, "Searching Materials") {
+            private List<MaterialSearchResult> results;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching materials with stock...");
+                results = controller.searchMaterialsInWarehouse(wh.getWarehouseId(), query);
+                return results != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentMaterialResults = results != null ? results : new ArrayList<>();
+                DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+                model.setRowCount(0);
+
+                for (MaterialSearchResult mat : currentMaterialResults) {
+                    model.addRow(new Object[]{
+                        mat.getMaterialCode(),
+                        mat.getMaterialDescription(),
+                        mat.getBaseUom(),
+                        (mat.getIsBatchManaged() != null && mat.getIsBatchManaged()) ? "Yes" : "No",
+                        String.format("%.2f", mat.getTotalAvailableQty())
+                    });
+                }
+
+                if (currentMaterialResults.isEmpty()) {
+                    StatusMessageHandler.showInfo(txtStatus, "No materials with stock found" + (query.isEmpty() ? "." : " for '" + query + "'."));
+                } else {
+                    StatusMessageHandler.showSuccess(txtStatus, currentMaterialResults.size() + " material(s) found.");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Search failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
     }//GEN-LAST:event_btnSearchMaterialActionPerformed
 
     private void txtMaterialSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaterialSearchActionPerformed
-        // TODO add your handling code here:
+        // trigger search on Enter key
+        btnSearchMaterialActionPerformed(evt);
     }//GEN-LAST:event_txtMaterialSearchActionPerformed
 
     private void txtaRemarksActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtaRemarksActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_txtaRemarksActionPerformed
 
     private void cmbSourceWarehouseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSourceWarehouseActionPerformed
-        // TODO add your handling code here:
+        WarehouseDTO wh = getSelectedWarehouse();
+        if (wh != null) {
+            // load destination bins for this warehouse
+            loadDestinationBins(wh.getWarehouseId());
+
+            // clear material search results and source bin selection
+            selectedMaterial = null;
+            currentMaterialResults.clear();
+            currentSourceBins.clear();
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0);
+            cmbSourceBin.removeAllItems();
+            cmbSourceBin.addItem("-- Select Source Bin --");
+            lblCurrentQty.setText("");
+            lblAvailableQty.setText("");
+            txtBatchNumber.setText("");
+            txtBatchDetails.setText("");
+        }
     }//GEN-LAST:event_cmbSourceWarehouseActionPerformed
 
     private void spinTransferQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spinTransferQtyActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_spinTransferQtyActionPerformed
 
     private void lblAvailableQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblAvailableQtyActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_lblAvailableQtyActionPerformed
 
     private void btnAddToTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToTransferActionPerformed
-        // TODO add your handling code here:
+        // validate material selected
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            return;
+        }
+
+        // validate source bin
+        int srcIdx = cmbSourceBin.getSelectedIndex();
+        if (srcIdx <= 0 || (srcIdx - 1) >= currentSourceBins.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a source bin.");
+            return;
+        }
+        SourceBinInfo srcBin = currentSourceBins.get(srcIdx - 1);
+
+        // validate frozen source bin
+        if (srcBin.getIsFrozen() != null && srcBin.getIsFrozen()) {
+            StatusMessageHandler.showWarning(txtStatus, "Cannot transfer from a frozen bin.");
+            return;
+        }
+
+        // validate destination bin
+        int destIdx = cmbDestinationWarehouse.getSelectedIndex();
+        if (destIdx <= 0 || (destIdx - 1) >= currentDestBins.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination bin.");
+            return;
+        }
+        DestBinInfo destBin = currentDestBins.get(destIdx - 1);
+
+        // validate source != destination
+        if (srcBin.getBinId().equals(destBin.getBinId())) {
+            StatusMessageHandler.showWarning(txtStatus, "Source and destination bins must be different.");
+            return;
+        }
+
+        // validate transfer quantity
+        String qtyStr = spinTransferQty.getText().trim();
+        double transferQty;
+        try {
+            transferQty = Double.parseDouble(qtyStr);
+        } catch (NumberFormatException e) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a valid transfer quantity.");
+            return;
+        }
+
+        if (transferQty <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Transfer quantity must be greater than 0.");
+            return;
+        }
+
+        // validate against available qty
+        double available = srcBin.getAvailableQty() != null ? srcBin.getAvailableQty() : 0;
+        // subtract already added to summary for same source bin & material
+        for (BinTransferItem existing : transferSummaryList) {
+            if (existing.getMaterialId().equals(selectedMaterial.getMaterialId())
+                && existing.getFromBinId().equals(srcBin.getBinId())) {
+                available -= existing.getQuantity();
+            }
+        }
+
+        if (transferQty > available) {
+            StatusMessageHandler.showWarning(txtStatus,
+                String.format("Transfer quantity (%.2f) exceeds available stock (%.2f) in source bin.", transferQty, available));
+            return;
+        }
+
+        // validate destination capacity
+        if (destBin.getMaxCapacity() != null && destBin.getMaxCapacity() > 0) {
+            double destRemaining = destBin.getMaxCapacity() - (destBin.getUsedCapacity() != null ? destBin.getUsedCapacity() : 0);
+            // account for items already added to this dest bin
+            for (BinTransferItem existing : transferSummaryList) {
+                if (existing.getToBinId().equals(destBin.getBinId())) {
+                    destRemaining -= existing.getQuantity();
+                }
+            }
+            if (transferQty > destRemaining) {
+                StatusMessageHandler.showWarning(txtStatus,
+                    String.format("Destination bin capacity insufficient. Remaining: %.0f, Requested: %.2f", destRemaining, transferQty));
+                return;
+            }
+        }
+
+        // create transfer item
+        BinTransferItem item = new BinTransferItem();
+        item.setMaterialId(selectedMaterial.getMaterialId());
+        item.setMaterialCode(selectedMaterial.getMaterialCode());
+        item.setMaterialDescription(selectedMaterial.getMaterialDescription());
+        item.setFromBinId(srcBin.getBinId());
+        item.setFromBinCode(srcBin.getBinCode());
+        item.setToBinId(destBin.getBinId());
+        item.setToBinCode(destBin.getBinCode());
+        item.setQuantity(transferQty);
+        item.setUom(selectedMaterial.getBaseUom());
+        item.setBatchId(srcBin.getBatchId());
+        item.setBatchNumber(srcBin.getBatchNumber());
+        item.setStatus("Pending");
+
+        transferSummaryList.add(item);
+        refreshTransferSummaryTable();
+
+        // reset qty input
+        spinTransferQty.setText("");
+        StatusMessageHandler.showSuccess(txtStatus, "Item added to transfer list.");
     }//GEN-LAST:event_btnAddToTransferActionPerformed
 
     private void btnCompleteTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteTransferActionPerformed
-        // TODO add your handling code here:
+        if (transferSummaryList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please add materials to transfer first.");
+            return;
+        }
+
+        // validate reason selected
+        if (cmbTransferReason.getSelectedIndex() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a transfer reason.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Transfer materials between bins?\nInventory locations will be updated.\n\n"
+            + transferSummaryList.size() + " item(s) to transfer.",
+            "Confirm Bin-to-Bin Transfer",
+            JOptionPane.YES_NO_OPTION);
+
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        String reason = cmbTransferReason.getSelectedItem().toString();
+        String remarks = txtaRemarks.getText().trim();
+
+        BackgroundTask task = new BackgroundTask(this, "Processing Bin-to-Bin Transfer") {
+            private String toNumber;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Posting transfer to server...");
+                toNumber = controller.completeBinToBinTransfer(transferSummaryList, reason, remarks);
+                return toNumber != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Bin-to-Bin transfer completed! Transfer Number: " + toNumber);
+
+                int printConfirm = JOptionPane.showConfirmDialog(
+                    BinToBinTransferForm.this,
+                    "Bin-to-Bin transfer completed successfully.\nTransfer Number: " + toNumber + "\n\nPrint transfer note?",
+                    "Transfer Complete",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE);
+
+                if (printConfirm == JOptionPane.YES_OPTION) {
+                    StatusMessageHandler.showInfo(txtStatus, "Print feature is not implemented yet.");
+                }
+
+                clearForm();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Transfer failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
     }//GEN-LAST:event_btnCompleteTransferActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnPrintTransferNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintTransferNoteActionPerformed
-        // TODO add your handling code here:
+        StatusMessageHandler.showInfo(txtStatus, "Print Transfer Note feature is not implemented yet.");
     }//GEN-LAST:event_btnPrintTransferNoteActionPerformed
 
     private void lblCurrentQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblCurrentQtyActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_lblCurrentQtyActionPerformed
 
     private void txtBatchDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchDetailsActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_txtBatchDetailsActionPerformed
 
     private void cmbDestinationZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDestinationZoneActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_cmbDestinationZoneActionPerformed
 
     private void cmbTransferReasonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTransferReasonActionPerformed
-        // TODO add your handling code here:
+        // no action needed
     }//GEN-LAST:event_cmbTransferReasonActionPerformed
 
     /**
