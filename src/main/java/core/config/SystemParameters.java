@@ -10,9 +10,8 @@ package core.config;
  */
 public class SystemParameters {
 
-    // public static final String API_BASE_URL = "http://hivon/api";
-    public static final String API_BASE_URL = "https://hivon-api.wasmer.app/api";
+    public static final String API_BASE_URL = "http://hivon.local/api";
+    // public static final String API_BASE_URL = "https://hivon-api.wasmer.app/api";
     public static final int SESSION_TIMEOUT_MINUTES = 1;
 
 }
-

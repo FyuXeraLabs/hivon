@@ -82,6 +82,7 @@ public class ApiClient {
 
     // execute HTTP request with automatic token refresh on 401
     public JsonObject executeWithAuth(HttpRequest request) throws Exception {
+        String requestMethod = request.method();
         HttpResponse<String> response = httpClient.send(request,
                 HttpResponse.BodyHandlers.ofString());
 
@@ -127,6 +128,16 @@ public class ApiClient {
         }
 
         JsonObject body = parseResponse(response);
+
+        // audit trace: record user POST actions locally; the API records the
+        // authoritative row in the database audit_log table for every post
+        if ("POST".equalsIgnoreCase(requestMethod)) {
+            String auditUser = session.isValid() ? session.getUsername() : "unknown";
+            Logger.log("Audit", "POST " + request.uri().getPath()
+                    + " -> HTTP " + response.statusCode()
+                    + " (" + auditUser + ")");
+        }
+
         return body;
     }
 
