@@ -4,18 +4,95 @@
  */
 package ui.movements;
 
+import movements.controllers.ScrapWriteoffController;
+import models.entity.Material;
+import models.entity.ScrapReason;
+
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
+ * Form for recording scrap and write-off transactions
  *
  * @author Thisula
  */
 public class ScrapWriteoffForm extends javax.swing.JFrame {
+
+    private final ScrapWriteoffController controller = new ScrapWriteoffController();
+    private DefaultTableModel tableModel;
+    private Material currentSelectedMaterial = null;
 
     /**
      * Creates new form ScrapWriteoffForm
      */
     public ScrapWriteoffForm() {
         initComponents();
+        customInit();
     }
+
+    private void customInit() {
+        // Setup JTable model
+        String[] columns = new String[]{"Material", "Qty", "Reason", "Date", "Approved By", "Status"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        jTable1.setModel(tableModel);
+
+        // Set read-only displays
+        txtMaterialCode.setEditable(false);
+        txtPMaterialName.setEditable(false);
+        txtCurrentQty.setEditable(false);
+        txtBatchNumber.setEditable(false);
+        txtPONumber4.setEditable(false);
+        txtStatus.setEditable(false);
+        txtStatus.setText("PENDING");
+
+        // Load Scrap Reasons
+        loadScrapReasons();
+    }
+
+    private void loadScrapReasons() {
+        
+    }
+
+    private void performSearch() {
+        String query = txtMaterialcode.getText();
+        if (query == null || query.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a Material Code or Name to search.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        txtWriteoffQty.setText("");
+        txtPONumber6.setText("");
+        txtWriteoffQty.requestFocus();
+    }
+
+    private void clearItemFields() {
+        txtMaterialcode.setText("");
+        txtMaterialCode.setText("");
+        txtPMaterialName.setText("");
+        txtCurrentQty.setText("");
+        txtBatchNumber.setText("");
+        txtPONumber4.setText("");
+        txtWriteoffQty.setText("");
+        txtBatchnumber.setText("");
+        txtPONumber6.setText("");
+        currentSelectedMaterial = null;
+        txtMaterialcode.requestFocus();
+    }
+
+    private void clearAllForm() {
+        clearItemFields();
+        tableModel.setRowCount(0);
+        txtStatus.setText("PENDING");
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,21 +103,520 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jPanel1 = new javax.swing.JPanel();
+        JpanelMaterialSearch = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txtMaterialcode = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        JpanelMaterialDetails = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txtPMaterialName = new javax.swing.JTextField();
+        txtCurrentQty = new javax.swing.JTextField();
+        txtBatchNumber = new javax.swing.JTextField();
+        txtPONumber4 = new javax.swing.JTextField();
+        txtMaterialCode = new javax.swing.JTextField();
+        jPanelWriteoffDetails = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        txtPONumber6 = new javax.swing.JTextField();
+        txtWriteoffQty = new javax.swing.JTextField();
+        txtBatchnumber = new javax.swing.JTextField();
+        txtStatus = new javax.swing.JTextField();
+        cmbScrapReason = new javax.swing.JComboBox<>();
+        jPanelWriteoffHistory = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        btbAdd = new javax.swing.JButton();
+        btnSubmit = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
+        btbCancel = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Details"));
+
+        JpanelMaterialSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Search Panel"));
+
+        jLabel1.setText("Material Code/Name ");
+
+        txtMaterialcode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtMaterialcodeActionPerformed(evt);
+            }
+        });
+
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearch.setText(" Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout JpanelMaterialSearchLayout = new javax.swing.GroupLayout(JpanelMaterialSearch);
+        JpanelMaterialSearch.setLayout(JpanelMaterialSearchLayout);
+        JpanelMaterialSearchLayout.setHorizontalGroup(
+            JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(JpanelMaterialSearchLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addGap(26, 26, 26)
+                .addComponent(txtMaterialcode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        JpanelMaterialSearchLayout.setVerticalGroup(
+            JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(JpanelMaterialSearchLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtMaterialcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch)
+                    .addComponent(jLabel1))
+                .addContainerGap(31, Short.MAX_VALUE))
+        );
+
+        JpanelMaterialDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Details"));
+
+        jLabel2.setText("Material Code");
+
+        jLabel3.setText("Current Qty");
+
+        jLabel6.setText("Batch Number");
+
+        jLabel7.setText("Expiry Date ");
+
+        jLabel4.setText(" Material Name");
+
+        txtPMaterialName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPMaterialNameActionPerformed(evt);
+            }
+        });
+
+        txtCurrentQty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCurrentQtyActionPerformed(evt);
+            }
+        });
+
+        txtBatchNumber.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBatchNumberActionPerformed(evt);
+            }
+        });
+
+        txtPONumber4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPONumber4ActionPerformed(evt);
+            }
+        });
+
+        txtMaterialCode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtMaterialCodeActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout JpanelMaterialDetailsLayout = new javax.swing.GroupLayout(JpanelMaterialDetails);
+        JpanelMaterialDetails.setLayout(JpanelMaterialDetailsLayout);
+        JpanelMaterialDetailsLayout.setHorizontalGroup(
+            JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)))
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtPMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(24, 24, 24)
+                        .addComponent(txtPONumber4, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        JpanelMaterialDetailsLayout.setVerticalGroup(
+            JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
+                .addGap(9, 9, 9)
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtPONumber4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtPMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
+        );
+
+        jPanelWriteoffDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Writeoff Details Panel"));
+
+        jLabel5.setText(" Writeoff Qty");
+
+        jLabel8.setText("Scrap Reason");
+
+        jLabel9.setText("Batch Number");
+
+        jLabel10.setText("Remarks");
+
+        jLabel11.setText("Approval Status ");
+
+        txtPONumber6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPONumber6ActionPerformed(evt);
+            }
+        });
+
+        txtWriteoffQty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtWriteoffQtyActionPerformed(evt);
+            }
+        });
+
+        txtBatchnumber.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBatchnumberActionPerformed(evt);
+            }
+        });
+
+        cmbScrapReason.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        javax.swing.GroupLayout jPanelWriteoffDetailsLayout = new javax.swing.GroupLayout(jPanelWriteoffDetails);
+        jPanelWriteoffDetails.setLayout(jPanelWriteoffDetailsLayout);
+        jPanelWriteoffDetailsLayout.setHorizontalGroup(
+            jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                                .addComponent(cmbScrapReason, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(9, 9, 9))))
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtWriteoffQty, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtPONumber6, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(728, 728, 728))
+        );
+        jPanelWriteoffDetailsLayout.setVerticalGroup(
+            jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addGap(28, 28, 28)
+                        .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel11)
+                            .addComponent(cmbScrapReason, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel9)
+                            .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtWriteoffQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtPONumber6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(12, Short.MAX_VALUE))
+        );
+
+        jPanelWriteoffHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Writeoff History Table"));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "Material", "Qty", "Reason", "Date", "Approved By", "Status "
+            }
+        ));
+        jScrollPane2.setViewportView(jTable1);
+
+        javax.swing.GroupLayout jPanelWriteoffHistoryLayout = new javax.swing.GroupLayout(jPanelWriteoffHistory);
+        jPanelWriteoffHistory.setLayout(jPanelWriteoffHistoryLayout);
+        jPanelWriteoffHistoryLayout.setHorizontalGroup(
+            jPanelWriteoffHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelWriteoffHistoryLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2)
+                .addContainerGap())
+        );
+        jPanelWriteoffHistoryLayout.setVerticalGroup(
+            jPanelWriteoffHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelWriteoffHistoryLayout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 12, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(JpanelMaterialDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanelWriteoffDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanelWriteoffHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(JpanelMaterialSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 1206, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(JpanelMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(JpanelMaterialDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanelWriteoffDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanelWriteoffHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(145, Short.MAX_VALUE))
+        );
+
+        jScrollPane1.setViewportView(jPanel1);
+
+        btbAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btbAdd.setText("Add to Writeoff ");
+        btbAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btbAddActionPerformed(evt);
+            }
+        });
+
+        btnSubmit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnSubmit.setText("Submit for Approval ");
+        btnSubmit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSubmitActionPerformed(evt);
+            }
+        });
+
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
+        btnSave.setText("Save Draft ");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
+
+        btbCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        btbCancel.setText(" Cancel");
+        btbCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btbCancelActionPerformed(evt);
+            }
+        });
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText(" Print Writeoff Notice");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btbAdd)
+                .addGap(40, 40, 40)
+                .addComponent(btnSubmit)
+                .addGap(71, 71, 71)
+                .addComponent(btnSave)
+                .addGap(81, 81, 81)
+                .addComponent(btbCancel)
+                .addGap(63, 63, 63)
+                .addComponent(btnPrint)
+                .addContainerGap(466, Short.MAX_VALUE))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 593, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSubmit)
+                    .addComponent(btnSave)
+                    .addComponent(btbCancel)
+                    .addComponent(btnPrint)
+                    .addComponent(btbAdd))
+                .addGap(17, 17, 17))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btbAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btbAddActionPerformed
+        if (currentSelectedMaterial == null) {
+            JOptionPane.showMessageDialog(this, "Please search and select a material first.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String writeoffText = txtWriteoffQty.getText().trim();
+        if (writeoffText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a writeoff quantity.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        double currentQty, writeoffQty;
+        try {
+            currentQty = Double.parseDouble(txtCurrentQty.getText());
+            writeoffQty = Double.parseDouble(writeoffText);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid numeric writeoff quantity.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        if (writeoffQty <= 0) {
+            JOptionPane.showMessageDialog(this, "Writeoff quantity must be greater than zero.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        if (writeoffQty > currentQty) {
+            JOptionPane.showMessageDialog(this, "Writeoff quantity (" + writeoffQty + ") cannot exceed available stock (" + currentQty + ").", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        String remarks = txtPONumber6.getText().trim();
+        if (remarks.length() < 10) {
+            JOptionPane.showMessageDialog(this, "Remarks are mandatory for scrap/write-off (minimum 10 characters required).", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            txtPONumber6.requestFocus();
+            return;
+        }
+
+        String selectedReasonStr = (String) cmbScrapReason.getSelectedItem();
+        String reasonCode = "DAMAGED";
+        String reasonDesc = "Physical Damage";
+        if (selectedReasonStr != null && selectedReasonStr.contains("-")) {
+            String[] parts = selectedReasonStr.split("-", 2);
+            reasonCode = parts[0].trim();
+            reasonDesc = parts[1].trim();
+        }
+
+        String batchNo = txtBatchnumber.getText().trim();
+        if (batchNo.isEmpty()) {
+            batchNo = txtBatchNumber.getText().trim();
+        }
+
+        clearItemFields();
+    }//GEN-LAST:event_btbAddActionPerformed
+
+    private void btnSubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitActionPerformed
+        
+    }//GEN-LAST:event_btnSubmitActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btbCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btbCancelActionPerformed
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear all form entries?", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            clearAllForm();
+        }
+    }//GEN-LAST:event_btbCancelActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void txtMaterialcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaterialcodeActionPerformed
+        performSearch();
+    }//GEN-LAST:event_txtMaterialcodeActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        performSearch();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void txtPMaterialNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPMaterialNameActionPerformed
+    }//GEN-LAST:event_txtPMaterialNameActionPerformed
+
+    private void txtCurrentQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrentQtyActionPerformed
+    }//GEN-LAST:event_txtCurrentQtyActionPerformed
+
+    private void txtBatchNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchNumberActionPerformed
+    }//GEN-LAST:event_txtBatchNumberActionPerformed
+
+    private void txtPONumber4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPONumber4ActionPerformed
+    }//GEN-LAST:event_txtPONumber4ActionPerformed
+
+    private void txtMaterialCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaterialCodeActionPerformed
+    }//GEN-LAST:event_txtMaterialCodeActionPerformed
+
+    private void txtPONumber6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPONumber6ActionPerformed
+    }//GEN-LAST:event_txtPONumber6ActionPerformed
+
+    private void txtWriteoffQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtWriteoffQtyActionPerformed
+    }//GEN-LAST:event_txtWriteoffQtyActionPerformed
+
+    private void txtBatchnumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchnumberActionPerformed
+    }//GEN-LAST:event_txtBatchnumberActionPerformed
 
     /**
      * @param args the command line arguments
@@ -78,5 +654,42 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel JpanelMaterialDetails;
+    private javax.swing.JPanel JpanelMaterialSearch;
+    private javax.swing.JButton btbAdd;
+    private javax.swing.JButton btbCancel;
+    private javax.swing.JButton btnPrint;
+    private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSubmit;
+    private javax.swing.JComboBox<String> cmbScrapReason;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanelWriteoffDetails;
+    private javax.swing.JPanel jPanelWriteoffHistory;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTextField txtBatchNumber;
+    private javax.swing.JTextField txtBatchnumber;
+    private javax.swing.JTextField txtCurrentQty;
+    private javax.swing.JTextField txtMaterialCode;
+    private javax.swing.JTextField txtMaterialcode;
+    private javax.swing.JTextField txtPMaterialName;
+    private javax.swing.JTextField txtPONumber4;
+    private javax.swing.JTextField txtPONumber6;
+    private javax.swing.JTextField txtStatus;
+    private javax.swing.JTextField txtWriteoffQty;
     // End of variables declaration//GEN-END:variables
 }
+
