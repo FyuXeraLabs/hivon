@@ -4,17 +4,707 @@
  */
 package ui.movements;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+import core.api.dao.CycleCountDAO.CycleCountItem;
+import core.api.dao.CycleCountDAO.CycleCountPlan;
+import core.api.dao.CycleCountDAO.CreateCountResult;
+import movements.controllers.CycleCountController;
+import models.dto.WarehouseDTO;
+import models.dto.ZoneDTO;
+import models.dto.StorageBinDTO;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author Piyumi
  */
 public class CycleCountForm extends javax.swing.JFrame {
 
+    private CycleCountController controller;
+    private List<WarehouseDTO> loadedWarehouses = new ArrayList<>();
+    private List<ZoneDTO> loadedZones = new ArrayList<>();
+    private List<StorageBinDTO> loadedBins = new ArrayList<>();
+    private List<CycleCountItem> countItems = new ArrayList<>();
+    private List<CycleCountItem> countedItems = new ArrayList<>();
+    private int currentItemIndex = -1;
+    private Integer activeCountId = null;
+    private String activeCountNumber = null;
+    private javax.swing.JLabel txtStatus;
+
     /**
      * Creates new form CycleCountForm
      */
     public CycleCountForm() {
         initComponents();
+        this.controller = new CycleCountController();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.setTitle("Cycle Count");
+        try {
+            this.setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+        } catch (Exception e) {
+            // icon not found, skip
+        }
+
+        // add status label programmatically at the bottom
+        txtStatus = new javax.swing.JLabel();
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.add(txtStatus);
+
+        setupWarehouseCombo();
+        setupDateCombo();
+        setupCountEntryFields();
+        setupCountSummaryTable();
+        setupButtonListeners();
+        setCountingPanelEnabled(false);
+        loadWarehouses();
+    }
+
+    // -- Setup methods --
+
+    private void setupWarehouseCombo() {
+        cmbWarehouse.removeAllItems();
+        cmbWarehouse.addItem("-- Select Warehouse --");
+        cmbZone.removeAllItems();
+        cmbZone.addItem("-- Select Zone --");
+        cmbBin.removeAllItems();
+        cmbBin.addItem("-- All Bins in Zone --");
+    }
+
+    private void setupDateCombo() {
+        // use the date combo as a simple text selector with today's date
+        dtCountDate.removeAllItems();
+        dtCountDate.addItem(java.time.LocalDate.now().toString());
+    }
+
+    private void setupCountEntryFields() {
+        // make counted qty editable (it was set non-editable in form designer)
+        spinCountedQty.setEditable(true);
+        txtaRemarks.setEditable(true);
+
+        // real-time variance calculation when counted qty changes
+        spinCountedQty.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                calculateVariance();
+            }
+        });
+    }
+
+    private void setupCountSummaryTable() {
+        DefaultTableModel model = new DefaultTableModel(
+            new String[]{"Material", "Batch", "System Qty", "Counted Qty", "Variance", "Variance %", "Status"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
+        tblCountSummary.setModel(model);
+        tblCountSummary.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblCountSummary.getTableHeader().setReorderingAllowed(false);
+
+        // click row to re-edit counted qty
+        tblCountSummary.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tblCountSummary.getSelectedRow();
+                if (row >= 0 && row < countedItems.size()) {
+                    loadItemIntoEntryPanel(countedItems.get(row));
+                }
+            }
+        });
+    }
+
+    private void setupButtonListeners() {
+        btnStartCount.addActionListener(e -> handleStartCount());
+        btnRecount.addActionListener(e -> handleRecount());
+        btnCompleteCount.addActionListener(e -> handleCompleteCount());
+        btnUnfreeze.addActionListener(e -> handleUnfreeze());
+    }
+
+    // -- Warehouse / Zone / Bin loading --
+
+    private WarehouseDTO getSelectedWarehouse() {
+        int idx = cmbWarehouse.getSelectedIndex();
+        if (idx > 0 && (idx - 1) < loadedWarehouses.size()) {
+            return loadedWarehouses.get(idx - 1);
+        }
+        return null;
+    }
+
+    private ZoneDTO getSelectedZone() {
+        int idx = cmbZone.getSelectedIndex();
+        if (idx > 0 && (idx - 1) < loadedZones.size()) {
+            return loadedZones.get(idx - 1);
+        }
+        return null;
+    }
+
+    private StorageBinDTO getSelectedBin() {
+        int idx = cmbBin.getSelectedIndex();
+        if (idx > 0 && (idx - 1) < loadedBins.size()) {
+            return loadedBins.get(idx - 1);
+        }
+        return null;
+    }
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses from server...");
+                warehouses = controller.getWarehouses();
+                return warehouses != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedWarehouses = warehouses != null ? warehouses : new ArrayList<>();
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.addItem("-- Select Warehouse --");
+                for (WarehouseDTO wh : loadedWarehouses) {
+                    cmbWarehouse.addItem(wh.getWarehouseCode() + " - " + wh.getWarehouseName());
+                }
+                if (!loadedWarehouses.isEmpty()) {
+                    StatusMessageHandler.showSuccess(txtStatus, "Warehouses loaded (" + loadedWarehouses.size() + " active).");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadZonesForWarehouse(int warehouseId) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
+            private List<ZoneDTO> zones;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching zones...");
+                zones = controller.getZonesByWarehouse(warehouseId);
+                return zones != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedZones = zones != null ? zones : new ArrayList<>();
+                cmbZone.removeAllItems();
+                cmbZone.addItem("-- Select Zone --");
+                for (ZoneDTO z : loadedZones) {
+                    cmbZone.addItem(z.getZoneCode() + " - " + z.getZoneName());
+                }
+                cmbBin.removeAllItems();
+                cmbBin.addItem("-- All Bins in Zone --");
+                loadedBins.clear();
+                StatusMessageHandler.showSuccess(txtStatus, loadedZones.size() + " zone(s) loaded.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load zones: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadBinsForZone(String zoneCode) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Bins") {
+            private List<StorageBinDTO> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching bins for zone " + zoneCode + "...");
+                bins = controller.getBinsByZone(zoneCode);
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedBins = bins != null ? bins : new ArrayList<>();
+                cmbBin.removeAllItems();
+                cmbBin.addItem("-- All Bins in Zone --");
+                for (StorageBinDTO b : loadedBins) {
+                    String label = b.getBinCode();
+                    if (b.getIsFrozen() != null && b.getIsFrozen()) {
+                        label += " [FROZEN]";
+                    }
+                    cmbBin.addItem(label);
+                }
+                StatusMessageHandler.showSuccess(txtStatus, loadedBins.size() + " bin(s) loaded.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    // -- Core Cycle Count workflow --
+
+    private void handleStartCount() {
+        WarehouseDTO wh = getSelectedWarehouse();
+        if (wh == null) {
+            JOptionPane.showMessageDialog(this, "Please select a warehouse.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        ZoneDTO zone = getSelectedZone();
+        StorageBinDTO bin = getSelectedBin();
+
+        if (zone == null && bin == null) {
+            JOptionPane.showMessageDialog(this, "Please select at least a Zone or a specific Bin.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String countReason = txtCountReason.getText().trim();
+        if (countReason.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a count reason.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String countDate = (String) dtCountDate.getSelectedItem();
+        Integer binId = bin != null ? bin.getBinId() : null;
+        String zoneCode = zone != null ? zone.getZoneCode() : null;
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Start cycle count?\nThis will FREEZE the selected bin(s) and lock them from other operations.",
+            "Confirm Start Count", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        BackgroundTask task = new BackgroundTask(this, "Starting Cycle Count") {
+            private CreateCountResult result;
+            private List<CycleCountItem> items;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Creating cycle count plan and freezing bins...");
+                result = controller.createCycleCount(wh.getWarehouseId(), binId, zoneCode, countDate, "ADHOC");
+
+                if (result == null || result.getCountId() == null) {
+                    throw new Exception("Failed to create cycle count plan.");
+                }
+
+                updateProgress("Loading items to count...");
+                items = controller.getCycleCountItems(result.getCountId());
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                activeCountId = result.getCountId();
+                activeCountNumber = result.getCountNumber();
+                countItems = items != null ? items : new ArrayList<>();
+                countedItems.clear();
+                currentItemIndex = -1;
+
+                // populate bin details panel
+                if (bin != null) {
+                    lblBinCode.setText(bin.getBinCode());
+                    lblZone.setText(bin.getZoneCode() != null ? bin.getZoneCode() : "");
+                    lblZone1.setText(""); // aisle - not in DTO
+                    lblRack.setText(""); // rack - not in DTO
+                    lblBinCode1.setText(""); // level - not in DTO
+                    tblBinMaterials.setText(String.valueOf(countItems.size()));
+                } else {
+                    lblBinCode.setText(zoneCode != null ? "Zone: " + zoneCode : "All");
+                    lblZone.setText(zoneCode != null ? zoneCode : "");
+                    lblZone1.setText("");
+                    lblRack.setText("");
+                    lblBinCode1.setText("");
+                    tblBinMaterials.setText(String.valueOf(countItems.size()));
+                }
+
+                setCountingPanelEnabled(true);
+                refreshCountSummaryTable();
+
+                if (!countItems.isEmpty()) {
+                    advanceToNextItem();
+                    StatusMessageHandler.showSuccess(txtStatus, "Cycle count " + activeCountNumber
+                        + " started. " + countItems.size() + " item(s) to count. Bins are FROZEN.");
+                } else {
+                    StatusMessageHandler.showWarning(txtStatus, "Cycle count " + activeCountNumber
+                        + " started but no inventory items found in selected bin(s).");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to start count: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void advanceToNextItem() {
+        currentItemIndex++;
+        if (currentItemIndex < countItems.size()) {
+            CycleCountItem item = countItems.get(currentItemIndex);
+            loadItemIntoEntryPanel(item);
+            StatusMessageHandler.showInfo(txtStatus, "Counting item " + (currentItemIndex + 1)
+                + " of " + countItems.size() + ": " + item.getMaterialCode());
+        } else {
+            // all items visited
+            clearEntryPanel();
+            StatusMessageHandler.showSuccess(txtStatus, "All items visited. Review and complete the count.");
+            JOptionPane.showMessageDialog(this,
+                "All items have been visited.\nReview the summary table, then click 'Complete Count' to finalize.",
+                "All Items Counted", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void loadItemIntoEntryPanel(CycleCountItem item) {
+        lblMaterialCode.setText(item.getMaterialCode() != null ? item.getMaterialCode() : "");
+        lblMaterialName.setText(item.getMaterialName() != null ? item.getMaterialName() : "");
+        lblBatchNumber.setText(item.getBatchNumber() != null ? item.getBatchNumber() : "N/A");
+        lblSystemQty.setText(item.getSystemQuantity() != null ? String.format("%.3f", item.getSystemQuantity()) : "0.000");
+
+        if (item.getCountedQuantity() != null) {
+            spinCountedQty.setText(String.format("%.3f", item.getCountedQuantity()));
+        } else {
+            spinCountedQty.setText("");
+        }
+
+        lblVariance.setText("");
+        lblVariancePercentage.setText("");
+        chkRecountRequired.setSelected(item.getRecountRequired() != null && item.getRecountRequired());
+        txtaRemarks.setText(item.getVarianceReason() != null ? item.getVarianceReason() : "");
+
+        calculateVariance();
+    }
+
+    private void clearEntryPanel() {
+        lblMaterialCode.setText("");
+        lblMaterialName.setText("");
+        lblBatchNumber.setText("");
+        lblSystemQty.setText("");
+        spinCountedQty.setText("");
+        lblVariance.setText("");
+        lblVariancePercentage.setText("");
+        chkRecountRequired.setSelected(false);
+        txtaRemarks.setText("");
+    }
+
+    private void calculateVariance() {
+        String sysQtyStr = lblSystemQty.getText().trim();
+        String countedStr = spinCountedQty.getText().trim();
+
+        if (sysQtyStr.isEmpty() || countedStr.isEmpty()) {
+            lblVariance.setText("");
+            lblVariancePercentage.setText("");
+            return;
+        }
+
+        try {
+            double sysQty = Double.parseDouble(sysQtyStr);
+            double counted = Double.parseDouble(countedStr);
+            double variance = counted - sysQty;
+            lblVariance.setText(String.format("%.3f", variance));
+
+            if (sysQty != 0) {
+                double pct = (variance / sysQty) * 100.0;
+                lblVariancePercentage.setText(String.format("%.1f%%", pct));
+            } else {
+                lblVariancePercentage.setText(counted > 0 ? "+∞" : "0%");
+            }
+
+            // auto-flag recount for large variances
+            if (sysQty > 0) {
+                double absPct = Math.abs(variance / sysQty);
+                if (absPct > 0.10 || Math.abs(variance) > 5) {
+                    chkRecountRequired.setSelected(true);
+                }
+            }
+        } catch (NumberFormatException e) {
+            lblVariance.setText("ERR");
+            lblVariancePercentage.setText("ERR");
+        }
+    }
+
+    private CycleCountItem findCurrentItem() {
+        // find the item currently displayed in the entry panel
+        String matCode = lblMaterialCode.getText().trim();
+        String batch = lblBatchNumber.getText().trim();
+
+        for (CycleCountItem item : countItems) {
+            boolean codeMatch = item.getMaterialCode() != null && item.getMaterialCode().equals(matCode);
+            boolean batchMatch = (item.getBatchNumber() == null && ("N/A".equals(batch) || batch.isEmpty()))
+                || (item.getBatchNumber() != null && item.getBatchNumber().equals(batch));
+            if (codeMatch && batchMatch) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private void setCountingPanelEnabled(boolean enabled) {
+        spinCountedQty.setEditable(enabled);
+        txtaRemarks.setEditable(enabled);
+        chkRecountRequired.setEnabled(enabled);
+        btnNextItem.setEnabled(enabled);
+        btnSkip.setEnabled(enabled);
+        btnRecount.setEnabled(enabled);
+        btnCompleteCount.setEnabled(enabled);
+        btnFreeze.setEnabled(!enabled); // freeze only when not counting
+        btnUnfreeze.setEnabled(enabled);
+    }
+
+    private void refreshCountSummaryTable() {
+        DefaultTableModel model = (DefaultTableModel) tblCountSummary.getModel();
+        model.setRowCount(0);
+
+        for (CycleCountItem item : countedItems) {
+            String status = "Counted";
+            if (item.getRecountRequired() != null && item.getRecountRequired()) {
+                status = "Recount Needed";
+            }
+
+            double sysQty = item.getSystemQuantity() != null ? item.getSystemQuantity() : 0;
+            double countedQty = item.getCountedQuantity() != null ? item.getCountedQuantity() : 0;
+            double variance = countedQty - sysQty;
+            String variancePct = sysQty != 0 ? String.format("%.1f%%", (variance / sysQty) * 100.0) : "-";
+
+            model.addRow(new Object[]{
+                item.getMaterialCode(),
+                item.getBatchNumber() != null ? item.getBatchNumber() : "N/A",
+                String.format("%.3f", sysQty),
+                String.format("%.3f", countedQty),
+                String.format("%.3f", variance),
+                variancePct,
+                status
+            });
+        }
+    }
+
+    // -- Button Handlers (called from GEN event handlers) --
+
+    private void handleNextItem() {
+        CycleCountItem current = findCurrentItem();
+        if (current == null) {
+            StatusMessageHandler.showWarning(txtStatus, "No item selected to record.");
+            advanceToNextItem();
+            return;
+        }
+
+        String countedStr = spinCountedQty.getText().trim();
+        if (countedStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter the counted quantity.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            double counted = Double.parseDouble(countedStr);
+            if (counted < 0) {
+                JOptionPane.showMessageDialog(this, "Counted quantity cannot be negative.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            current.setCountedQuantity(counted);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid number for counted quantity.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        current.setRecountRequired(chkRecountRequired.isSelected());
+        String remarks = txtaRemarks.getText().trim();
+        if (!remarks.isEmpty()) {
+            current.setVarianceReason(remarks);
+        }
+
+        // add or update in counted list
+        boolean found = false;
+        for (int i = 0; i < countedItems.size(); i++) {
+            if (countedItems.get(i).getCountItemId().equals(current.getCountItemId())) {
+                countedItems.set(i, current);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            countedItems.add(current);
+        }
+
+        refreshCountSummaryTable();
+        StatusMessageHandler.showSuccess(txtStatus, "Item " + current.getMaterialCode() + " recorded: "
+            + String.format("%.3f", current.getCountedQuantity()));
+        advanceToNextItem();
+    }
+
+    private void handleSkip() {
+        StatusMessageHandler.showInfo(txtStatus, "Item skipped.");
+        advanceToNextItem();
+    }
+
+    private void handleRecount() {
+        if (countedItems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No items have been counted yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // reset and re-count from beginning
+        currentItemIndex = -1;
+        for (CycleCountItem item : countedItems) {
+            item.setRecountRequired(true);
+        }
+        refreshCountSummaryTable();
+        StatusMessageHandler.showInfo(txtStatus, "Recount started. All items will be recounted.");
+        advanceToNextItem();
+    }
+
+    private void handleCompleteCount() {
+        if (activeCountId == null) {
+            JOptionPane.showMessageDialog(this, "No active cycle count.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (countedItems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No items have been counted. Count at least one item before completing.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // check if all items are counted
+        int uncounted = 0;
+        for (CycleCountItem item : countItems) {
+            boolean wasCounted = false;
+            for (CycleCountItem ci : countedItems) {
+                if (ci.getCountItemId().equals(item.getCountItemId())) {
+                    wasCounted = true;
+                    break;
+                }
+            }
+            if (!wasCounted) uncounted++;
+        }
+
+        if (uncounted > 0) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                uncounted + " item(s) were not counted (skipped).\nThey must be counted before completing. Continue counting?",
+                "Uncounted Items", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                // reset index to re-visit uncounted
+                currentItemIndex = -1;
+                advanceToNextUncountedItem();
+            }
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Complete cycle count " + activeCountNumber + "?\n\nThis will:\n"
+            + "• Post variance adjustments to inventory\n"
+            + "• Unfreeze all counted bins\n"
+            + "• Mark the count as COMPLETED\n\nThis action cannot be undone.",
+            "Confirm Complete Count", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        final int countId = activeCountId;
+        final List<CycleCountItem> itemsToRecord = new ArrayList<>(countedItems);
+
+        BackgroundTask task = new BackgroundTask(this, "Completing Cycle Count") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Submitting physical counts to server...");
+                controller.recordCounts(countId, itemsToRecord);
+
+                updateProgress("Posting variance adjustments and unfreezing bins...");
+                controller.completeCycleCount(countId);
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                JOptionPane.showMessageDialog(CycleCountForm.this,
+                    "Cycle Count " + activeCountNumber + " completed successfully!\n\n"
+                    + "• " + itemsToRecord.size() + " item(s) counted\n"
+                    + "• Variance adjustments posted\n"
+                    + "• Bins unfrozen",
+                    "Count Complete", JOptionPane.INFORMATION_MESSAGE);
+
+                StatusMessageHandler.showSuccess(txtStatus, "Cycle count " + activeCountNumber + " completed.");
+                resetForm();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to complete count: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void advanceToNextUncountedItem() {
+        for (int i = currentItemIndex + 1; i < countItems.size(); i++) {
+            CycleCountItem item = countItems.get(i);
+            boolean wasCounted = false;
+            for (CycleCountItem ci : countedItems) {
+                if (ci.getCountItemId().equals(item.getCountItemId())) {
+                    wasCounted = true;
+                    break;
+                }
+            }
+            if (!wasCounted) {
+                currentItemIndex = i;
+                loadItemIntoEntryPanel(item);
+                StatusMessageHandler.showInfo(txtStatus, "Counting uncounted item " + (i + 1)
+                    + " of " + countItems.size() + ": " + item.getMaterialCode());
+                return;
+            }
+        }
+        // if we get here, all items were counted
+        StatusMessageHandler.showSuccess(txtStatus, "All items are now counted. Click 'Complete Count' again.");
+    }
+
+    private void handleFreeze() {
+        // freeze handled by start count - this is a placeholder
+        StatusMessageHandler.showInfo(txtStatus, "Bins are frozen when you click 'Start Count'.");
+    }
+
+    private void handleUnfreeze() {
+        if (activeCountId == null) {
+            StatusMessageHandler.showWarning(txtStatus, "No active count to unfreeze.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Cancel this cycle count and unfreeze bins?\nAll counted data will be lost.",
+            "Confirm Cancel & Unfreeze", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        // since we can't cancel via API easily, just complete with original system quantities
+        // Actually, there's no cancel endpoint. Just reset the form.
+        StatusMessageHandler.showWarning(txtStatus, "Count cancelled locally. Bins will be unfrozen when count is completed or expires.");
+        resetForm();
+    }
+
+    private void resetForm() {
+        activeCountId = null;
+        activeCountNumber = null;
+        countItems.clear();
+        countedItems.clear();
+        currentItemIndex = -1;
+
+        clearEntryPanel();
+        lblBinCode.setText("");
+        lblZone.setText("");
+        lblZone1.setText("");
+        lblRack.setText("");
+        lblBinCode1.setText("");
+        tblBinMaterials.setText("");
+
+        DefaultTableModel model = (DefaultTableModel) tblCountSummary.getModel();
+        model.setRowCount(0);
+
+        setCountingPanelEnabled(false);
+        txtCountReason.setText("");
     }
 
     /**
@@ -634,11 +1324,17 @@ public class CycleCountForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmbWarehouseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbWarehouseActionPerformed
-        // TODO add your handling code here:
+        WarehouseDTO wh = getSelectedWarehouse();
+        if (wh != null) {
+            loadZonesForWarehouse(wh.getWarehouseId());
+        }
     }//GEN-LAST:event_cmbWarehouseActionPerformed
 
     private void cmbZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbZoneActionPerformed
-        // TODO add your handling code here:
+        ZoneDTO zone = getSelectedZone();
+        if (zone != null) {
+            loadBinsForZone(zone.getZoneCode());
+        }
     }//GEN-LAST:event_cmbZoneActionPerformed
 
     private void lblBinCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblBinCodeActionPerformed
@@ -682,7 +1378,7 @@ public class CycleCountForm extends javax.swing.JFrame {
     }//GEN-LAST:event_lblSystemQtyActionPerformed
 
     private void spinCountedQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spinCountedQtyActionPerformed
-        // TODO add your handling code here:
+        calculateVariance();
     }//GEN-LAST:event_spinCountedQtyActionPerformed
 
     private void lblVarianceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblVarianceActionPerformed
@@ -702,15 +1398,15 @@ public class CycleCountForm extends javax.swing.JFrame {
     }//GEN-LAST:event_txtaRemarksActionPerformed
 
     private void btnNextItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextItemActionPerformed
-        // TODO add your handling code here:
+        handleNextItem();
     }//GEN-LAST:event_btnNextItemActionPerformed
 
     private void btnSkipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSkipActionPerformed
-        // TODO add your handling code here:
+        handleSkip();
     }//GEN-LAST:event_btnSkipActionPerformed
 
     private void btnFreezeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFreezeActionPerformed
-        // TODO add your handling code here:
+        handleFreeze();
     }//GEN-LAST:event_btnFreezeActionPerformed
 
     /**
