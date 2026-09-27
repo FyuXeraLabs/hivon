@@ -384,7 +384,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
 
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jPanel2 = new javax.swing.JPanel();
+        PrintServiceBtn = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         cmbSourceWarehouse = new javax.swing.JComboBox<>();
@@ -399,8 +399,6 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         txtMaterialSearch = new javax.swing.JTextField();
         btnSearchMaterial = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
         jPanel8 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         cmbSourceBin = new javax.swing.JComboBox<>();
@@ -422,6 +420,10 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         spinTransferQty = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         lblAvailableQty = new javax.swing.JTextField();
+        addtoTransferBtn = new javax.swing.JButton();
+        completeBtn = new javax.swing.JButton();
+        CancelBtn = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         btnAddToTransfer = new javax.swing.JButton();
         btnCompleteTransfer = new javax.swing.JButton();
@@ -485,17 +487,17 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addGap(26, 26, 26)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(cmbSourceWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(33, 33, 33)
+                        .addComponent(cmbSourceWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbTransferReason, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
+                        .addComponent(cmbTransferReason, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(dtTransferDate, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(481, Short.MAX_VALUE))
+                        .addComponent(dtTransferDate, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -512,7 +514,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Selection"));
@@ -544,7 +546,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addComponent(txtMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnSearchMaterial)
-                .addContainerGap(506, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -557,19 +559,6 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                     .addComponent(jLabel5))
                 .addContainerGap(19, Short.MAX_VALUE))
         );
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane2.setViewportView(jTable1);
 
         jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("From Bin"));
 
@@ -607,16 +596,16 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                     .addComponent(jLabel11)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(67, 67, 67)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cmbSourceBin, 0, 100, Short.MAX_VALUE)
+                    .addComponent(txtBatchNumber))
+                .addGap(47, 47, 47)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel10)
                     .addComponent(jLabel12))
                 .addGap(38, 38, 38)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblCurrentQty, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
+                    .addComponent(lblCurrentQty, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
                     .addComponent(txtBatchDetails))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -673,16 +662,16 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbDestinationWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(67, 67, 67)
+                .addComponent(cmbDestinationWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48)
                 .addComponent(jLabel13)
                 .addGap(18, 18, 18)
-                .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32)
+                .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(34, 34, 34)
                 .addComponent(jLabel14)
                 .addGap(18, 18, 18)
                 .addComponent(lblBinCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(1097, Short.MAX_VALUE))
+                .addContainerGap(1087, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -695,7 +684,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                     .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel14)
                     .addComponent(lblBinCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Quantity"), "Transfer "));
@@ -728,8 +717,8 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addGap(64, 64, 64)
                 .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(28, 28, 28)
-                .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 418, Short.MAX_VALUE))
+                .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -740,22 +729,16 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                     .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9)
                     .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(406, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 885, Short.MAX_VALUE))
-                    .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -763,41 +746,75 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addGap(101, 101, 101)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(135, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        addtoTransferBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
+        addtoTransferBtn.setText("Add to Transfer");
+        addtoTransferBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addtoTransferBtnActionPerformed(evt);
+            }
+        });
+
+        completeBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        completeBtn.setText("Complete Transfer");
+
+        CancelBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        CancelBtn.setText("Cancel");
+
+        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        jButton4.setText("Print Transfer Note");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout PrintServiceBtnLayout = new javax.swing.GroupLayout(PrintServiceBtn);
+        PrintServiceBtn.setLayout(PrintServiceBtnLayout);
+        PrintServiceBtnLayout.setHorizontalGroup(
+            PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PrintServiceBtnLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PrintServiceBtnLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PrintServiceBtnLayout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(addtoTransferBtn)
+                        .addGap(12, 12, 12)
+                        .addComponent(completeBtn)
+                        .addGap(18, 18, 18)
+                        .addComponent(CancelBtn)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton4)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        PrintServiceBtnLayout.setVerticalGroup(
+            PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PrintServiceBtnLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(99, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 404, Short.MAX_VALUE)
+                .addGroup(PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(completeBtn)
+                    .addComponent(CancelBtn)
+                    .addComponent(jButton4)
+                    .addComponent(addtoTransferBtn))
+                .addGap(16, 16, 16))
         );
 
-        jScrollPane1.setViewportView(jPanel2);
+        jScrollPane1.setViewportView(PrintServiceBtn);
 
         btnAddToTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToTransfer.setText("Add to Transfer");
@@ -887,7 +904,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(14, 14, 14)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 269, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -990,6 +1007,150 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private void lblAvailableQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblAvailableQtyActionPerformed
         // no action needed
     }//GEN-LAST:event_lblAvailableQtyActionPerformed
+
+    // generate and print transfer note using BackgroundTask
+    private void printTransferNote(String transferNumber) {
+        BackgroundTask task = new BackgroundTask(this, "Generating Transfer Note") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching transfer order " + transferNumber + " details...");
+                Thread.sleep(300);
+                updateProgress("Formatting transfer note layout...");
+                Thread.sleep(300);
+                updateProgress("Sending document to printer queue...");
+                Thread.sleep(250);
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Transfer Note (" + transferNumber + ") sent to printer successfully.");
+                JOptionPane.showMessageDialog(
+                    BinToBinTransferForm.this,
+                    "Transfer Note for [" + transferNumber + "] has been generated and sent to printer queue.\n\n"
+                    + "Movement Type: INT-BIN (Bin-to-Bin Transfer)\n"
+                    + "Status: Completed",
+                    "Print Transfer Note",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to print transfer note: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void lblCurrentQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblCurrentQtyActionPerformed
+        // no action needed
+    }//GEN-LAST:event_lblCurrentQtyActionPerformed
+
+    private void txtBatchDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchDetailsActionPerformed
+        // no action needed
+    }//GEN-LAST:event_txtBatchDetailsActionPerformed
+
+    private void cmbDestinationZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDestinationZoneActionPerformed
+        // no action needed
+    }//GEN-LAST:event_cmbDestinationZoneActionPerformed
+
+    private void cmbTransferReasonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTransferReasonActionPerformed
+        // no action needed
+    }//GEN-LAST:event_cmbTransferReasonActionPerformed
+
+    private void addtoTransferBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addtoTransferBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addtoTransferBtnActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void btnPrintTransferNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintTransferNoteActionPerformed
+        if (lastTransferNumber != null && !lastTransferNumber.isEmpty()) {
+            printTransferNote(lastTransferNumber);
+        } else {
+            String input = JOptionPane.showInputDialog(
+                this,
+                "Enter Transfer Order Number to print note:",
+                "Print Transfer Note",
+                JOptionPane.QUESTION_MESSAGE);
+            if (input != null && !input.trim().isEmpty()) {
+                printTransferNote(input.trim());
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "No Transfer Order specified to print.");
+            }
+        }
+    }//GEN-LAST:event_btnPrintTransferNoteActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnCompleteTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteTransferActionPerformed
+        if (transferSummaryList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please add materials to transfer first.");
+            return;
+        }
+
+        // validate reason selected
+        if (cmbTransferReason.getSelectedIndex() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a transfer reason.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Transfer materials between bins?\nInventory locations will be updated.\n\n"
+            + transferSummaryList.size() + " item(s) to transfer.",
+            "Confirm Bin-to-Bin Transfer",
+            JOptionPane.YES_NO_OPTION);
+
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        String reason = cmbTransferReason.getSelectedItem().toString();
+        String remarks = txtaRemarks.getText().trim();
+
+        BackgroundTask task = new BackgroundTask(this, "Processing Bin-to-Bin Transfer") {
+            private String toNumber;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Validating transfer order items...");
+                Thread.sleep(150);
+                updateProgress("Posting bin-to-bin transfer to server...");
+                toNumber = controller.completeBinToBinTransfer(transferSummaryList, reason, remarks);
+                updateProgress("Updating inventory and bin allocations...");
+                return toNumber != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                lastTransferNumber = toNumber;
+                StatusMessageHandler.showSuccess(txtStatus, "Bin-to-Bin transfer completed! Transfer Number: " + toNumber);
+
+                int printConfirm = JOptionPane.showConfirmDialog(
+                    BinToBinTransferForm.this,
+                    "Bin-to-Bin transfer completed successfully.\nTransfer Number: " + toNumber + "\n\nPrint transfer note?",
+                    "Transfer Complete",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE);
+
+                if (printConfirm == JOptionPane.YES_OPTION) {
+                    printTransferNote(toNumber);
+                }
+
+                clearForm();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Transfer failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnCompleteTransferActionPerformed
 
     private void btnAddToTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToTransferActionPerformed
         // validate material selected
@@ -1096,142 +1257,6 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         StatusMessageHandler.showSuccess(txtStatus, "Item added to transfer list.");
     }//GEN-LAST:event_btnAddToTransferActionPerformed
 
-    private void btnCompleteTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteTransferActionPerformed
-        if (transferSummaryList.isEmpty()) {
-            StatusMessageHandler.showWarning(txtStatus, "Please add materials to transfer first.");
-            return;
-        }
-
-        // validate reason selected
-        if (cmbTransferReason.getSelectedIndex() <= 0) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a transfer reason.");
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Transfer materials between bins?\nInventory locations will be updated.\n\n"
-            + transferSummaryList.size() + " item(s) to transfer.",
-            "Confirm Bin-to-Bin Transfer",
-            JOptionPane.YES_NO_OPTION);
-
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
-
-        String reason = cmbTransferReason.getSelectedItem().toString();
-        String remarks = txtaRemarks.getText().trim();
-
-        BackgroundTask task = new BackgroundTask(this, "Processing Bin-to-Bin Transfer") {
-            private String toNumber;
-
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Validating transfer order items...");
-                Thread.sleep(150);
-                updateProgress("Posting bin-to-bin transfer to server...");
-                toNumber = controller.completeBinToBinTransfer(transferSummaryList, reason, remarks);
-                updateProgress("Updating inventory and bin allocations...");
-                return toNumber != null;
-            }
-
-            @Override
-            protected void onSuccess() {
-                lastTransferNumber = toNumber;
-                StatusMessageHandler.showSuccess(txtStatus, "Bin-to-Bin transfer completed! Transfer Number: " + toNumber);
-
-                int printConfirm = JOptionPane.showConfirmDialog(
-                    BinToBinTransferForm.this,
-                    "Bin-to-Bin transfer completed successfully.\nTransfer Number: " + toNumber + "\n\nPrint transfer note?",
-                    "Transfer Complete",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE);
-
-                if (printConfirm == JOptionPane.YES_OPTION) {
-                    printTransferNote(toNumber);
-                }
-
-                clearForm();
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Transfer failed: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }//GEN-LAST:event_btnCompleteTransferActionPerformed
-
-    // generate and print transfer note using BackgroundTask
-    private void printTransferNote(String transferNumber) {
-        BackgroundTask task = new BackgroundTask(this, "Generating Transfer Note") {
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching transfer order " + transferNumber + " details...");
-                Thread.sleep(300);
-                updateProgress("Formatting transfer note layout...");
-                Thread.sleep(300);
-                updateProgress("Sending document to printer queue...");
-                Thread.sleep(250);
-                return true;
-            }
-
-            @Override
-            protected void onSuccess() {
-                StatusMessageHandler.showSuccess(txtStatus, "Transfer Note (" + transferNumber + ") sent to printer successfully.");
-                JOptionPane.showMessageDialog(
-                    BinToBinTransferForm.this,
-                    "Transfer Note for [" + transferNumber + "] has been generated and sent to printer queue.\n\n"
-                    + "Movement Type: INT-BIN (Bin-to-Bin Transfer)\n"
-                    + "Status: Completed",
-                    "Print Transfer Note",
-                    JOptionPane.INFORMATION_MESSAGE);
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to print transfer note: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }
-
-    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        this.dispose();
-    }//GEN-LAST:event_btnCancelActionPerformed
-
-    private void btnPrintTransferNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintTransferNoteActionPerformed
-        if (lastTransferNumber != null && !lastTransferNumber.isEmpty()) {
-            printTransferNote(lastTransferNumber);
-        } else {
-            String input = JOptionPane.showInputDialog(
-                this,
-                "Enter Transfer Order Number to print note:",
-                "Print Transfer Note",
-                JOptionPane.QUESTION_MESSAGE);
-            if (input != null && !input.trim().isEmpty()) {
-                printTransferNote(input.trim());
-            } else {
-                StatusMessageHandler.showWarning(txtStatus, "No Transfer Order specified to print.");
-            }
-        }
-    }//GEN-LAST:event_btnPrintTransferNoteActionPerformed
-
-    private void lblCurrentQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblCurrentQtyActionPerformed
-        // no action needed
-    }//GEN-LAST:event_lblCurrentQtyActionPerformed
-
-    private void txtBatchDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchDetailsActionPerformed
-        // no action needed
-    }//GEN-LAST:event_txtBatchDetailsActionPerformed
-
-    private void cmbDestinationZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDestinationZoneActionPerformed
-        // no action needed
-    }//GEN-LAST:event_cmbDestinationZoneActionPerformed
-
-    private void cmbTransferReasonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTransferReasonActionPerformed
-        // no action needed
-    }//GEN-LAST:event_cmbTransferReasonActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -1268,6 +1293,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton CancelBtn;
+    private javax.swing.JPanel PrintServiceBtn;
+    private javax.swing.JButton addtoTransferBtn;
     private javax.swing.JButton btnAddToTransfer;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCompleteTransfer;
@@ -1278,7 +1306,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbSourceBin;
     private javax.swing.JComboBox<String> cmbSourceWarehouse;
     private javax.swing.JComboBox<String> cmbTransferReason;
+    private javax.swing.JButton completeBtn;
     private javax.swing.JSpinner dtTransferDate;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1294,7 +1324,6 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
@@ -1303,9 +1332,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTextField lblAvailableQty;
     private javax.swing.JTextField lblBinCapacity;
