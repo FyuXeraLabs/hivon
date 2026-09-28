@@ -9,7 +9,6 @@ import javax.swing.JOptionPane;
 import java.util.ArrayList;
 import java.util.List;
 import core.api.dao.CycleCountDAO.CycleCountItem;
-import core.api.dao.CycleCountDAO.CycleCountPlan;
 import core.api.dao.CycleCountDAO.CreateCountResult;
 import movements.controllers.CycleCountController;
 import models.dto.WarehouseDTO;
@@ -17,7 +16,6 @@ import models.dto.ZoneDTO;
 import models.dto.StorageBinDTO;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
-import core.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**
@@ -1007,7 +1005,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         });
 
-        jLabel14.setText("Batch Numbe");
+        jLabel14.setText("Batch Number");
 
         lblBatchNumber.setEditable(false);
         lblBatchNumber.addActionListener(new java.awt.event.ActionListener() {
@@ -1187,11 +1185,6 @@ public class CycleCountForm extends javax.swing.JFrame {
         btnRecount.setText("Recount");
 
         btnCompleteCount.setText("Complete Count");
-        btnCompleteCount.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteCountActionPerformed(evt);
-            }
-        });
 
         btnFreeze.setText("Freeze");
         btnFreeze.addActionListener(new java.awt.event.ActionListener() {
@@ -1369,10 +1362,6 @@ public class CycleCountForm extends javax.swing.JFrame {
     private void btnFreezeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFreezeActionPerformed
         handleFreeze();
     }//GEN-LAST:event_btnFreezeActionPerformed
-
-    private void btnCompleteCountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteCountActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnCompleteCountActionPerformed
 
     /**
      * @param args the command line arguments
