@@ -88,6 +88,7 @@ public class CycleCountDAO {
     public static class CycleCountItem {
         private Integer countItemId;
         private Integer countId;
+        private Integer binId;
         private Integer materialId;
         private String materialCode;
         private String materialName;
@@ -107,6 +108,8 @@ public class CycleCountDAO {
         public void setCountItemId(Integer countItemId) { this.countItemId = countItemId; }
         public Integer getCountId() { return countId; }
         public void setCountId(Integer countId) { this.countId = countId; }
+        public Integer getBinId() { return binId; }
+        public void setBinId(Integer binId) { this.binId = binId; }
         public Integer getMaterialId() { return materialId; }
         public void setMaterialId(Integer materialId) { this.materialId = materialId; }
         public String getMaterialCode() { return materialCode; }
@@ -329,6 +332,7 @@ public class CycleCountDAO {
         CycleCountItem item = new CycleCountItem();
         if (json.has("count_item_id") && !json.get("count_item_id").isJsonNull()) item.setCountItemId(json.get("count_item_id").getAsInt());
         if (json.has("count_id") && !json.get("count_id").isJsonNull()) item.setCountId(json.get("count_id").getAsInt());
+        if (json.has("bin_id") && !json.get("bin_id").isJsonNull()) item.setBinId(json.get("bin_id").getAsInt());
         if (json.has("material_id") && !json.get("material_id").isJsonNull()) item.setMaterialId(json.get("material_id").getAsInt());
         if (json.has("material_code") && !json.get("material_code").isJsonNull()) item.setMaterialCode(json.get("material_code").getAsString());
         if (json.has("material_name") && !json.get("material_name").isJsonNull()) item.setMaterialName(json.get("material_name").getAsString());

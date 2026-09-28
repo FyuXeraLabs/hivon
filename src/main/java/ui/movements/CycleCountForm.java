@@ -309,12 +309,35 @@ public class CycleCountForm extends javax.swing.JFrame {
                 currentItemIndex = -1;
 
                 // populate bin details panel
+                // resolve the actual bin code from the loaded items (so zone-wide counts show real bin info)
+                String firstBinCode = "";
+                if (!countItems.isEmpty() && countItems.get(0).getBinId() != null) {
+                    Integer firstBinId = countItems.get(0).getBinId();
+                    for (StorageBinDTO b : loadedBins) {
+                        if (b.getBinId() != null && b.getBinId().equals(firstBinId)) {
+                            firstBinCode = b.getBinCode();
+                            break;
+                        }
+                    }
+                    if (firstBinCode.isEmpty()) {
+                        firstBinCode = "Bin " + firstBinId;
+                    }
+                }
+
                 if (bin != null) {
                     lblBinCode.setText(bin.getBinCode());
                     lblZone.setText(bin.getZoneCode() != null ? bin.getZoneCode() : "");
                     lblZone1.setText(""); // aisle - not in DTO
                     lblRack.setText(""); // rack - not in DTO
                     lblBinCode1.setText(""); // level - not in DTO
+                    tblBinMaterials.setText(String.valueOf(countItems.size()));
+                } else if (!firstBinCode.isEmpty()) {
+                    // zone-wide count: show first bin code, count, etc.
+                    lblBinCode.setText("First bin: " + firstBinCode);
+                    lblZone.setText(zoneCode != null ? zoneCode : "");
+                    lblZone1.setText("");
+                    lblRack.setText("");
+                    lblBinCode1.setText("");
                     tblBinMaterials.setText(String.valueOf(countItems.size()));
                 } else {
                     lblBinCode.setText(zoneCode != null ? "Zone: " + zoneCode : "All");
