@@ -546,17 +546,45 @@ public class CycleCountForm extends javax.swing.JFrame {
     // "All items in cycle count must be counted". We mutate the in-memory reference and
     // set counted_quantity = system_quantity so there's no variance.
     private void autoFillSkippedItems() {
+        if (activeCountId == null) return;
+
+        // fetch fresh items from the API so we reconcile with the DB (catches stale local state)
+        List<CycleCountItem> freshItems;
+        try {
+            freshItems = controller.getCycleCountItems(activeCountId);
+        } catch (Exception e) {
+            StatusMessageHandler.showError(txtStatus, "Failed to fetch items for auto-fill: " + e.getMessage());
+            return;
+        }
+        if (freshItems == null) freshItems = new ArrayList<>();
+
+        // index what we already have in countedItems for the current count
         Map<Integer, CycleCountItem> countedByItemId = new HashMap<>();
         for (CycleCountItem ci : countedItems) {
-            countedByItemId.put(ci.getCountItemId(), ci);
+            if (ci.getCountId() != null && ci.getCountId().equals(activeCountId)) {
+                countedByItemId.put(ci.getCountItemId(), ci);
+            }
         }
+
         int autoFilled = 0;
+        // (1) walk the fresh DB items
+        for (CycleCountItem fresh : freshItems) {
+            if (countedByItemId.containsKey(fresh.getCountItemId())) continue;
+            if (fresh.getSystemQuantity() == null) {
+                fresh.setCountedQuantity(0.0);
+            } else {
+                fresh.setCountedQuantity(fresh.getSystemQuantity());
+            }
+            fresh.setVarianceReason("Skipped - assumed system quantity");
+            countedItems.add(fresh);
+            autoFilled++;
+        }
+
+        // (2) defensive: also catch any items in our local countItems that weren't in the fresh fetch
         for (CycleCountItem item : countItems) {
             if (item.getCountId() == null || !item.getCountId().equals(activeCountId)) continue;
             if (countedByItemId.containsKey(item.getCountItemId())) continue;
-            // skipped - mark with system quantity (no variance)
             if (item.getSystemQuantity() == null) {
-                // defensive: if system qty is null, default to 0 so we still record something
                 item.setCountedQuantity(0.0);
             } else {
                 item.setCountedQuantity(item.getSystemQuantity());
@@ -565,6 +593,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             countedItems.add(item);
             autoFilled++;
         }
+
         if (autoFilled > 0) {
             refreshCountSummaryTable();
             StatusMessageHandler.showInfo(txtStatus, autoFilled + " skipped item(s) auto-recorded as system quantity (no variance).");
