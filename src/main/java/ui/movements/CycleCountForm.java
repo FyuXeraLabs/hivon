@@ -7,7 +7,9 @@ package ui.movements;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import core.api.dao.CycleCountDAO.CycleCountItem;
 import core.api.dao.CycleCountDAO.CreateCountResult;
 import movements.controllers.CycleCountController;
@@ -33,6 +35,10 @@ public class CycleCountForm extends javax.swing.JFrame {
     private int currentItemIndex = -1;
     private Integer activeCountId = null;
     private String activeCountNumber = null;
+    // multiple active counts (one per bin) when accumulating across bins in one session
+    private final Map<Integer, String> activeCountNumbers = new HashMap<>();
+    // cache bin_code lookups across zone changes so summary rows always show the bin
+    private final Map<Integer, String> binCodeCache = new HashMap<>();
     private javax.swing.JLabel txtStatus;
 
     /**
@@ -97,8 +103,9 @@ public class CycleCountForm extends javax.swing.JFrame {
     }
 
     private void setupCountSummaryTable() {
+        // matches .form columns: Bin, Material, System Qty, Counted Qty, Variance, Variance %, Status
         DefaultTableModel model = new DefaultTableModel(
-            new String[]{"Material", "Batch", "System Qty", "Counted Qty", "Variance", "Variance %", "Status"}, 0
+            new String[]{"Bin", "Material", "System Qty", "Counted Qty", "Variance", "Variance %", "Status"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int col) { return false; }
@@ -123,6 +130,17 @@ public class CycleCountForm extends javax.swing.JFrame {
         btnRecount.addActionListener(e -> handleRecount());
         btnCompleteCount.addActionListener(e -> handleCompleteCount());
         btnUnfreeze.addActionListener(e -> handleUnfreeze());
+        cmbBin.addActionListener(e -> handleBinSelectionChanged());
+    }
+
+    // when the user picks a different bin, clear the entry panel so they don't accidentally
+    // record a counted qty against the previous bin's item. table data (countedItems) is preserved.
+    private void handleBinSelectionChanged() {
+        if (activeCountId == null) return; // nothing in flight, nothing to clear
+        clearEntryPanel();
+        countItems.clear();
+        currentItemIndex = -1;
+        StatusMessageHandler.showInfo(txtStatus, "Bin changed. Click Start Count to count this bin.");
     }
 
     // -- Warehouse / Zone / Bin loading --
@@ -233,6 +251,10 @@ public class CycleCountForm extends javax.swing.JFrame {
                 cmbBin.removeAllItems();
                 cmbBin.addItem("-- All Bins in Zone --");
                 for (StorageBinDTO b : loadedBins) {
+                    // cache bin code so summary rows can identify the bin even after zone change
+                    if (b.getBinId() != null) {
+                        binCodeCache.put(b.getBinId(), b.getBinCode());
+                    }
                     String label = b.getBinCode();
                     if (b.getIsFrozen() != null && b.getIsFrozen()) {
                         label += " [FROZEN]";
@@ -304,8 +326,9 @@ public class CycleCountForm extends javax.swing.JFrame {
             protected void onSuccess() {
                 activeCountId = result.getCountId();
                 activeCountNumber = result.getCountNumber();
+                activeCountNumbers.put(activeCountId, activeCountNumber);
                 countItems = items != null ? items : new ArrayList<>();
-                countedItems.clear();
+                // do NOT clear countedItems — preserve summary rows from previous bin counts in this session
                 currentItemIndex = -1;
 
                 // populate bin details panel
@@ -492,14 +515,21 @@ public class CycleCountForm extends javax.swing.JFrame {
                 status = "Recount Needed";
             }
 
+            // resolve bin code from cache (works across zone changes)
+            String binCode = "";
+            if (item.getBinId() != null) {
+                binCode = binCodeCache.get(item.getBinId());
+                if (binCode == null) binCode = "Bin " + item.getBinId();
+            }
+
             double sysQty = item.getSystemQuantity() != null ? item.getSystemQuantity() : 0;
             double countedQty = item.getCountedQuantity() != null ? item.getCountedQuantity() : 0;
             double variance = countedQty - sysQty;
             String variancePct = sysQty != 0 ? String.format("%.1f%%", (variance / sysQty) * 100.0) : "-";
 
             model.addRow(new Object[]{
+                binCode,
                 item.getMaterialCode(),
-                item.getBatchNumber() != null ? item.getBatchNumber() : "N/A",
                 String.format("%.3f", sysQty),
                 String.format("%.3f", countedQty),
                 String.format("%.3f", variance),
@@ -594,12 +624,13 @@ public class CycleCountForm extends javax.swing.JFrame {
             return;
         }
 
-        // check if all items are counted
+        // check for uncounted items in the CURRENT (most recent) count only — older counts' skipped items are not flagged
         int uncounted = 0;
         for (CycleCountItem item : countItems) {
+            if (!item.getCountId().equals(activeCountId)) continue;
             boolean wasCounted = false;
             for (CycleCountItem ci : countedItems) {
-                if (ci.getCountItemId().equals(item.getCountItemId())) {
+                if (ci.getCountId().equals(activeCountId) && ci.getCountItemId().equals(item.getCountItemId())) {
                     wasCounted = true;
                     break;
                 }
@@ -609,54 +640,80 @@ public class CycleCountForm extends javax.swing.JFrame {
 
         if (uncounted > 0) {
             int confirm = JOptionPane.showConfirmDialog(this,
-                uncounted + " item(s) were not counted (skipped).\nThey must be counted before completing. Continue counting?",
+                uncounted + " item(s) in the current bin were not counted (skipped).\nThey must be counted before completing. Continue counting?",
                 "Uncounted Items", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (confirm == JOptionPane.YES_OPTION) {
-                // reset index to re-visit uncounted
                 currentItemIndex = -1;
                 advanceToNextUncountedItem();
             }
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Complete cycle count " + activeCountNumber + "?\n\nThis will:\n"
-            + "• Post variance adjustments to inventory\n"
-            + "• Unfreeze all counted bins\n"
-            + "• Mark the count as COMPLETED\n\nThis action cannot be undone.",
-            "Confirm Complete Count", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        // group countedItems by countId so we can complete each bin's count separately
+        final Map<Integer, List<CycleCountItem>> itemsByCount = new HashMap<>();
+        for (CycleCountItem item : countedItems) {
+            itemsByCount.computeIfAbsent(item.getCountId(), k -> new ArrayList<>()).add(item);
+        }
+
+        // confirm with the user — message reflects how many separate counts will be completed
+        int countCount = itemsByCount.size();
+        String confirmMsg;
+        if (countCount == 1) {
+            confirmMsg = "Complete cycle count " + activeCountNumber + "?\n\nThis will:\n"
+                + "• Post variance adjustments to inventory\n"
+                + "• Unfreeze all counted bins\n"
+                + "• Mark the count as COMPLETED\n\nThis action cannot be undone.";
+        } else {
+            StringBuilder sb = new StringBuilder("Complete " + countCount + " cycle counts?\n\n");
+            for (Map.Entry<Integer, List<CycleCountItem>> e : itemsByCount.entrySet()) {
+                String num = activeCountNumbers.get(e.getKey());
+                sb.append("• ").append(num != null ? num : ("#" + e.getKey()))
+                  .append(" (").append(e.getValue().size()).append(" item(s))\n");
+            }
+            sb.append("\nThis will post variance adjustments, unfreeze bins, and mark each count COMPLETED.");
+            confirmMsg = sb.toString();
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, confirmMsg,
+            "Confirm Complete Count" + (countCount > 1 ? "s" : ""),
+            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (confirm != JOptionPane.YES_OPTION) return;
 
-        final int countId = activeCountId;
-        final List<CycleCountItem> itemsToRecord = new ArrayList<>(countedItems);
-
-        BackgroundTask task = new BackgroundTask(this, "Completing Cycle Count") {
+        BackgroundTask task = new BackgroundTask(this, "Completing Cycle Count" + (countCount > 1 ? "s" : "")) {
             @Override
             protected Boolean performTask() throws Exception {
-                updateProgress("Submitting physical counts to server...");
-                controller.recordCounts(countId, itemsToRecord);
+                int i = 0;
+                int total = itemsByCount.size();
+                for (Map.Entry<Integer, List<CycleCountItem>> entry : itemsByCount.entrySet()) {
+                    int countId = entry.getKey();
+                    List<CycleCountItem> items = entry.getValue();
+                    updateProgress("Submitting " + items.size() + " count(s) for #" + (++i) + " of " + total + " (id=" + countId + ")...");
+                    controller.recordCounts(countId, items);
 
-                updateProgress("Posting variance adjustments and unfreezing bins...");
-                controller.completeCycleCount(countId);
+                    updateProgress("Posting variance adjustments and unfreezing bins for id=" + countId + "...");
+                    controller.completeCycleCount(countId);
+                }
                 return true;
             }
 
             @Override
             protected void onSuccess() {
+                int total = itemsByCount.size();
+                int itemTotal = countedItems.size();
                 JOptionPane.showMessageDialog(CycleCountForm.this,
-                    "Cycle Count " + activeCountNumber + " completed successfully!\n\n"
-                    + "• " + itemsToRecord.size() + " item(s) counted\n"
+                    "Cycle Count" + (total > 1 ? "s" : "") + " completed successfully!\n\n"
+                    + "• " + itemTotal + " item(s) counted across " + total + " bin count(s)\n"
                     + "• Variance adjustments posted\n"
                     + "• Bins unfrozen",
                     "Count Complete", JOptionPane.INFORMATION_MESSAGE);
 
-                StatusMessageHandler.showSuccess(txtStatus, "Cycle count " + activeCountNumber + " completed.");
+                StatusMessageHandler.showSuccess(txtStatus, "Cycle count" + (total > 1 ? "s" : "") + " completed.");
                 resetForm();
             }
 
             @Override
             protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to complete count: " + e.getMessage());
+                StatusMessageHandler.showError(txtStatus, "Failed to complete count" + (itemsByCount.size() > 1 ? "s" : "") + ": " + e.getMessage());
             }
         };
         task.executeWithDialog();
@@ -709,6 +766,7 @@ public class CycleCountForm extends javax.swing.JFrame {
     private void resetForm() {
         activeCountId = null;
         activeCountNumber = null;
+        activeCountNumbers.clear();
         countItems.clear();
         countedItems.clear();
         currentItemIndex = -1;
