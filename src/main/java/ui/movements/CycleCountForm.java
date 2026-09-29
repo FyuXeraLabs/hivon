@@ -1147,7 +1147,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         });
 
-        jLabel14.setText("Batch Number");
+        jLabel14.setText("Batch Numbe");
 
         lblBatchNumber.setEditable(false);
         lblBatchNumber.addActionListener(new java.awt.event.ActionListener() {
@@ -1310,6 +1310,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
         );
 
+        btnNextItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/load-14.png"))); // NOI18N
         btnNextItem.setText("Next Item");
         btnNextItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1317,6 +1318,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         });
 
+        btnSkip.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/hide-14.png"))); // NOI18N
         btnSkip.setText("Skip");
         btnSkip.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1324,9 +1326,16 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         });
 
+        btnRecount.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/sinchronize-14.png"))); // NOI18N
         btnRecount.setText("Recount");
 
+        btnCompleteCount.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnCompleteCount.setText("Complete Count");
+        btnCompleteCount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompleteCountActionPerformed(evt);
+            }
+        });
 
         btnFreeze.setText("Freeze");
         btnFreeze.addActionListener(new java.awt.event.ActionListener() {

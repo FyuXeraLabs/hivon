@@ -779,6 +779,9 @@
               <SubComponents>
                 <Component class="javax.swing.JButton" name="btnNextItem">
                   <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/btnicn/load-14.png"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Next Item"/>
                   </Properties>
                   <Events>
@@ -787,6 +790,9 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="btnSkip">
                   <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/btnicn/hide-14.png"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Skip"/>
                   </Properties>
                   <Events>
@@ -795,11 +801,17 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="btnRecount">
                   <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/btnicn/sinchronize-14.png"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Recount"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JButton" name="btnCompleteCount">
                   <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/btnicn/done-14.png"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Complete Count"/>
                   </Properties>
                   <Events>

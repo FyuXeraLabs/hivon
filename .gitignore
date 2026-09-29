@@ -11,3 +11,4 @@ readme.txt
 *.md
 /tmp/
 .vscode/settings.json
+docs/demo/CycleCountForm-BinDetails-TestData.sql
