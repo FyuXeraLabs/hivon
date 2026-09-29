@@ -541,6 +541,36 @@ public class CycleCountForm extends javax.swing.JFrame {
 
     // -- Button Handlers (called from GEN event handlers) --
 
+    // any item the user skipped (didn't enter a counted quantity for) must still be sent
+    // to the API with a counted_quantity, otherwise the PHP completeCycleCount() throws
+    // "All items in cycle count must be counted". We mutate the in-memory reference and
+    // set counted_quantity = system_quantity so there's no variance.
+    private void autoFillSkippedItems() {
+        Map<Integer, CycleCountItem> countedByItemId = new HashMap<>();
+        for (CycleCountItem ci : countedItems) {
+            countedByItemId.put(ci.getCountItemId(), ci);
+        }
+        int autoFilled = 0;
+        for (CycleCountItem item : countItems) {
+            if (item.getCountId() == null || !item.getCountId().equals(activeCountId)) continue;
+            if (countedByItemId.containsKey(item.getCountItemId())) continue;
+            // skipped - mark with system quantity (no variance)
+            if (item.getSystemQuantity() == null) {
+                // defensive: if system qty is null, default to 0 so we still record something
+                item.setCountedQuantity(0.0);
+            } else {
+                item.setCountedQuantity(item.getSystemQuantity());
+            }
+            item.setVarianceReason("Skipped - assumed system quantity");
+            countedItems.add(item);
+            autoFilled++;
+        }
+        if (autoFilled > 0) {
+            refreshCountSummaryTable();
+            StatusMessageHandler.showInfo(txtStatus, autoFilled + " skipped item(s) auto-recorded as system quantity (no variance).");
+        }
+    }
+
     private void handleNextItem() {
         CycleCountItem current = findCurrentItem();
         if (current == null) {
@@ -624,30 +654,10 @@ public class CycleCountForm extends javax.swing.JFrame {
             return;
         }
 
-        // check for uncounted items in the CURRENT (most recent) count only — older counts' skipped items are not flagged
-        int uncounted = 0;
-        for (CycleCountItem item : countItems) {
-            if (!item.getCountId().equals(activeCountId)) continue;
-            boolean wasCounted = false;
-            for (CycleCountItem ci : countedItems) {
-                if (ci.getCountId().equals(activeCountId) && ci.getCountItemId().equals(item.getCountItemId())) {
-                    wasCounted = true;
-                    break;
-                }
-            }
-            if (!wasCounted) uncounted++;
-        }
-
-        if (uncounted > 0) {
-            int confirm = JOptionPane.showConfirmDialog(this,
-                uncounted + " item(s) in the current bin were not counted (skipped).\nThey must be counted before completing. Continue counting?",
-                "Uncounted Items", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (confirm == JOptionPane.YES_OPTION) {
-                currentItemIndex = -1;
-                advanceToNextUncountedItem();
-            }
-            return;
-        }
+        // auto-fill any items the user skipped (no quantity entered). The PHP API rejects
+        // completion when any item has null counted_quantity, so skipped items must be
+        // recorded with their system quantity (zero variance) before submit.
+        autoFillSkippedItems();
 
         // group countedItems by countId so we can complete each bin's count separately
         final Map<Integer, List<CycleCountItem>> itemsByCount = new HashMap<>();
