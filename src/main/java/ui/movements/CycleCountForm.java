@@ -143,6 +143,27 @@ public class CycleCountForm extends javax.swing.JFrame {
         StatusMessageHandler.showInfo(txtStatus, "Bin changed. Click Start Count to count this bin.");
     }
 
+
+    // populate the Bin Details panel from a StorageBinDTO
+    private void populateBinDetailsPanel(StorageBinDTO bin) {
+        if (bin == null) return;
+        lblBinCode.setText(bin.getBinCode() != null ? bin.getBinCode() : "");
+        lblZone.setText(bin.getZoneCode() != null ? bin.getZoneCode() : "");
+        lblZone1.setText(bin.getAisle() != null ? bin.getAisle() : ""); // aisle
+        lblRack.setText(bin.getShelf() != null ? bin.getShelf() : ""); // rack
+        lblBinCode1.setText(bin.getLevel() != null ? bin.getLevel() : ""); // level
+    }
+
+    // look up a StorageBinDTO by id in the loaded list (searches all loaded bins)
+    private StorageBinDTO findBinById(Integer binId) {
+        if (binId == null) return null;
+        for (StorageBinDTO b : loadedBins) {
+            if (b.getBinId() != null && b.getBinId().equals(binId)) return b;
+        }
+        // also search the binCodeCache by fetching from a separate source if needed
+        return null;
+    }
+
     // -- Warehouse / Zone / Bin loading --
 
     private WarehouseDTO getSelectedWarehouse() {
@@ -348,19 +369,20 @@ public class CycleCountForm extends javax.swing.JFrame {
                 }
 
                 if (bin != null) {
-                    lblBinCode.setText(bin.getBinCode());
-                    lblZone.setText(bin.getZoneCode() != null ? bin.getZoneCode() : "");
-                    lblZone1.setText(""); // aisle - not in DTO
-                    lblRack.setText(""); // rack - not in DTO
-                    lblBinCode1.setText(""); // level - not in DTO
+                    populateBinDetailsPanel(bin);
                     tblBinMaterials.setText(String.valueOf(countItems.size()));
                 } else if (!firstBinCode.isEmpty()) {
                     // zone-wide count: show first bin code, count, etc.
-                    lblBinCode.setText("First bin: " + firstBinCode);
-                    lblZone.setText(zoneCode != null ? zoneCode : "");
-                    lblZone1.setText("");
-                    lblRack.setText("");
-                    lblBinCode1.setText("");
+                    StorageBinDTO firstBin = findBinById(countItems.get(0).getBinId());
+                    if (firstBin != null) {
+                        populateBinDetailsPanel(firstBin);
+                    } else {
+                        lblBinCode.setText("First bin: " + firstBinCode);
+                        lblZone.setText(zoneCode != null ? zoneCode : "");
+                        lblZone1.setText("");
+                        lblRack.setText("");
+                        lblBinCode1.setText("");
+                    }
                     tblBinMaterials.setText(String.valueOf(countItems.size()));
                 } else {
                     lblBinCode.setText(zoneCode != null ? "Zone: " + zoneCode : "All");

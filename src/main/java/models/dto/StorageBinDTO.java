@@ -14,12 +14,16 @@ public class StorageBinDTO {
     private String binCode;
     private String binDescription;
     private String zoneCode;
+    private String aisle;
+    private String shelf;
+    private String level;
     private String binType;
     private Boolean isFrozen;
     private Boolean isActive;
     private String warehouseCode;
     private String warehouseName;
     private Double maxCapacity;
+    private Double maxWeight;
     private Double usedCapacity;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
@@ -74,6 +78,38 @@ public class StorageBinDTO {
 
     public void setZone(String zone) {
         this.zoneCode = zone;
+    }
+
+    public String getAisle() {
+        return aisle;
+    }
+
+    public void setAisle(String aisle) {
+        this.aisle = aisle;
+    }
+
+    public String getShelf() {
+        return shelf;
+    }
+
+    public void setShelf(String shelf) {
+        this.shelf = shelf;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public Double getMaxWeight() {
+        return maxWeight;
+    }
+
+    public void setMaxWeight(Double maxWeight) {
+        this.maxWeight = maxWeight;
     }
 
     public String getBinType() {

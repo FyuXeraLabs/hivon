@@ -171,6 +171,9 @@ public class BinDAO {
         if (json.has("bin_code") && !json.get("bin_code").isJsonNull()) {
             dto.setBinCode(json.get("bin_code").getAsString());
         }
+        if (json.has("bin_description") && !json.get("bin_description").isJsonNull()) {
+            dto.setBinDescription(json.get("bin_description").getAsString());
+        }
         if (json.has("warehouse_id") && !json.get("warehouse_id").isJsonNull()) {
             dto.setWarehouseId(json.get("warehouse_id").getAsInt());
         }
@@ -185,11 +188,31 @@ public class BinDAO {
         } else if (json.has("zone_code") && !json.get("zone_code").isJsonNull()) {
             dto.setZone(json.get("zone_code").getAsString());
         }
+        if (json.has("aisle") && !json.get("aisle").isJsonNull()) {
+            dto.setAisle(json.get("aisle").getAsString());
+        }
+        if (json.has("shelf") && !json.get("shelf").isJsonNull()) {
+            dto.setShelf(json.get("shelf").getAsString());
+        }
+        if (json.has("level") && !json.get("level").isJsonNull()) {
+            dto.setLevel(json.get("level").getAsString());
+        }
+        if (json.has("bin_type") && !json.get("bin_type").isJsonNull()) {
+            dto.setBinType(json.get("bin_type").getAsString());
+        }
         if (json.has("max_capacity") && !json.get("max_capacity").isJsonNull()) {
             dto.setMaxCapacity(json.get("max_capacity").getAsDouble());
         }
+        if (json.has("max_weight") && !json.get("max_weight").isJsonNull()) {
+            dto.setMaxWeight(json.get("max_weight").getAsDouble());
+        }
         if (json.has("used_capacity") && !json.get("used_capacity").isJsonNull()) {
             dto.setUsedCapacity(json.get("used_capacity").getAsDouble());
+        } else if (json.has("current_capacity") && !json.get("current_capacity").isJsonNull()) {
+            dto.setUsedCapacity(json.get("current_capacity").getAsDouble());
+        }
+        if (json.has("is_frozen") && !json.get("is_frozen").isJsonNull()) {
+            dto.setIsFrozen(json.get("is_frozen").getAsBoolean());
         }
         if (json.has("is_active") && !json.get("is_active").isJsonNull()) {
             dto.setIsActive(json.get("is_active").getAsBoolean());
