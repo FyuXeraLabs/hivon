@@ -4,17 +4,69 @@
  */
 package ui.reports;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JTable;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import models.dto.UtilizationReportDTO;
+import models.dto.UtilizationReportDTO.BinUtilizationItem;
+import models.dto.UtilizationReportDTO.TopSpaceConsumerItem;
+import models.dto.UtilizationReportDTO.ZoneUtilizationItem;
+import models.dto.WarehouseDTO;
+import models.dto.ZoneDTO;
+import reports.controllers.UtilizationReportController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import core.utils.export.UtilizationReportExportUtils;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 /**
  *
- * @author Piyumi
+ * @author Sanod D. Mendis
  */
 public class UtilizationReportForm extends javax.swing.JFrame {
+
+    private UtilizationReportController controller;
+    private UtilizationReportDTO currentReportData;
+    private static final DecimalFormat currencyFmt = new DecimalFormat("#,##0.00");
+    private static final DecimalFormat qtyFmt = new DecimalFormat("#,##0.000");
+    private static final DecimalFormat pctFmt = new DecimalFormat("#,##0.0");
 
     /**
      * Creates new form UtilizationReportForm
      */
     public UtilizationReportForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new UtilizationReportController();
+        initCustomLogic();
     }
 
     /**
@@ -26,21 +78,961 @@ public class UtilizationReportForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        popupExportBtn = new javax.swing.JPopupMenu();
+        menuitemPDF = new javax.swing.JMenuItem();
+        menuitemXLSX = new javax.swing.JMenuItem();
+        jPanel1 = new javax.swing.JPanel();
+        cmbWarehouse = new ui.components.CheckedComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        cmbZone = new ui.components.CheckedComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        datepickerFrom = new com.toedter.calendar.JDateChooser();
+        jLabel2 = new javax.swing.JLabel();
+        datepickerTo = new com.toedter.calendar.JDateChooser();
+        btnGenerate = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        lblTotalWarehouseCapacity = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        lblCurrentStockValue = new javax.swing.JLabel();
+        lblCurrentStockValueCurrency = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        lblEmptyBins = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        lblFullyOccupiedBins = new javax.swing.JLabel();
+        jPanel8 = new javax.swing.JPanel();
+        jLabel15 = new javax.swing.JLabel();
+        lblAverageBinUtilization = new javax.swing.JLabel();
+        jPanel9 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblBinUtilization = new javax.swing.JTable();
+        jPanel10 = new javax.swing.JPanel();
+        chartZoneUtilization = new javax.swing.JPanel();
+        jPanel11 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblTopSpaceConsumers = new javax.swing.JTable();
+        txtStatus = new javax.swing.JLabel();
+
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png"))); // NOI18N
+        menuitemPDF.setText("  Export as PDF");
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemPDFActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png"))); // NOI18N
+        menuitemXLSX.setText("  Export as XLSX");
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemXLSX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemXLSXActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemXLSX);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Reports - Utilization Report (REP65)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel3.setText("Warehouse");
+
+        jLabel4.setText("Zone");
+
+        jLabel1.setText("From");
+
+        jLabel2.setText("To");
+
+        btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
+        btnGenerate.setText("Generate");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbZone, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(datepickerFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(datepickerTo, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addGap(29, 29, 29)
+                .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                        .addComponent(jLabel1)
+                        .addComponent(jLabel2)
+                        .addComponent(jLabel4)
+                        .addComponent(jLabel3)
+                        .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(datepickerFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(datepickerTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnExport)
+                    .addComponent(btnClear)
+                    .addComponent(btnGenerate)
+                    .addComponent(cmbZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel5.setText("Total Warehouse Capacity");
+
+        lblTotalWarehouseCapacity.setText("[capacity]");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel5))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(lblTotalWarehouseCapacity)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblTotalWarehouseCapacity)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel7.setText("Current Stock Value");
+
+        lblCurrentStockValue.setText("[value]");
+
+        lblCurrentStockValueCurrency.setText("[cur]");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(lblCurrentStockValueCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCurrentStockValue))
+                    .addComponent(jLabel7))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel7)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblCurrentStockValue)
+                    .addComponent(lblCurrentStockValueCurrency))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel9.setText("Utilization");
+
+        jLabel10.setText("[percentage]");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel9))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addComponent(jLabel10)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel9)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel10)
+                .addContainerGap(9, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel11.setText("Empty Bins");
+
+        lblEmptyBins.setText("[count]");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel11))
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addComponent(lblEmptyBins)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(jLabel11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblEmptyBins)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel13.setText("Fully Occupied Bins");
+
+        lblFullyOccupiedBins.setText("[count]");
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel13)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblFullyOccupiedBins)
+                .addGap(38, 38, 38))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblFullyOccupiedBins)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel15.setText("Average Bin Utilization");
+
+        lblAverageBinUtilization.setText("[percentage]");
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel15))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(37, 37, 37)
+                        .addComponent(lblAverageBinUtilization)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(jLabel15)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblAverageBinUtilization)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Bin Utilization"));
+
+        tblBinUtilization.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Bin Code", "Zone", "Current Items", "Current Qty", "Max Capacity", "Utilization %", "Status"
+            }
+        ));
+        jScrollPane1.setViewportView(tblBinUtilization);
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1)
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE))
+        );
+
+        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Zone Utilization"));
+
+        javax.swing.GroupLayout chartZoneUtilizationLayout = new javax.swing.GroupLayout(chartZoneUtilization);
+        chartZoneUtilization.setLayout(chartZoneUtilizationLayout);
+        chartZoneUtilizationLayout.setHorizontalGroup(
+            chartZoneUtilizationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 458, Short.MAX_VALUE)
+        );
+        chartZoneUtilizationLayout.setVerticalGroup(
+            chartZoneUtilizationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 250, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chartZoneUtilization, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chartZoneUtilization, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder("Top Space Consumers"));
+
+        tblTopSpaceConsumers.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Material Code", "Material Name", "Bins Used", "Volume/Qty", "Space"
+            }
+        ));
+        jScrollPane2.setViewportView(tblTopSpaceConsumers);
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2)
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE))
+        );
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        generateReport();
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        initDefaultFilters();
+        resetFormDisplay();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void menuitemXLSXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemXLSXActionPerformed
+        exportReport("XLSX");
+    }//GEN-LAST:event_menuitemXLSXActionPerformed
+
+    private void menuitemPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemPDFActionPerformed
+        exportReport("PDF");
+    }//GEN-LAST:event_menuitemPDFActionPerformed
+
+    private void initCustomLogic() {
+        initDefaultFilters();
+
+        // Enforce chartZoneUtilization preferred size (250 height matching NetBeans form design)
+        Dimension panelDim = new Dimension(0, 250);
+        chartZoneUtilization.setPreferredSize(panelDim);
+        chartZoneUtilization.setMinimumSize(new Dimension(0, 0));
+
+        // Load dropdown options
+        loadWarehouses();
+        loadZones(null);
+
+        // Configure table sorting and cell renderers
+        tblBinUtilization.setAutoCreateRowSorter(true);
+        tblTopSpaceConsumers.setAutoCreateRowSorter(true);
+
+        // Status & Utilization column renderer for tblBinUtilization (Columns 5 and 6)
+        tblBinUtilization.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    try {
+                        int modelRow = table.convertRowIndexToModel(row);
+                        Object statusVal = table.getModel().getValueAt(modelRow, 6);
+                        String status = statusVal != null ? statusVal.toString().trim() : "";
+
+                        if (column == 6 || column == 5) {
+                            if ("Optimal".equalsIgnoreCase(status)) {
+                                c.setBackground(new Color(236, 253, 245)); // Soft green
+                                c.setForeground(new Color(6, 95, 70));
+                            } else if ("Under-utilized".equalsIgnoreCase(status)) {
+                                c.setBackground(new Color(254, 243, 199)); // Soft amber
+                                c.setForeground(new Color(146, 64, 14));
+                            } else if ("Empty".equalsIgnoreCase(status)) {
+                                c.setBackground(new Color(241, 245, 249)); // Soft slate/gray
+                                c.setForeground(new Color(71, 85, 105));
+                            } else if ("Full".equalsIgnoreCase(status)) {
+                                c.setBackground(new Color(255, 237, 213)); // Soft orange
+                                c.setForeground(new Color(194, 65, 12));
+                            } else {
+                                c.setBackground(new Color(254, 226, 226)); // Soft red (Over-capacity)
+                                c.setForeground(new Color(153, 27, 27));
+                            }
+                        } else {
+                            c.setBackground(Color.WHITE);
+                            c.setForeground(new Color(30, 41, 59));
+                        }
+                    } catch (Exception ex) {
+                        c.setBackground(Color.WHITE);
+                        c.setForeground(Color.BLACK);
+                    }
+                }
+                return c;
+            }
+        });
+
+        // Initialize empty display state
+        resetFormDisplay();
+    }
+
+    private void initDefaultFilters() {
+        Calendar cal = Calendar.getInstance();
+        datepickerTo.setDate(cal.getTime());
+        cal.add(Calendar.DAY_OF_MONTH, -30);
+        datepickerFrom.setDate(cal.getTime());
+    }
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = controller.getWarehouses();
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.addItem("All");
+                if (warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        if (wh.getWarehouseName() != null) {
+                            cmbWarehouse.addItem(wh.getWarehouseName());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load warehouses in UtilizationReportForm", e);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadZones(Integer warehouseId) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Zones") {
+            private List<ZoneDTO> zones;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching zones...");
+                zones = controller.getZones(warehouseId);
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbZone.removeAllItems();
+                cmbZone.addItem("All");
+                if (zones != null) {
+                    for (ZoneDTO z : zones) {
+                        String zCode = z.getZoneCode();
+                        if (zCode != null && !zCode.trim().isEmpty()) {
+                            cmbZone.addItem(zCode);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load zones in UtilizationReportForm", e);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private String getSelectedFromDate() {
+        Date selectedDate = datepickerFrom.getDate();
+        if (selectedDate == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedToDate() {
+        Date selectedDate = datepickerTo.getDate();
+        if (selectedDate == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedWarehouseFilter() {
+        Set<String> selected = cmbWarehouse.getSelectedItems();
+        if (selected != null && !selected.isEmpty()) {
+            return String.join(",", selected);
+        }
+        Object item = cmbWarehouse.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private String getSelectedZoneFilter() {
+        Set<String> selected = cmbZone.getSelectedItems();
+        if (selected != null && !selected.isEmpty()) {
+            return String.join(",", selected);
+        }
+        Object item = cmbZone.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private void generateReport() {
+        String fromDate = getSelectedFromDate();
+        String toDate = getSelectedToDate();
+
+        if (fromDate != null && toDate != null && fromDate.compareTo(toDate) > 0) {
+            StatusMessageHandler.showError(txtStatus, "'From' date cannot be after 'To' date.");
+            return;
+        }
+
+        String warehouseFilter = getSelectedWarehouseFilter();
+        String zoneFilter = getSelectedZoneFilter();
+
+        BackgroundTask task = new BackgroundTask(this, "Calculating Warehouse Utilization") {
+            private UtilizationReportDTO dto;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Querying warehouse utilization data...");
+                dto = controller.generateUtilizationReport(warehouseFilter, zoneFilter, fromDate, toDate);
+                return dto != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentReportData = dto;
+                populateReportData(dto);
+                StatusMessageHandler.showSuccess(txtStatus, "Warehouse utilization report generated successfully.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to generate utilization report: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateReportData(UtilizationReportDTO dto) {
+        if (dto == null) return;
+
+        String cur = (dto.getCurrency() != null && !dto.getCurrency().isEmpty()) ? dto.getCurrency() : "$";
+
+        // KPI Summary cards
+        lblTotalWarehouseCapacity.setText(qtyFmt.format(dto.getTotalWarehouseCapacity()));
+        lblCurrentStockValueCurrency.setText(cur);
+        lblCurrentStockValue.setText(currencyFmt.format(dto.getCurrentStockValue()));
+        jLabel10.setText(pctFmt.format(dto.getOverallUtilizationPct()) + "%");
+        lblEmptyBins.setText(String.format("%,d", dto.getEmptyBins()));
+        lblFullyOccupiedBins.setText(String.format("%,d", dto.getFullyOccupiedBins()));
+        lblAverageBinUtilization.setText(pctFmt.format(dto.getAverageBinUtilization()) + "%");
+
+        // Bin Utilization Table
+        DefaultTableModel binModel = (DefaultTableModel) tblBinUtilization.getModel();
+        binModel.setRowCount(0);
+        if (dto.getBinUtilizationList() != null) {
+            for (BinUtilizationItem b : dto.getBinUtilizationList()) {
+                binModel.addRow(new Object[]{
+                    b.getBinCode(),
+                    b.getZone(),
+                    b.getCurrentItems(),
+                    qtyFmt.format(b.getCurrentQty()),
+                    qtyFmt.format(b.getMaxCapacity()),
+                    pctFmt.format(b.getUtilizationPct()) + "%",
+                    b.getStatus()
+                });
+            }
+        }
+
+        // Top Space Consumers Table
+        DefaultTableModel topModel = (DefaultTableModel) tblTopSpaceConsumers.getModel();
+        topModel.setRowCount(0);
+        if (dto.getTopSpaceConsumersList() != null) {
+            for (TopSpaceConsumerItem t : dto.getTopSpaceConsumersList()) {
+                topModel.addRow(new Object[]{
+                    t.getMaterialCode(),
+                    t.getMaterialName(),
+                    t.getBinsUsed(),
+                    qtyFmt.format(t.getVolumeQty()),
+                    t.getSpacePct()
+                });
+            }
+        }
+
+        // Render Zone Utilization Bar Chart
+        renderZoneBarChart(dto);
+    }
+
+    private void renderZoneBarChart(UtilizationReportDTO dto) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        if (dto.getZoneUtilizationList() != null && !dto.getZoneUtilizationList().isEmpty()) {
+            for (ZoneUtilizationItem zone : dto.getZoneUtilizationList()) {
+                dataset.addValue(zone.getUtilizationPct(), "Utilization %", zone.getZoneName());
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+            "Zone Space Utilization (%)",
+            "Zone",
+            "Utilization %",
+            dataset,
+            PlotOrientation.VERTICAL,
+            false,
+            true,
+            false
+        );
+        styleBarChart(chart);
+        embedChart(chartZoneUtilization, chart);
+    }
+
+    private void styleBarChart(JFreeChart chart) {
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle title = chart.getTitle();
+        if (title != null) {
+            title.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            title.setPaint(new Color(30, 41, 59));
+            title.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setInsets(new RectangleInsets(2, 4, 4, 4));
+        plot.setRangeGridlinePaint(new Color(226, 232, 240));
+
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setBarPainter(new StandardBarPainter());
+        renderer.setShadowVisible(false);
+        renderer.setMaximumBarWidth(0.20);
+        renderer.setItemMargin(0.05);
+        renderer.setSeriesPaint(0, new Color(14, 165, 233)); // Modern sky blue
+
+        plot.getDomainAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 9));
+        plot.getRangeAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 9));
+    }
+
+    private void embedChart(javax.swing.JPanel panel, JFreeChart chart) {
+        panel.setLayout(new BorderLayout());
+        panel.removeAll();
+
+        // Enforce design height 250 and width 0/panel.getWidth() to auto-scale without overflowing
+        Dimension panelDim = new Dimension(panel.getWidth() > 0 ? panel.getWidth() : 0, 250);
+        panel.setPreferredSize(panelDim);
+        panel.setMinimumSize(new Dimension(0, 0));
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(panelDim);
+        chartPanel.setMinimumSize(new Dimension(0, 0));
+
+        // Eliminate minimum drawing boundaries so JFreeChart draws crisply to fit panel bounds
+        chartPanel.setMinimumDrawWidth(0);
+        chartPanel.setMinimumDrawHeight(0);
+        chartPanel.setMaximumDrawWidth(4000);
+        chartPanel.setMaximumDrawHeight(4000);
+        chartPanel.setMouseWheelEnabled(false);
+        chartPanel.setPopupMenu(null);
+        chartPanel.setDomainZoomable(false);
+        chartPanel.setRangeZoomable(false);
+
+        panel.add(chartPanel, BorderLayout.CENTER);
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private void resetFormDisplay() {
+        currentReportData = null;
+
+        lblTotalWarehouseCapacity.setText("0.000");
+        lblCurrentStockValueCurrency.setText("$");
+        lblCurrentStockValue.setText("0.00");
+        jLabel10.setText("0.0%");
+        lblEmptyBins.setText("0");
+        lblFullyOccupiedBins.setText("0");
+        lblAverageBinUtilization.setText("0.0%");
+
+        DefaultTableModel binModel = (DefaultTableModel) tblBinUtilization.getModel();
+        binModel.setRowCount(0);
+
+        DefaultTableModel topModel = (DefaultTableModel) tblTopSpaceConsumers.getModel();
+        topModel.setRowCount(0);
+
+        renderEmptyChart(chartZoneUtilization, "Zone Utilization");
+        StatusMessageHandler.clearStatus(txtStatus);
+    }
+
+    private void renderEmptyChart(javax.swing.JPanel panel, String title) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        JFreeChart chart = ChartFactory.createBarChart(title, "Zone", "Utilization %", dataset, PlotOrientation.VERTICAL, false, false, false);
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle t = chart.getTitle();
+        if (t != null) {
+            t.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            t.setPaint(new Color(100, 116, 139));
+            t.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setNoDataMessage("No zone utilization data available");
+        plot.setNoDataMessageFont(new Font("Segoe UI", Font.ITALIC, 10));
+        plot.setNoDataMessagePaint(new Color(148, 163, 184));
+
+        embedChart(panel, chart);
+    }
+
+    private void exportReport(String format) {
+        if (currentReportData == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please generate a report first before exporting.");
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save " + format + " Report");
+        String defaultFileName = "UtilizationReport_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ("XLSX".equalsIgnoreCase(format) ? ".xlsx" : ".pdf");
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel Workbook (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            final File fileToSave = fileChooser.getSelectedFile();
+            BackgroundTask task = new BackgroundTask(this, "Exporting Report as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " report file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        UtilizationReportExportUtils.exportToXLSX(currentReportData, fileToSave);
+                    } else {
+                        UtilizationReportExportUtils.exportToPDF(currentReportData, fileToSave);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " report exported: " + fileToSave.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export report as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +1070,49 @@ public class UtilizationReportForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnGenerate;
+    private javax.swing.JPanel chartZoneUtilization;
+    private ui.components.CheckedComboBox<String> cmbWarehouse;
+    private ui.components.CheckedComboBox<String> cmbZone;
+    private com.toedter.calendar.JDateChooser datepickerFrom;
+    private com.toedter.calendar.JDateChooser datepickerTo;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblAverageBinUtilization;
+    private javax.swing.JLabel lblCurrentStockValue;
+    private javax.swing.JLabel lblCurrentStockValueCurrency;
+    private javax.swing.JLabel lblEmptyBins;
+    private javax.swing.JLabel lblFullyOccupiedBins;
+    private javax.swing.JLabel lblTotalWarehouseCapacity;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JTable tblBinUtilization;
+    private javax.swing.JTable tblTopSpaceConsumers;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
