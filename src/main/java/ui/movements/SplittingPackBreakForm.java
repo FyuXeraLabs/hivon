@@ -4,17 +4,52 @@
  */
 package ui.movements;
 
+import core.logging.Logger;
+import core.security.UserSession;
+import core.workers.BackgroundTask;
+import models.dto.BinToBinDestinationBinDTO;
+import models.dto.SplittingItemDTO;
+import models.dto.SplittingMaterialDTO;
+import models.dto.SplittingSourceBinDTO;
+import movements.controllers.SplittingPackBreakController;
+import ui.components.AutoSuggestTextField;
+import ui.components.StatusMessageHandler;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
+ * Form for Splitting / Pack Breaking (INT18).
  *
  * @author Ishani
  */
 public class SplittingPackBreakForm extends javax.swing.JFrame {
+
+    private SplittingPackBreakController controller;
+    private SplittingMaterialDTO selectedMaterial;
+    private List<SplittingSourceBinDTO> loadedSourceBins = new ArrayList<>();
+    private List<BinToBinDestinationBinDTO> loadedDestBins = new ArrayList<>();
+    private List<SplittingItemDTO> breakingItems = new ArrayList<>();
+    private DefaultTableModel tableModel;
+    private boolean isProgrammaticChange = false;
+    private boolean isCalculating = false;
 
     /**
      * Creates new form SplittingPackBreakForm
      */
     public SplittingPackBreakForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new SplittingPackBreakController();
+        initCustomComponents();
+        loadDestinationBins();
     }
 
     /**
@@ -26,33 +61,56 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jPanel3 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txtMaterialCode = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jButton1 = new javax.swing.JButton();
+        cmbSourceBin = new javax.swing.JComboBox<>();
+        btnSearch = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        txtMaterialName = new javax.swing.JTextField();
+        txtCurrentPackUOM = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        txtQtyPerPack = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        txtBaseUOM = new javax.swing.JTextField();
+        txtAvailableQty = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtCurrentPacks = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        spinnerPacksToBreak = new javax.swing.JSpinner();
+        jLabel8 = new javax.swing.JLabel();
+        spinnerBaseUnitsCreated = new javax.swing.JSpinner();
+        jLabel9 = new javax.swing.JLabel();
+        cmbDestinationBin = new javax.swing.JComboBox<>();
+        btnAdd = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+        btnPost = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblSummary = new javax.swing.JTable();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Internal - Splitting/Pack Break (INT18)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Search"));
         jPanel4.setToolTipText("");
 
-        jLabel1.setText("Material Code/Name");
+        jLabel1.setText("Material Code");
 
         jLabel2.setText("Source Bin");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jButton1.setText("Save");
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -60,46 +118,80 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(42, 42, 42)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32)
-                .addComponent(jButton1)
+                .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSearch)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(11, 11, 11)
+                .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addContainerGap(19, Short.MAX_VALUE))
+                    .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Details"));
 
         jLabel3.setText("Material");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        txtMaterialName.setEditable(false);
+
+        txtCurrentPackUOM.setEditable(false);
+        txtCurrentPackUOM.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jLabel5.setText("Qty per Pack");
+
+        txtQtyPerPack.setEditable(false);
+
+        jLabel4.setText("Available Qty");
+
+        txtBaseUOM.setEditable(false);
+        txtBaseUOM.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        txtAvailableQty.setEditable(false);
+
+        jLabel6.setText("Current Packs");
+
+        txtCurrentPacks.setEditable(false);
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(19, 19, 19)
+                .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(716, Short.MAX_VALUE))
+                .addComponent(txtMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(50, 50, 50)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCurrentPackUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtQtyPerPack, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(37, 37, 37)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(46, 46, 46)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCurrentPacks, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(78, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -107,77 +199,868 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(123, Short.MAX_VALUE))
+                    .addComponent(txtMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCurrentPackUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtQtyPerPack, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtCurrentPacks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 33, Short.MAX_VALUE))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 438, Short.MAX_VALUE))
-        );
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Breaking/Splitting"));
 
-        jScrollPane2.setViewportView(jPanel3);
+        jLabel7.setText("Packs to Break");
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 888, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
-        );
+        jLabel8.setText("Base Units Created");
+
+        jLabel9.setText("Destination Bin");
+
+        btnAdd.setText("Add");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(778, Short.MAX_VALUE))
+                .addGap(17, 17, 17)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spinnerPacksToBreak, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spinnerBaseUnitsCreated, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(39, 39, 39)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnAdd)
+                .addGap(99, 99, 99))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(483, Short.MAX_VALUE))
+                .addGap(15, 15, 15)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(spinnerPacksToBreak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8)
+                    .addComponent(spinnerBaseUnitsCreated, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9)
+                    .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnAdd))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
-        jScrollPane1.setViewportView(jPanel1);
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        btnPost.setText("POST");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPostActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnPost)
+                .addGap(28, 28, 28)
+                .addComponent(btnCancel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnPost)
+                        .addComponent(btnCancel))
+                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Breaking Summary"));
+
+        tblSummary.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Material", "Source Bin", "Packs", "Base Units", "Destination Bin"
+            }
+        ));
+        jScrollPane1.setViewportView(tblSummary);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 591, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 38, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        performMaterialSearch();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        addToBreakingList();
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
+        completePackageBreaking();
+    }//GEN-LAST:event_btnPostActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        cancelOrReset();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void initCustomComponents() {
+        txtMaterialName.setEditable(false);
+        txtCurrentPackUOM.setEditable(false);
+        txtQtyPerPack.setEditable(false);
+        txtBaseUOM.setEditable(false);
+        txtAvailableQty.setEditable(false);
+        txtCurrentPacks.setEditable(false);
+
+        // Setup breaking summary table
+        tableModel = new DefaultTableModel(
+            new String[]{"Material", "Source Bin", "Packs", "Base Units", "Destination Bin"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tblSummary.setModel(tableModel);
+
+        // Alignment renderers
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        tblSummary.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+        tblSummary.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        tblSummary.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        tblSummary.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+
+        // Context menu and Delete key on table to remove queued items
+        JPopupMenu tablePopup = new JPopupMenu();
+        JMenuItem removeItem = new JMenuItem("Remove from Breaking List");
+        removeItem.addActionListener(e -> removeSelectedBreakingItem());
+        tablePopup.add(removeItem);
+        tblSummary.setComponentPopupMenu(tablePopup);
+
+        tblSummary.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                    removeSelectedBreakingItem();
+                }
+            }
+        });
+
+        // Initialize spinners
+        spinnerPacksToBreak.setModel(new SpinnerNumberModel(0.0, 0.0, 999999.0, 1.0));
+        spinnerBaseUnitsCreated.setModel(new SpinnerNumberModel(0.0, 0.0, 999999.0, 1.0));
+
+        // Two-way flexibility between Packs to Break and Base Units Created
+        setupTwoWaySpinners();
+
+        // Material search enter key
+        txtMaterialCode.addActionListener(e -> performMaterialSearch());
+
+        // AutoSuggest on material code
+        AutoSuggestTextField.attach(txtMaterialCode, query -> {
+            try {
+                List<SplittingMaterialDTO> list = controller.searchMaterials(getUserWarehouseId(), query);
+                List<String> suggestions = new ArrayList<>();
+                if (list != null) {
+                    for (SplittingMaterialDTO m : list) {
+                        suggestions.add(m.getMaterialCode() + " - " + m.getMaterialDescription());
+                    }
+                }
+                return suggestions;
+            } catch (Exception ex) {
+                Logger.errlog("Failed to load material suggestions", ex);
+                return new ArrayList<>();
+            }
+        });
+
+        // Combo box action listeners
+        cmbSourceBin.addActionListener(e -> {
+            if (!isProgrammaticChange) {
+                onSourceBinSelected();
+            }
+        });
+
+        cmbDestinationBin.addActionListener(e -> {
+            if (!isProgrammaticChange) {
+                onDestinationBinSelected();
+            }
+        });
+
+        StatusMessageHandler.showInfo(txtStatus, "Ready. Search material code to break packages.");
+    }
+
+    private Integer getUserWarehouseId() {
+        try {
+            if (UserSession.getInstance().getCurrentUser() != null) {
+                return UserSession.getInstance().getCurrentUser().getWarehouseId();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private void setupTwoWaySpinners() {
+        spinnerPacksToBreak.addChangeListener(e -> {
+            if (!isCalculating && selectedMaterial != null && selectedMaterial.getUnitsPerPack() > 0) {
+                isCalculating = true;
+                try {
+                    double packs = Double.parseDouble(spinnerPacksToBreak.getValue().toString());
+                    if (packs >= 0) {
+                        double baseUnits = packs * selectedMaterial.getUnitsPerPack();
+                        spinnerBaseUnitsCreated.setValue(baseUnits);
+                    }
+                } catch (Exception ignored) {
+                }
+                isCalculating = false;
+            }
+        });
+
+        spinnerBaseUnitsCreated.addChangeListener(e -> {
+            if (!isCalculating && selectedMaterial != null && selectedMaterial.getUnitsPerPack() > 0) {
+                isCalculating = true;
+                try {
+                    double baseUnits = Double.parseDouble(spinnerBaseUnitsCreated.getValue().toString());
+                    if (baseUnits >= 0) {
+                        double packs = Math.ceil(baseUnits / selectedMaterial.getUnitsPerPack());
+                        spinnerPacksToBreak.setValue(packs);
+                    }
+                } catch (Exception ignored) {
+                }
+                isCalculating = false;
+            }
+        });
+    }
+
+    private void loadDestinationBins() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Destination Bins") {
+            private List<BinToBinDestinationBinDTO> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Loading available destination bins...");
+                bins = controller.getDestinationBins(getUserWarehouseId());
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedDestBins = bins != null ? bins : new ArrayList<>();
+                refreshDestBinComboLabels();
+                onDestinationBinSelected();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load destination bins", e);
+                StatusMessageHandler.showError(txtStatus, "Failed to load destination bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private String formatDestBinLabel(BinToBinDestinationBinDTO bin) {
+        double remCap = calculateRemainingDestCapacity(bin);
+        return bin.getBinCode() + "  [" + (bin.getZoneCode() != null ? bin.getZoneCode() : "") + " | "
+            + (bin.getBinType() != null ? bin.getBinType() : "") + "]  "
+            + String.format("%.0f", remCap) + "/" + String.format("%.0f", bin.getMaxCapacity());
+    }
+
+    private void refreshDestBinComboLabels() {
+        isProgrammaticChange = true;
+        int currentIdx = cmbDestinationBin.getSelectedIndex();
+        cmbDestinationBin.removeAllItems();
+        for (BinToBinDestinationBinDTO b : loadedDestBins) {
+            cmbDestinationBin.addItem(formatDestBinLabel(b));
+        }
+        if (currentIdx >= 0 && currentIdx < cmbDestinationBin.getItemCount()) {
+            cmbDestinationBin.setSelectedIndex(currentIdx);
+        }
+        isProgrammaticChange = false;
+    }
+
+    private void onDestinationBinSelected() {
+        // Can be used for extra destination bin visual feedback if needed
+    }
+
+    private void performMaterialSearch() {
+        String query = txtMaterialCode.getText().trim();
+        // If suggestion formatted like "M001 - Widget A", extract code
+        if (query.contains(" - ")) {
+            query = query.split(" - ")[0].trim();
+            txtMaterialCode.setText(query);
+        }
+
+        if (query.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a material code to search.");
+            return;
+        }
+
+        final String finalQuery = query;
+        BackgroundTask task = new BackgroundTask(this, "Searching Material") {
+            private List<SplittingMaterialDTO> materials;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching for packable material stock...");
+                materials = controller.searchMaterials(getUserWarehouseId(), finalQuery);
+                return materials != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (materials == null || materials.isEmpty()) {
+                    StatusMessageHandler.showWarning(txtStatus, "No available stock found for material: " + finalQuery);
+                    clearMaterialFields();
+                    return;
+                }
+
+                SplittingMaterialDTO chosen = materials.get(0);
+                for (SplittingMaterialDTO m : materials) {
+                    if (m.getMaterialCode().equalsIgnoreCase(finalQuery)) {
+                        chosen = m;
+                        break;
+                    }
+                }
+
+                displayMaterialDetails(chosen);
+                loadSourceBinsForMaterial(chosen.getMaterialId());
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Material search failed", e);
+                StatusMessageHandler.showError(txtStatus, "Material search failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void displayMaterialDetails(SplittingMaterialDTO mat) {
+        this.selectedMaterial = mat;
+        txtMaterialCode.setText(mat.getMaterialCode());
+        txtMaterialName.setText(mat.getMaterialDescription());
+        txtCurrentPackUOM.setText(mat.getPackUom());
+        txtQtyPerPack.setText(String.format("%.0f", mat.getUnitsPerPack()));
+        txtBaseUOM.setText(mat.getBaseUom());
+    }
+
+    private void loadSourceBinsForMaterial(int materialId) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Source Bins") {
+            private List<SplittingSourceBinDTO> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Loading source bins containing material...");
+                bins = controller.getSourceBins(materialId, getUserWarehouseId());
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                isProgrammaticChange = true;
+                cmbSourceBin.removeAllItems();
+                loadedSourceBins = bins != null ? bins : new ArrayList<>();
+                for (SplittingSourceBinDTO b : loadedSourceBins) {
+                    String label = b.getBinCode()
+                        + (b.getBatchNumber() != null ? " (Batch: " + b.getBatchNumber() + ")" : "")
+                        + " - " + String.format("%.0f", b.getAvailableQty()) + " " + selectedMaterial.getBaseUom();
+                    cmbSourceBin.addItem(label);
+                }
+                if (!loadedSourceBins.isEmpty()) {
+                    cmbSourceBin.setSelectedIndex(0);
+                }
+                isProgrammaticChange = false;
+
+                if (loadedSourceBins.isEmpty()) {
+                    StatusMessageHandler.showWarning(txtStatus, "No active source bins with stock available for " + selectedMaterial.getMaterialCode());
+                    resetBinQuantities();
+                } else {
+                    onSourceBinSelected();
+                    StatusMessageHandler.showInfo(txtStatus, "Found " + loadedSourceBins.size() + " source bin(s) for " + selectedMaterial.getMaterialCode());
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load source bins", e);
+                StatusMessageHandler.showError(txtStatus, "Failed to load source bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private SplittingSourceBinDTO getSelectedSourceBin() {
+        int idx = cmbSourceBin.getSelectedIndex();
+        if (idx >= 0 && idx < loadedSourceBins.size()) {
+            return loadedSourceBins.get(idx);
+        }
+        return null;
+    }
+
+    private BinToBinDestinationBinDTO getSelectedDestinationBin() {
+        int idx = cmbDestinationBin.getSelectedIndex();
+        if (idx >= 0 && idx < loadedDestBins.size()) {
+            return loadedDestBins.get(idx);
+        }
+        return null;
+    }
+
+    private double calculateRemainingSourceQty(SplittingSourceBinDTO srcBin) {
+        if (srcBin == null) return 0.0;
+        double avail = srcBin.getAvailableQty();
+        for (SplittingItemDTO item : breakingItems) {
+            if (item.getSourceBinId() == srcBin.getBinId()) {
+                if ((srcBin.getBatchId() == null && item.getBatchId() == null) ||
+                    (srcBin.getBatchId() != null && srcBin.getBatchId().equals(item.getBatchId()))) {
+                    avail -= item.getBaseUnits();
+                }
+            }
+        }
+        return Math.max(0.0, avail);
+    }
+
+    private double calculateRemainingDestCapacity(BinToBinDestinationBinDTO destBin) {
+        if (destBin == null) return 0.0;
+        double rem = destBin.getRemainingCapacity();
+        for (SplittingItemDTO item : breakingItems) {
+            if (item.getDestBinId() == destBin.getBinId()) {
+                rem -= item.getBaseUnits();
+            }
+        }
+        return Math.max(0.0, rem);
+    }
+
+    private void onSourceBinSelected() {
+        SplittingSourceBinDTO bin = getSelectedSourceBin();
+        if (bin == null || selectedMaterial == null) {
+            resetBinQuantities();
+            return;
+        }
+
+        double remAvail = calculateRemainingSourceQty(bin);
+        txtAvailableQty.setText(String.format("%.2f", remAvail));
+
+        double unitsPerPack = selectedMaterial.getUnitsPerPack();
+        double currentPacks = unitsPerPack > 0 ? Math.floor(remAvail / unitsPerPack) : 0;
+        txtCurrentPacks.setText(String.format("%.0f", currentPacks));
+
+        // Configure spinner maximums based on available stock
+        isCalculating = true;
+        double initPacks = currentPacks > 0 ? 1.0 : 0.0;
+        spinnerPacksToBreak.setModel(new SpinnerNumberModel(initPacks, 0.0, Math.max(0.0, currentPacks), 1.0));
+        spinnerBaseUnitsCreated.setModel(new SpinnerNumberModel(initPacks * unitsPerPack, 0.0, Math.max(0.0, remAvail), 1.0));
+        isCalculating = false;
+    }
+
+    private void calculateConversion(boolean manualClick) {
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            txtMaterialCode.requestFocus();
+            return;
+        }
+
+        double unitsPerPack = selectedMaterial.getUnitsPerPack();
+        if (unitsPerPack <= 0) {
+            StatusMessageHandler.showError(txtStatus, "Invalid units per pack for selected material.");
+            return;
+        }
+
+        double packs = 0.0;
+        double baseUnits = 0.0;
+        try {
+            packs = Double.parseDouble(spinnerPacksToBreak.getValue().toString());
+            baseUnits = Double.parseDouble(spinnerBaseUnitsCreated.getValue().toString());
+        } catch (Exception ex) {
+            StatusMessageHandler.showError(txtStatus, "Invalid quantity entered in spinners.");
+            return;
+        }
+
+        // Two-way flexibility:
+        // Option A: If packs > 0, compute base units
+        // Option B: If baseUnits > 0 and packs == 0 (or reverse calculation needed)
+        if (packs > 0) {
+            baseUnits = packs * unitsPerPack;
+            spinnerBaseUnitsCreated.setValue(baseUnits);
+        } else if (baseUnits > 0) {
+            packs = Math.ceil(baseUnits / unitsPerPack);
+            spinnerPacksToBreak.setValue(packs);
+            baseUnits = packs * unitsPerPack;
+            spinnerBaseUnitsCreated.setValue(baseUnits);
+        }
+
+        SplittingSourceBinDTO srcBin = getSelectedSourceBin();
+        double availPacks = 0.0;
+        if (srcBin != null) {
+            double remAvail = calculateRemainingSourceQty(srcBin);
+            availPacks = Math.floor(remAvail / unitsPerPack);
+        }
+
+        if (packs > availPacks) {
+            StatusMessageHandler.showWarning(txtStatus, "Requested " + String.format("%.0f", packs) + " packs exceeds available " + String.format("%.0f", availPacks) + " packs in source bin.");
+        } else {
+            StatusMessageHandler.showInfo(txtStatus, "Calculated: " + String.format("%.0f", packs) + " " + selectedMaterial.getPackUom() + " = " + String.format("%.2f", baseUnits) + " " + selectedMaterial.getBaseUom());
+        }
+    }
+
+    private void addToBreakingList() {
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            txtMaterialCode.requestFocus();
+            return;
+        }
+
+        SplittingSourceBinDTO srcBin = getSelectedSourceBin();
+        if (srcBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a source bin.");
+            return;
+        }
+
+        BinToBinDestinationBinDTO destBin = getSelectedDestinationBin();
+        if (destBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination bin.");
+            return;
+        }
+
+        double packs = 0.0;
+        double baseUnits = 0.0;
+        try {
+            packs = Double.parseDouble(spinnerPacksToBreak.getValue().toString());
+            baseUnits = Double.parseDouble(spinnerBaseUnitsCreated.getValue().toString());
+        } catch (Exception ex) {
+            StatusMessageHandler.showError(txtStatus, "Invalid quantity entered.");
+            return;
+        }
+
+        if (packs <= 0 || baseUnits <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Packs to break must be greater than 0.");
+            return;
+        }
+
+        // Validate available packs in source bin (cannot break more than available)
+        double remAvail = calculateRemainingSourceQty(srcBin);
+        double maxPacks = selectedMaterial.getUnitsPerPack() > 0 ? Math.floor(remAvail / selectedMaterial.getUnitsPerPack()) : 0;
+        if (packs > maxPacks) {
+            StatusMessageHandler.showError(txtStatus, "Cannot break more packs than available in source bin. Available: " + String.format("%.0f", maxPacks) + " packs.");
+            JOptionPane.showMessageDialog(
+                this,
+                "Cannot break more packs than available in source bin " + srcBin.getBinCode() + ".\nAvailable: " + String.format("%.0f", maxPacks) + " packs (" + String.format("%.2f", remAvail) + " " + selectedMaterial.getBaseUom() + ")\nRequested: " + String.format("%.0f", packs) + " packs (" + String.format("%.2f", baseUnits) + " " + selectedMaterial.getBaseUom() + ")",
+                "Insufficient Stock",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // Validate destination bin capacity if moving to a different bin
+        if (destBin.getBinId() != srcBin.getBinId()) {
+            double remDestCap = calculateRemainingDestCapacity(destBin);
+            if (baseUnits > remDestCap) {
+                StatusMessageHandler.showError(txtStatus, "Destination bin does not have enough capacity. Remaining: " + String.format("%.2f", remDestCap));
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Destination bin " + destBin.getBinCode() + " capacity exceeded.\nRemaining Capacity: " + String.format("%.2f", remDestCap) + "\nRequested: " + String.format("%.2f", baseUnits),
+                    "Capacity Exceeded",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+        }
+
+        // Add to breakingItems list
+        SplittingItemDTO item = new SplittingItemDTO(
+            selectedMaterial.getMaterialId(),
+            selectedMaterial.getMaterialCode(),
+            selectedMaterial.getMaterialDescription(),
+            srcBin.getBinId(),
+            srcBin.getBinCode(),
+            destBin.getBinId(),
+            destBin.getBinCode(),
+            packs,
+            selectedMaterial.getUnitsPerPack(),
+            baseUnits,
+            selectedMaterial.getPackUom(),
+            selectedMaterial.getBaseUom(),
+            srcBin.getBatchId(),
+            srcBin.getBatchNumber()
+        );
+
+        breakingItems.add(item);
+
+        tableModel.addRow(new Object[]{
+            item.getMaterialCode(),
+            item.getSourceBinCode() + (item.getBatchNumber() != null ? " (" + item.getBatchNumber() + ")" : ""),
+            String.format("%.0f", item.getPacks()) + " " + item.getPackUom(),
+            String.format("%.2f", item.getBaseUnits()) + " " + item.getBaseUom(),
+            item.getDestBinCode()
+        });
+
+        // Update remaining displays
+        onSourceBinSelected();
+        refreshDestBinComboLabels();
+
+        StatusMessageHandler.showSuccess(txtStatus, "Added " + item.getMaterialCode() + " (" + String.format("%.0f", packs) + " " + item.getPackUom() + " -> " + String.format("%.2f", baseUnits) + " " + item.getBaseUom() + ") to breaking list.");
+    }
+
+    private void removeSelectedBreakingItem() {
+        int selectedRow = tblSummary.getSelectedRow();
+        if (selectedRow < 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Select an item from the table to remove.");
+            return;
+        }
+
+        if (selectedRow < breakingItems.size()) {
+            SplittingItemDTO removed = breakingItems.remove(selectedRow);
+            tableModel.removeRow(selectedRow);
+
+            onSourceBinSelected();
+            refreshDestBinComboLabels();
+            StatusMessageHandler.showInfo(txtStatus, "Removed " + removed.getMaterialCode() + " from breaking list.");
+        }
+    }
+
+    private void completePackageBreaking() {
+        if (breakingItems.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please add packages to break before completing transaction.");
+            JOptionPane.showMessageDialog(this, "Please add packages to break", "Empty Breaking List", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        double totalPacks = 0;
+        double totalBaseUnits = 0;
+        for (SplittingItemDTO item : breakingItems) {
+            totalPacks += item.getPacks();
+            totalBaseUnits += item.getBaseUnits();
+        }
+
+        final double finalPacks = totalPacks;
+        final double finalBaseUnits = totalBaseUnits;
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Break " + String.format("%.0f", totalPacks) + " packages into " + String.format("%.2f", totalBaseUnits) + " base units?\nInventory will be updated immediately.",
+            "Confirm Package Breaking",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        BackgroundTask task = new BackgroundTask(this, "Processing Package Breaking") {
+            private String movementNumber;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Posting package breaking goods movement (INT18)...");
+                com.google.gson.JsonObject result = controller.completePackageBreaking(breakingItems, null);
+                if (result != null && result.has("data") && result.getAsJsonObject("data").has("movement_number")) {
+                    movementNumber = result.getAsJsonObject("data").get("movement_number").getAsString();
+                } else {
+                    movementNumber = "INT18-" + System.currentTimeMillis();
+                }
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Package breaking completed successfully. Movement Number: " + movementNumber);
+
+                JOptionPane.showMessageDialog(
+                    SplittingPackBreakForm.this,
+                    "Package breaking completed successfully.\nMovement Number: " + movementNumber + "\n" + String.format("%.2f", finalBaseUnits) + " base units are now available for picking.",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+
+                int printConfirm = JOptionPane.showConfirmDialog(
+                    SplittingPackBreakForm.this,
+                    "Print package breaking note?",
+                    "Print Breaking Note",
+                    JOptionPane.YES_NO_OPTION
+                );
+                if (printConfirm == JOptionPane.YES_OPTION) {
+                    printBreakingNote(movementNumber);
+                }
+
+                clearForm();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to complete package breaking", e);
+                StatusMessageHandler.showError(txtStatus, "Failed to complete package breaking: " + e.getMessage());
+                JOptionPane.showMessageDialog(SplittingPackBreakForm.this, "Failed to complete package breaking:\n" + e.getMessage(), "Breaking Error", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void printBreakingNote(String movementNumber) {
+        StringBuilder note = new StringBuilder();
+        note.append("=================================================================\n");
+        note.append("                 HIVON WMS - PACKAGE BREAKING NOTE               \n");
+        note.append("=================================================================\n\n");
+        note.append("Transaction / Movement No : ").append(movementNumber).append("\n");
+        note.append("Movement Type             : INT18 - Splitting/Pack Break\n");
+        note.append("Date                      : ").append(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date())).append("\n");
+        String user = "System";
+        try {
+            if (UserSession.getInstance().getCurrentUser() != null) {
+                user = UserSession.getInstance().getCurrentUser().getUsername();
+            }
+        } catch (Exception ignored) {}
+        note.append("Processed By              : ").append(user).append("\n\n");
+        note.append(String.format("%-12s %-16s %-14s %-16s %-14s\n", "Material", "From Bin", "Packs", "Units Created", "To Bin"));
+        note.append("---------------------------------------------------------------------------------\n");
+        for (SplittingItemDTO item : breakingItems) {
+            note.append(String.format("%-12s %-16s %-14s %-16s %-14s\n",
+                    item.getMaterialCode(),
+                    item.getSourceBinCode() + (item.getBatchNumber() != null ? " (" + item.getBatchNumber() + ")" : ""),
+                    String.format("%.0f %s", item.getPacks(), item.getPackUom()),
+                    String.format("%.2f %s", item.getBaseUnits(), item.getBaseUom()),
+                    item.getDestBinCode()
+            ));
+        }
+        note.append("=================================================================================\n");
+        note.append("Supervisor Signature: __________________   Date: ________________\n");
+
+        JTextArea textArea = new JTextArea(note.toString());
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new java.awt.Dimension(680, 420));
+        JOptionPane.showMessageDialog(this, scrollPane, "Breaking Note Preview - " + movementNumber, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void clearMaterialFields() {
+        selectedMaterial = null;
+        txtMaterialName.setText("");
+        txtCurrentPackUOM.setText("");
+        txtQtyPerPack.setText("");
+        txtBaseUOM.setText("");
+        clearBinFields();
+    }
+
+    private void resetBinQuantities() {
+        txtAvailableQty.setText("");
+        txtCurrentPacks.setText("");
+        isCalculating = true;
+        spinnerPacksToBreak.setModel(new SpinnerNumberModel(0.0, 0.0, 999999.0, 1.0));
+        spinnerBaseUnitsCreated.setModel(new SpinnerNumberModel(0.0, 0.0, 999999.0, 1.0));
+        isCalculating = false;
+    }
+
+    private void clearBinFields() {
+        isProgrammaticChange = true;
+        cmbSourceBin.removeAllItems();
+        loadedSourceBins.clear();
+        isProgrammaticChange = false;
+        resetBinQuantities();
+    }
+
+    private void clearForm() {
+        clearMaterialFields();
+        txtMaterialCode.setText("");
+        breakingItems.clear();
+        tableModel.setRowCount(0);
+        refreshDestBinComboLabels();
+        StatusMessageHandler.showInfo(txtStatus, "Ready. Search material code to break packages.");
+    }
+
+    private void cancelOrReset() {
+        if (!breakingItems.isEmpty()) {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Discard queued breaking items?",
+                "Confirm Cancel",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+            clearForm();
+        } else {
+            this.dispose();
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -215,19 +1098,37 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
+    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<String> cmbDestinationBin;
+    private javax.swing.JComboBox<String> cmbSourceBin;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JSpinner spinnerBaseUnitsCreated;
+    private javax.swing.JSpinner spinnerPacksToBreak;
+    private javax.swing.JTable tblSummary;
+    private javax.swing.JTextField txtAvailableQty;
+    private javax.swing.JTextField txtBaseUOM;
+    private javax.swing.JTextField txtCurrentPackUOM;
+    private javax.swing.JTextField txtCurrentPacks;
+    private javax.swing.JTextField txtMaterialCode;
+    private javax.swing.JTextField txtMaterialName;
+    private javax.swing.JTextField txtQtyPerPack;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
