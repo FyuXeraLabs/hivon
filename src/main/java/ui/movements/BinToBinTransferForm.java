@@ -4,20 +4,29 @@
  */
 package ui.movements;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JOptionPane;
-import java.util.ArrayList;
-import java.util.List;
-import core.api.dao.BinToBinTransferDAO.MaterialSearchResult;
-import core.api.dao.BinToBinTransferDAO.SourceBinInfo;
-import core.api.dao.BinToBinTransferDAO.DestBinInfo;
-import core.api.dao.BinToBinTransferDAO.BinTransferItem;
-import movements.controllers.BinToBinTransferController;
-import models.dto.WarehouseDTO;
-import core.workers.BackgroundTask;
-import ui.components.StatusMessageHandler;
 import core.logging.Logger;
-import javax.swing.ImageIcon;
+import core.workers.BackgroundTask;
+import models.dto.BinToBinDestinationBinDTO;
+import models.dto.BinToBinSourceBinDTO;
+import models.dto.BinToBinTransferItemDTO;
+import models.dto.MaterialDTO;
+import models.dto.WarehouseDTO;
+import movements.controllers.BinToBinTransferController;
+import ui.components.AutoSuggestTextField;
+import ui.components.StatusMessageHandler;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -26,351 +35,26 @@ import javax.swing.ImageIcon;
 public class BinToBinTransferForm extends javax.swing.JFrame {
 
     private BinToBinTransferController controller;
-    private List<BinTransferItem> transferSummaryList = new ArrayList<>();
-    private List<MaterialSearchResult> currentMaterialResults = new ArrayList<>();
-    private List<SourceBinInfo> currentSourceBins = new ArrayList<>();
-    private List<DestBinInfo> currentDestBins = new ArrayList<>();
     private List<WarehouseDTO> loadedWarehouses = new ArrayList<>();
-    private MaterialSearchResult selectedMaterial = null;
+    private List<BinToBinDestinationBinDTO> loadedDestBins = new ArrayList<>();
+    private List<BinToBinSourceBinDTO> loadedSourceBins = new ArrayList<>();
+    private MaterialDTO selectedMaterial = null;
+    private List<BinToBinTransferItemDTO> transferItems = new ArrayList<>();
+    private DefaultTableModel tableModel;
     private String lastTransferNumber = null;
-    private javax.swing.JLabel txtStatus;
-
-    private WarehouseDTO getSelectedWarehouse() {
-        int idx = cmbSourceWarehouse.getSelectedIndex();
-        if (idx > 0 && (idx - 1) < loadedWarehouses.size()) {
-            return loadedWarehouses.get(idx - 1);
-        }
-        return null;
-    }
+    private boolean detailsConfirmed = false;
+    private boolean isProgrammaticChange = false;
 
     /**
      * Creates new form BinToBinTransferForm
      */
     public BinToBinTransferForm() {
         initComponents();
-        this.controller = new BinToBinTransferController();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
-        this.setTitle("Bin-to-Bin Transfer (INT-BIN)");
-        try {
-            this.setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
-        } catch (Exception e) {
-            // icon not found, skip
-        }
-
-        // add status label programmatically at the bottom
-        txtStatus = new javax.swing.JLabel();
-        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jPanel1.add(txtStatus);
-
-        setupWarehouseCombo();
-        setupTransferReasonCombo();
-        setupTransferDateSpinner();
-        setupMaterialSearchTable();
-        setupTransferSummaryTable();
-        setupSourceBinListener();
-        setupDestBinListener();
-        setupMaterialTableListener();
+        this.controller = new BinToBinTransferController();
+        initCustomComponents();
         loadWarehouses();
-    }
-
-    // populate transfer reason dropdown
-    private void setupTransferReasonCombo() {
-        cmbTransferReason.removeAllItems();
-        cmbTransferReason.addItem("-- Select Reason --");
-        cmbTransferReason.addItem("Consolidation");
-        cmbTransferReason.addItem("Relocation");
-        cmbTransferReason.addItem("Damage Recovery");
-        cmbTransferReason.addItem("Optimization");
-        cmbTransferReason.addItem("Other");
-    }
-
-    // setup warehouse combo placeholder
-    private void setupWarehouseCombo() {
-        cmbSourceWarehouse.removeAllItems();
-        cmbSourceWarehouse.addItem("-- Select Warehouse --");
-    }
-
-    // configure transfer date spinner as date
-    private void setupTransferDateSpinner() {
-        dtTransferDate.setModel(new javax.swing.SpinnerDateModel());
-        dtTransferDate.setEditor(new javax.swing.JSpinner.DateEditor(dtTransferDate, "yyyy-MM-dd"));
-    }
-
-    // setup material search results table (jTable1)
-    private void setupMaterialSearchTable() {
-        DefaultTableModel model = new DefaultTableModel(
-            new String[]{"Code", "Description", "UOM", "Batch?", "Available Qty"}, 0
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int col) { return false; }
-        };
-        jTable1.setModel(model);
-        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jTable1.getTableHeader().setReorderingAllowed(false);
-    }
-
-    // setup transfer summary table (jTable2)
-    private void setupTransferSummaryTable() {
-        DefaultTableModel model = new DefaultTableModel(
-            new String[]{"Material", "From Bin", "To Bin", "Qty", "Batch", "Status"}, 0
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int col) { return false; }
-        };
-        jTable2.setModel(model);
-        jTable2.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jTable2.getTableHeader().setReorderingAllowed(false);
-
-        // delete key to remove row from transfer summary
-        jTable2.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_DELETE) {
-                    int selectedRow = jTable2.getSelectedRow();
-                    if (selectedRow >= 0 && selectedRow < transferSummaryList.size()) {
-                        transferSummaryList.remove(selectedRow);
-                        refreshTransferSummaryTable();
-                        StatusMessageHandler.showInfo(txtStatus, "Item removed from transfer list.");
-                    }
-                }
-            }
-        });
-    }
-
-    // when user selects a material in jTable1, load source bins
-    private void setupMaterialTableListener() {
-        jTable1.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int row = jTable1.getSelectedRow();
-                if (row >= 0 && row < currentMaterialResults.size()) {
-                    selectedMaterial = currentMaterialResults.get(row);
-                    onMaterialSelected();
-                } else {
-                    selectedMaterial = null;
-                }
-            }
-        });
-    }
-
-    // when user selects source bin, populate current qty, batch info
-    private void setupSourceBinListener() {
-        cmbSourceBin.addActionListener(e -> {
-            int idx = cmbSourceBin.getSelectedIndex();
-            if (idx > 0 && (idx - 1) < currentSourceBins.size()) {
-                SourceBinInfo src = currentSourceBins.get(idx - 1);
-                lblCurrentQty.setText(String.format("%.2f", src.getQuantity()));
-                lblAvailableQty.setText(String.format("%.2f", src.getAvailableQty()));
-
-                if (src.getBatchNumber() != null && !src.getBatchNumber().isEmpty()) {
-                    txtBatchNumber.setText(src.getBatchNumber());
-                    String details = src.getBatchStatus() != null ? src.getBatchStatus() : "";
-                    if (src.getExpiryDate() != null) {
-                        details += (details.isEmpty() ? "" : " | ") + "Exp: " + src.getExpiryDate();
-                    }
-                    txtBatchDetails.setText(details);
-                } else {
-                    txtBatchNumber.setText("N/A");
-                    txtBatchDetails.setText("Not batch-managed");
-                }
-            } else {
-                lblCurrentQty.setText("");
-                lblAvailableQty.setText("");
-                txtBatchNumber.setText("");
-                txtBatchDetails.setText("");
-            }
-        });
-    }
-
-    // when user selects destination bin, show zone and capacity
-    private void setupDestBinListener() {
-        cmbDestinationWarehouse.addActionListener(e -> {
-            int idx = cmbDestinationWarehouse.getSelectedIndex();
-            if (idx > 0 && (idx - 1) < currentDestBins.size()) {
-                DestBinInfo dest = currentDestBins.get(idx - 1);
-                cmbDestinationZone.setText(dest.getZoneCode() != null ? dest.getZoneCode() : "");
-                double remaining = (dest.getMaxCapacity() != null ? dest.getMaxCapacity() : 0)
-                                 - (dest.getUsedCapacity() != null ? dest.getUsedCapacity() : 0);
-                lblBinCapacity.setText(String.format("%.0f / %.0f", dest.getUsedCapacity(), dest.getMaxCapacity()));
-            } else {
-                cmbDestinationZone.setText("");
-                lblBinCapacity.setText("");
-            }
-        });
-    }
-
-    // called when material is selected from search results
-    private void onMaterialSelected() {
-        if (selectedMaterial == null) return;
-
-        WarehouseDTO wh = getSelectedWarehouse();
-        if (wh == null) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first.");
-            return;
-        }
-
-        loadSourceBins(wh.getWarehouseId(), selectedMaterial.getMaterialId());
-    }
-
-    // load warehouses into combo
-    private void loadWarehouses() {
-        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
-            private List<WarehouseDTO> warehouses;
-
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching warehouses from server...");
-                warehouses = controller.getWarehouses();
-                return warehouses != null;
-            }
-
-            @Override
-            protected void onSuccess() {
-                loadedWarehouses = warehouses != null ? warehouses : new ArrayList<>();
-                cmbSourceWarehouse.removeAllItems();
-                cmbSourceWarehouse.addItem("-- Select Warehouse --");
-                for (WarehouseDTO wh : loadedWarehouses) {
-                    cmbSourceWarehouse.addItem(wh.getWarehouseCode() + " - " + wh.getWarehouseName());
-                }
-                if (!loadedWarehouses.isEmpty()) {
-                    StatusMessageHandler.showSuccess(txtStatus, "Warehouses loaded (" + loadedWarehouses.size() + " active).");
-                }
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }
-
-    // load source bins for selected material in selected warehouse
-    private void loadSourceBins(int warehouseId, int materialId) {
-        BackgroundTask task = new BackgroundTask(this, "Loading Source Bins") {
-            private List<SourceBinInfo> bins;
-
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching source bins with available stock...");
-                bins = controller.getSourceBins(warehouseId, materialId);
-                return bins != null;
-            }
-
-            @Override
-            protected void onSuccess() {
-                currentSourceBins = bins != null ? bins : new ArrayList<>();
-                cmbSourceBin.removeAllItems();
-                cmbSourceBin.addItem("-- Select Source Bin --");
-                for (SourceBinInfo bin : currentSourceBins) {
-                    String label = bin.getBinCode();
-                    if (bin.getBatchNumber() != null && !bin.getBatchNumber().isEmpty()) {
-                        label += " (" + bin.getBatchNumber() + " - Avail: " + String.format("%.2f", bin.getAvailableQty()) + ")";
-                    } else {
-                        label += " (Avail: " + String.format("%.2f", bin.getAvailableQty()) + ")";
-                    }
-                    if (bin.getIsFrozen() != null && bin.getIsFrozen()) {
-                        label += " [FROZEN]";
-                    }
-                    cmbSourceBin.addItem(label);
-                }
-
-                if (currentSourceBins.isEmpty()) {
-                    StatusMessageHandler.showInfo(txtStatus, "No bins with stock found for this material.");
-                } else {
-                    StatusMessageHandler.showSuccess(txtStatus, currentSourceBins.size() + " source bin(s) available with stock.");
-                }
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load source bins: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }
-
-    // load destination bins for a warehouse
-    private void loadDestinationBins(int warehouseId) {
-        BackgroundTask task = new BackgroundTask(this, "Loading Destination Bins") {
-            private List<DestBinInfo> bins;
-
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching destination bins for warehouse...");
-                bins = controller.getDestinationBins(warehouseId);
-                return bins != null;
-            }
-
-            @Override
-            protected void onSuccess() {
-                currentDestBins = bins != null ? bins : new ArrayList<>();
-                cmbDestinationWarehouse.removeAllItems();
-                cmbDestinationWarehouse.addItem("-- Select Dest Bin --");
-                for (DestBinInfo bin : currentDestBins) {
-                    String label = bin.getBinCode();
-                    if (bin.getZoneCode() != null && !bin.getZoneCode().isEmpty()) {
-                        label += " [" + bin.getZoneCode() + "]";
-                    }
-                    cmbDestinationWarehouse.addItem(label);
-                }
-                if (!currentDestBins.isEmpty()) {
-                    StatusMessageHandler.showSuccess(txtStatus, currentDestBins.size() + " destination bin(s) available.");
-                }
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to load destination bins: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }
-
-    // refresh transfer summary table (jTable2)
-    private void refreshTransferSummaryTable() {
-        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
-        model.setRowCount(0);
-
-        for (BinTransferItem item : transferSummaryList) {
-            model.addRow(new Object[]{
-                item.getMaterialCode() + " - " + item.getMaterialDescription(),
-                item.getFromBinCode(),
-                item.getToBinCode(),
-                String.format("%.2f", item.getQuantity()),
-                item.getBatchNumber() != null ? item.getBatchNumber() : "N/A",
-                item.getStatus() != null ? item.getStatus() : "Pending"
-            });
-        }
-    }
-
-    // clear the entire form
-    private void clearForm() {
-        selectedMaterial = null;
-        transferSummaryList.clear();
-        currentMaterialResults.clear();
-        currentSourceBins.clear();
-        currentDestBins.clear();
-
-        txtMaterialSearch.setText("");
-        lblCurrentQty.setText("");
-        lblAvailableQty.setText("");
-        txtBatchNumber.setText("");
-        txtBatchDetails.setText("");
-        cmbDestinationZone.setText("");
-        lblBinCapacity.setText("");
-        spinTransferQty.setText("");
-        txtaRemarks.setText("");
-
-        cmbSourceBin.removeAllItems();
-        cmbSourceBin.addItem("-- Select Source Bin --");
-        cmbDestinationWarehouse.removeAllItems();
-        cmbDestinationWarehouse.addItem("-- Select Dest Bin --");
-
-        DefaultTableModel m1 = (DefaultTableModel) jTable1.getModel();
-        m1.setRowCount(0);
-        refreshTransferSummaryTable();
     }
 
     /**
@@ -383,8 +67,11 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel4 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        PrintServiceBtn = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        btnCompleteTransfer = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        btnPrintTransferNote = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         cmbSourceWarehouse = new javax.swing.JComboBox<>();
@@ -393,17 +80,20 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         txtaRemarks = new javax.swing.JTextField();
-        dtTransferDate = new javax.swing.JSpinner();
+        datepickerDate = new com.toedter.calendar.JDateChooser();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         txtMaterialSearch = new javax.swing.JTextField();
         btnSearchMaterial = new javax.swing.JButton();
-        jPanel6 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jPanel10 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         cmbSourceBin = new javax.swing.JComboBox<>();
-        jLabel10 = new javax.swing.JLabel();
-        lblCurrentQty = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         txtBatchNumber = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
@@ -417,22 +107,12 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         lblBinCapacity = new javax.swing.JTextField();
         jPanel9 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
-        spinTransferQty = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         lblAvailableQty = new javax.swing.JTextField();
-        addtoTransferBtn = new javax.swing.JButton();
-        completeBtn = new javax.swing.JButton();
-        CancelBtn = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
+        jLabel10 = new javax.swing.JLabel();
+        lblCurrentQty = new javax.swing.JTextField();
         btnAddToTransfer = new javax.swing.JButton();
-        btnCompleteTransfer = new javax.swing.JButton();
-        btnCancel = new javax.swing.JButton();
-        btnPrintTransferNote = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        spinTransferQty = new javax.swing.JSpinner();
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -445,25 +125,68 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             .addGap(0, 100, Short.MAX_VALUE)
         );
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Internal - Bin-to-Bin Transfer (INT17)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        btnCompleteTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnCompleteTransfer.setText("POST");
+        btnCompleteTransfer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompleteTransferActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        btnPrintTransferNote.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrintTransferNote.setText("Print");
+        btnPrintTransferNote.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintTransferNoteActionPerformed(evt);
+            }
+        });
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnCompleteTransfer)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnPrintTransferNote)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCancel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnCompleteTransfer)
+                        .addComponent(btnCancel)
+                        .addComponent(btnPrintTransferNote)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Details"));
 
         jLabel1.setText("Warehouse");
-
-        cmbSourceWarehouse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbSourceWarehouse.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbSourceWarehouseActionPerformed(evt);
-            }
-        });
-
-        cmbTransferReason.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbTransferReason.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbTransferReasonActionPerformed(evt);
-            }
-        });
 
         jLabel2.setText("Reason for Transfer");
 
@@ -471,9 +194,17 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
 
         jLabel4.setText("Remarks");
 
-        txtaRemarks.addActionListener(new java.awt.event.ActionListener() {
+        jButton1.setText("Confirm");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtaRemarksActionPerformed(evt);
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Cancel");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
             }
         });
 
@@ -483,51 +214,54 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel4))
-                .addGap(26, 26, 26)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(cmbSourceWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbSourceWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbTransferReason, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cmbTransferReason, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(dtTransferDate, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(datepickerDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton2)
+                        .addGap(6, 6, 6)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(cmbSourceWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addComponent(cmbTransferReason, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3)
-                    .addComponent(dtTransferDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(cmbSourceWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2)
+                        .addComponent(cmbTransferReason, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel3))
+                    .addComponent(datepickerDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(34, Short.MAX_VALUE))
+                    .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Selection"));
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel5.setText("Material Code/Name");
-
-        txtMaterialSearch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtMaterialSearchActionPerformed(evt);
-            }
-        });
 
         btnSearchMaterial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearchMaterial.setText("Search");
@@ -546,7 +280,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSearchMaterial)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -554,341 +288,14 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(14, 14, 14)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnSearchMaterial))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearchMaterial)
                     .addComponent(jLabel5))
-                .addContainerGap(19, Short.MAX_VALUE))
-        );
-
-        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("From Bin"));
-
-        jLabel6.setText("Source Bin");
-
-        cmbSourceBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jLabel10.setText("Current Qty");
-
-        lblCurrentQty.setEditable(false);
-        lblCurrentQty.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lblCurrentQtyActionPerformed(evt);
-            }
-        });
-
-        jLabel11.setText("Batch Number");
-
-        jLabel12.setText("Batch Details");
-
-        txtBatchDetails.setEditable(false);
-        txtBatchDetails.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtBatchDetailsActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel11)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cmbSourceBin, 0, 100, Short.MAX_VALUE)
-                    .addComponent(txtBatchNumber))
-                .addGap(47, 47, 47)
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel10)
-                    .addComponent(jLabel12))
-                .addGap(38, 38, 38)
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblCurrentQty, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
-                    .addComponent(txtBatchDetails))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel10)
-                        .addComponent(lblCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel6)
-                        .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap())
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtBatchDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel12))
-                        .addContainerGap(12, Short.MAX_VALUE))))
-        );
 
-        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("To Bin"));
-
-        jLabel7.setText("Destination Bin");
-
-        cmbDestinationWarehouse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jLabel13.setText("Destination Zone");
-
-        cmbDestinationZone.setEditable(false);
-        cmbDestinationZone.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbDestinationZoneActionPerformed(evt);
-            }
-        });
-
-        jLabel14.setText("Bin Capacity");
-
-        lblBinCapacity.setEditable(false);
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbDestinationWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(48, 48, 48)
-                .addComponent(jLabel13)
-                .addGap(18, 18, 18)
-                .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jLabel14)
-                .addGap(18, 18, 18)
-                .addComponent(lblBinCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(1087, Short.MAX_VALUE))
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(11, 11, 11)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(cmbDestinationWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel13)
-                    .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel14)
-                    .addComponent(lblBinCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(20, Short.MAX_VALUE))
-        );
-
-        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Quantity"), "Transfer "));
-
-        jLabel8.setText("Transfer Qty");
-
-        spinTransferQty.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                spinTransferQtyActionPerformed(evt);
-            }
-        });
-
-        jLabel9.setText("Available Qty");
-
-        lblAvailableQty.setEditable(false);
-        lblAvailableQty.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lblAvailableQtyActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(64, 64, 64)
-                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(28, 28, 28)
-                .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGap(11, 11, 11)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel9)
-                    .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(18, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-
-        addtoTransferBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
-        addtoTransferBtn.setText("Add to Transfer");
-        addtoTransferBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addtoTransferBtnActionPerformed(evt);
-            }
-        });
-
-        completeBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        completeBtn.setText("Complete Transfer");
-
-        CancelBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
-        CancelBtn.setText("Cancel");
-
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        jButton4.setText("Print Transfer Note");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout PrintServiceBtnLayout = new javax.swing.GroupLayout(PrintServiceBtn);
-        PrintServiceBtn.setLayout(PrintServiceBtnLayout);
-        PrintServiceBtnLayout.setHorizontalGroup(
-            PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PrintServiceBtnLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PrintServiceBtnLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(PrintServiceBtnLayout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(addtoTransferBtn)
-                        .addGap(12, 12, 12)
-                        .addComponent(completeBtn)
-                        .addGap(18, 18, 18)
-                        .addComponent(CancelBtn)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton4)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        PrintServiceBtnLayout.setVerticalGroup(
-            PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PrintServiceBtnLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 404, Short.MAX_VALUE)
-                .addGroup(PrintServiceBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(completeBtn)
-                    .addComponent(CancelBtn)
-                    .addComponent(jButton4)
-                    .addComponent(addtoTransferBtn))
-                .addGap(16, 16, 16))
-        );
-
-        jScrollPane1.setViewportView(PrintServiceBtn);
-
-        btnAddToTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
-        btnAddToTransfer.setText("Add to Transfer");
-        btnAddToTransfer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddToTransferActionPerformed(evt);
-            }
-        });
-
-        btnCompleteTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteTransfer.setText("Complete Transfer");
-        btnCompleteTransfer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteTransferActionPerformed(evt);
-            }
-        });
-
-        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
-        btnCancel.setText("Cancel");
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelActionPerformed(evt);
-            }
-        });
-
-        btnPrintTransferNote.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintTransferNote.setText("Print Transfer Note");
-        btnPrintTransferNote.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintTransferNoteActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(btnAddToTransfer)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnCompleteTransfer)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnPrintTransferNote)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnCancel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnAddToTransfer)
-                    .addComponent(btnCompleteTransfer)
-                    .addComponent(btnCancel)
-                    .addComponent(btnPrintTransferNote))
-                .addContainerGap(14, Short.MAX_VALUE))
-        );
-
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "Material", "From", "Bin", "To Bin", "Qty", "Batch", "Status"
-            }
-        ));
-        jScrollPane3.setViewportView(jTable2);
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Summary"));
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -903,380 +310,1048 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(jTable1);
 
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 945, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 192, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+
+        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("From Bin"));
+
+        jLabel6.setText("Source Bin");
+
+        jLabel11.setText("Batch Number");
+
+        jLabel12.setText("Batch Details");
+
+        txtBatchDetails.setEditable(false);
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel11)
+                    .addComponent(jLabel6))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cmbSourceBin, 0, 100, Short.MAX_VALUE)
+                    .addComponent(txtBatchNumber))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtBatchDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(44, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtBatchDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel12))
+                    .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel11)
+                        .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("To Bin"));
+
+        jLabel7.setText("Destination Bin");
+
+        jLabel13.setText("Destination Zone");
+
+        cmbDestinationZone.setEditable(false);
+
+        jLabel14.setText("Bin Capacity");
+
+        lblBinCapacity.setEditable(false);
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbDestinationWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(64, 64, 64)
+                        .addComponent(jLabel14)
+                        .addGap(18, 18, 18)
+                        .addComponent(lblBinCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(jLabel13)
+                        .addGap(18, 18, 18)
+                        .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(25, Short.MAX_VALUE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(11, 11, 11)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(cmbDestinationWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel14)
+                    .addComponent(lblBinCapacity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(cmbDestinationZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Transfer Quantity"), "Transfer Details"));
+
+        jLabel8.setText("Transfer Qty");
+
+        jLabel9.setText("Available Qty");
+
+        lblAvailableQty.setEditable(false);
+
+        jLabel10.setText("Current Qty");
+
+        lblCurrentQty.setEditable(false);
+
+        btnAddToTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAddToTransfer.setText("Add to Transfer");
+        btnAddToTransfer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddToTransferActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(80, 80, 80)
+                .addComponent(btnAddToTransfer)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel10)
+                        .addComponent(lblCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel8)
+                        .addComponent(jLabel9)
+                        .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAddToTransfer)
+                        .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel10Layout.createSequentialGroup()
+                        .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addContainerGap()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void searchMaterials(int warehouseId, String query) {
-        BackgroundTask task = new BackgroundTask(this, "Searching Materials") {
-            private List<MaterialSearchResult> results;
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        confirmTransferDetails();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Searching materials with stock in warehouse...");
-                results = controller.searchMaterialsInWarehouse(warehouseId, query);
-                return results != null;
-            }
-
-            @Override
-            protected void onSuccess() {
-                currentMaterialResults = results != null ? results : new ArrayList<>();
-                DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-                model.setRowCount(0);
-
-                for (MaterialSearchResult mat : currentMaterialResults) {
-                    model.addRow(new Object[]{
-                        mat.getMaterialCode(),
-                        mat.getMaterialDescription(),
-                        mat.getBaseUom(),
-                        (mat.getIsBatchManaged() != null && mat.getIsBatchManaged()) ? "Yes" : "No",
-                        String.format("%.2f", mat.getTotalAvailableQty())
-                    });
-                }
-
-                if (currentMaterialResults.isEmpty()) {
-                    StatusMessageHandler.showInfo(txtStatus, "No materials with stock found" + (query.isEmpty() ? "." : " for '" + query + "'."));
-                } else {
-                    StatusMessageHandler.showSuccess(txtStatus, currentMaterialResults.size() + " material(s) found with available stock.");
-                }
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Search failed: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        resetTransferDetails();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnSearchMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchMaterialActionPerformed
-        WarehouseDTO wh = getSelectedWarehouse();
-        if (wh == null) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first.");
-            return;
-        }
-        searchMaterials(wh.getWarehouseId(), txtMaterialSearch.getText().trim());
+        performMaterialSearch();
     }//GEN-LAST:event_btnSearchMaterialActionPerformed
 
-    private void txtMaterialSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaterialSearchActionPerformed
-        // trigger search on Enter key
-        btnSearchMaterialActionPerformed(evt);
-    }//GEN-LAST:event_txtMaterialSearchActionPerformed
+    private void btnAddToTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToTransferActionPerformed
+        addToTransfer();
+    }//GEN-LAST:event_btnAddToTransferActionPerformed
 
-    private void txtaRemarksActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtaRemarksActionPerformed
-        // no action needed
-    }//GEN-LAST:event_txtaRemarksActionPerformed
-
-    private void cmbSourceWarehouseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSourceWarehouseActionPerformed
-        WarehouseDTO wh = getSelectedWarehouse();
-        if (wh != null) {
-            // clear previous material and source bin selection
-            selectedMaterial = null;
-            currentMaterialResults.clear();
-            currentSourceBins.clear();
-            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-            model.setRowCount(0);
-            cmbSourceBin.removeAllItems();
-            cmbSourceBin.addItem("-- Select Source Bin --");
-            lblCurrentQty.setText("");
-            lblAvailableQty.setText("");
-            txtBatchNumber.setText("");
-            txtBatchDetails.setText("");
-
-            // 1. load destination bins for this warehouse via BackgroundTask
-            loadDestinationBins(wh.getWarehouseId());
-
-            // 2. auto-load materials available with stock in this warehouse via BackgroundTask
-            searchMaterials(wh.getWarehouseId(), txtMaterialSearch.getText().trim());
-        }
-    }//GEN-LAST:event_cmbSourceWarehouseActionPerformed
-
-    private void spinTransferQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spinTransferQtyActionPerformed
-        // no action needed
-    }//GEN-LAST:event_spinTransferQtyActionPerformed
-
-    private void lblAvailableQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblAvailableQtyActionPerformed
-        // no action needed
-    }//GEN-LAST:event_lblAvailableQtyActionPerformed
-
-    // generate and print transfer note using BackgroundTask
-    private void printTransferNote(String transferNumber) {
-        BackgroundTask task = new BackgroundTask(this, "Generating Transfer Note") {
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Fetching transfer order " + transferNumber + " details...");
-                Thread.sleep(300);
-                updateProgress("Formatting transfer note layout...");
-                Thread.sleep(300);
-                updateProgress("Sending document to printer queue...");
-                Thread.sleep(250);
-                return true;
-            }
-
-            @Override
-            protected void onSuccess() {
-                StatusMessageHandler.showSuccess(txtStatus, "Transfer Note (" + transferNumber + ") sent to printer successfully.");
-                JOptionPane.showMessageDialog(
-                    BinToBinTransferForm.this,
-                    "Transfer Note for [" + transferNumber + "] has been generated and sent to printer queue.\n\n"
-                    + "Movement Type: INT-BIN (Bin-to-Bin Transfer)\n"
-                    + "Status: Completed",
-                    "Print Transfer Note",
-                    JOptionPane.INFORMATION_MESSAGE);
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                StatusMessageHandler.showError(txtStatus, "Failed to print transfer note: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }
-
-    private void lblCurrentQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblCurrentQtyActionPerformed
-        // no action needed
-    }//GEN-LAST:event_lblCurrentQtyActionPerformed
-
-    private void txtBatchDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchDetailsActionPerformed
-        // no action needed
-    }//GEN-LAST:event_txtBatchDetailsActionPerformed
-
-    private void cmbDestinationZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbDestinationZoneActionPerformed
-        // no action needed
-    }//GEN-LAST:event_cmbDestinationZoneActionPerformed
-
-    private void cmbTransferReasonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTransferReasonActionPerformed
-        // no action needed
-    }//GEN-LAST:event_cmbTransferReasonActionPerformed
-
-    private void addtoTransferBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addtoTransferBtnActionPerformed
-        // delegate to the wired Add-to-Transfer button inside jPanel1
-        btnAddToTransferActionPerformed(evt);
-    }//GEN-LAST:event_addtoTransferBtnActionPerformed
-
-    // orphan legacy buttons delegate to the wired handlers in jPanel1
-    private void completeBtnActionPerformed(java.awt.event.ActionEvent evt) {
-        btnCompleteTransferActionPerformed(evt);
-    }
-
-    private void CancelBtnActionPerformed(java.awt.event.ActionEvent evt) {
-        btnCancelActionPerformed(evt);
-    }
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // delegate to the wired Print Transfer Note button inside jPanel1
-        btnPrintTransferNoteActionPerformed(evt);
-    }//GEN-LAST:event_jButton4ActionPerformed
+    private void btnCompleteTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteTransferActionPerformed
+        completeTransfer();
+    }//GEN-LAST:event_btnCompleteTransferActionPerformed
 
     private void btnPrintTransferNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintTransferNoteActionPerformed
-        if (lastTransferNumber != null && !lastTransferNumber.isEmpty()) {
-            printTransferNote(lastTransferNumber);
-        } else {
-            String input = JOptionPane.showInputDialog(
-                this,
-                "Enter Transfer Order Number to print note:",
-                "Print Transfer Note",
-                JOptionPane.QUESTION_MESSAGE);
-            if (input != null && !input.trim().isEmpty()) {
-                printTransferNote(input.trim());
-            } else {
-                StatusMessageHandler.showWarning(txtStatus, "No Transfer Order specified to print.");
-            }
-        }
+        printTransferNote();
     }//GEN-LAST:event_btnPrintTransferNoteActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        this.dispose();
+        cancelForm();
     }//GEN-LAST:event_btnCancelActionPerformed
 
-    private void btnCompleteTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteTransferActionPerformed
-        if (transferSummaryList.isEmpty()) {
-            StatusMessageHandler.showWarning(txtStatus, "Please add materials to transfer first.");
+    // ==========================================
+    // Custom Bin-to-Bin Initialization & Logic
+    // ==========================================
+
+    private void initCustomComponents() {
+        txtBatchDetails.setEditable(false);
+        txtBatchNumber.setEditable(false);
+        cmbDestinationZone.setEditable(false);
+        lblBinCapacity.setEditable(false);
+        lblCurrentQty.setEditable(false);
+        lblAvailableQty.setEditable(false);
+
+        datepickerDate.setDate(new Date());
+
+        loadReasons();
+
+        // Setup table model for transfer summary
+        tableModel = new DefaultTableModel(
+            new String[]{"Material", "From Bin", "To Bin", "Qty", "Batch", "Status"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        jTable1.setModel(tableModel);
+
+        // Center align status column and right-align Qty column
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        jTable1.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        jTable1.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+
+        // Context menu and delete key listener for removing queued items from jTable1
+        JPopupMenu tablePopup = new JPopupMenu();
+        JMenuItem removeItem = new JMenuItem("Remove from Transfer");
+        removeItem.addActionListener(e -> removeSelectedTransferItem());
+        tablePopup.add(removeItem);
+        jTable1.setComponentPopupMenu(tablePopup);
+
+        jTable1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                    removeSelectedTransferItem();
+                }
+            }
+        });
+
+        // Spinner initialization
+        spinTransferQty.setModel(new SpinnerNumberModel(1.0, 0.01, 9999999.0, 1.0));
+
+        // Event listeners for combo boxes
+        cmbSourceWarehouse.addActionListener(e -> {
+            if (!isProgrammaticChange) {
+                onWarehouseChanged();
+            }
+        });
+
+        cmbSourceBin.addActionListener(e -> {
+            if (!isProgrammaticChange) {
+                onSourceBinSelected();
+            }
+        });
+
+        cmbDestinationWarehouse.addActionListener(e -> {
+            if (!isProgrammaticChange) {
+                onDestinationBinSelected();
+            }
+        });
+
+        // Material search enter key listener
+        txtMaterialSearch.addActionListener(e -> performMaterialSearch());
+
+        // Attach AutoSuggest to material search
+        AutoSuggestTextField.attach(txtMaterialSearch, query -> {
+            int whId = getSelectedWarehouseId();
+            if (whId <= 0) {
+                return new ArrayList<>();
+            }
+            try {
+                List<MaterialDTO> mats = controller.searchMaterialsInWarehouse(whId, query);
+                List<String> suggestions = new ArrayList<>();
+                if (mats != null) {
+                    for (MaterialDTO m : mats) {
+                        suggestions.add(m.getMaterialCode() + " - " + m.getMaterialDescription());
+                    }
+                }
+                return suggestions;
+            } catch (Exception ex) {
+                Logger.errlog("Failed to load material suggestions", ex);
+                return new ArrayList<>();
+            }
+        });
+
+        StatusMessageHandler.showInfo(txtStatus, "Ready. Select warehouse and confirm transfer details.");
+    }
+
+    private void loadReasons() {
+        cmbTransferReason.removeAllItems();
+        cmbTransferReason.addItem("CONSOLIDATION - Space Consolidation");
+        cmbTransferReason.addItem("REORGANIZATION - Warehouse Reorganization");
+        cmbTransferReason.addItem("REPLENISHMENT - Pick Face Replenishment");
+        cmbTransferReason.addItem("DAMAGE - Move Damaged Goods");
+        cmbTransferReason.addItem("MAINTENANCE - Bin Maintenance");
+        cmbTransferReason.addItem("RELOCATION - General Relocation");
+        cmbTransferReason.addItem("OTHER - Other Transfer");
+    }
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = controller.getWarehouses();
+                return warehouses != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                isProgrammaticChange = true;
+                cmbSourceWarehouse.removeAllItems();
+                loadedWarehouses = warehouses != null ? warehouses : new ArrayList<>();
+                for (WarehouseDTO wh : loadedWarehouses) {
+                    cmbSourceWarehouse.addItem(wh.getWarehouseCode() + " - " + wh.getWarehouseName());
+                }
+                isProgrammaticChange = false;
+
+                if (!loadedWarehouses.isEmpty()) {
+                    loadDestinationBins(loadedWarehouses.get(0).getWarehouseId());
+                }
+                StatusMessageHandler.showInfo(txtStatus, "Warehouses loaded. Confirm details to start.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load warehouses", e);
+                StatusMessageHandler.showError(txtStatus, "Failed to load warehouses: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private int getSelectedWarehouseId() {
+        int idx = cmbSourceWarehouse.getSelectedIndex();
+        if (idx >= 0 && idx < loadedWarehouses.size()) {
+            return loadedWarehouses.get(idx).getWarehouseId();
+        }
+        return -1;
+    }
+
+    private void onWarehouseChanged() {
+        if (!transferItems.isEmpty()) {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Changing warehouse will clear current transfer items. Proceed?",
+                "Confirm Warehouse Change",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+            transferItems.clear();
+            tableModel.setRowCount(0);
+        }
+
+        clearMaterialSelection();
+
+        int whId = getSelectedWarehouseId();
+        if (whId > 0) {
+            loadDestinationBins(whId);
+        }
+    }
+
+    private void loadDestinationBins(int warehouseId) {
+        BackgroundTask task = new BackgroundTask(this, "Loading Destination Bins") {
+            private List<BinToBinDestinationBinDTO> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Loading destination bins...");
+                bins = controller.getDestinationBins(warehouseId);
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                loadedDestBins = bins != null ? bins : new ArrayList<>();
+                refreshDestBinComboLabels();
+                onDestinationBinSelected();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load destination bins", e);
+                StatusMessageHandler.showError(txtStatus, "Failed to load destination bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void confirmTransferDetails() {
+        int whId = getSelectedWarehouseId();
+        if (whId <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first.");
             return;
         }
 
-        // validate reason selected
-        if (cmbTransferReason.getSelectedIndex() <= 0) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a transfer reason.");
+        detailsConfirmed = true;
+        cmbSourceWarehouse.setEnabled(false);
+        cmbTransferReason.setEnabled(false);
+        datepickerDate.setEnabled(false);
+        txtaRemarks.setEditable(false);
+        jButton1.setEnabled(false);
+        jButton2.setEnabled(true);
+
+        StatusMessageHandler.showSuccess(txtStatus, "Transfer details confirmed. Search and select material to transfer.");
+        txtMaterialSearch.requestFocus();
+    }
+
+    private void resetTransferDetails() {
+        if (!transferItems.isEmpty()) {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Resetting transfer details will clear queued transfer items. Discard items?",
+                "Confirm Reset",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+            transferItems.clear();
+            tableModel.setRowCount(0);
+        }
+
+        detailsConfirmed = false;
+        cmbSourceWarehouse.setEnabled(true);
+        cmbTransferReason.setEnabled(true);
+        datepickerDate.setEnabled(true);
+        txtaRemarks.setEditable(true);
+        jButton1.setEnabled(true);
+
+        clearMaterialSelection();
+        StatusMessageHandler.showInfo(txtStatus, "Transfer details unlocked.");
+    }
+
+    private void performMaterialSearch() {
+        int whId = getSelectedWarehouseId();
+        if (whId <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first.");
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Transfer materials between bins?\nInventory locations will be updated.\n\n"
-            + transferSummaryList.size() + " item(s) to transfer.",
+        String query = txtMaterialSearch.getText().trim();
+        if (query.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Enter material code or description to search.");
+            txtMaterialSearch.requestFocus();
+            return;
+        }
+
+        // If query contains " - ", extract the material code portion
+        if (query.contains(" - ")) {
+            query = query.substring(0, query.indexOf(" - ")).trim();
+        }
+
+        final String searchTerm = query;
+
+        BackgroundTask task = new BackgroundTask(this, "Searching Materials") {
+            private List<MaterialDTO> materials;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching materials in warehouse...");
+                materials = controller.searchMaterialsInWarehouse(whId, searchTerm);
+                return materials != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (materials == null || materials.isEmpty()) {
+                    StatusMessageHandler.showWarning(txtStatus, "No material with available stock found for: " + searchTerm);
+                    clearMaterialSelection();
+                    return;
+                }
+
+                if (materials.size() == 1) {
+                    onMaterialSelected(materials.get(0));
+                } else {
+                    // Check if exact code match exists
+                    MaterialDTO exactMatch = null;
+                    for (MaterialDTO m : materials) {
+                        if (searchTerm.equalsIgnoreCase(m.getMaterialCode())) {
+                            exactMatch = m;
+                            break;
+                        }
+                    }
+
+                    if (exactMatch != null) {
+                        onMaterialSelected(exactMatch);
+                    } else {
+                        // Let user choose from matching list
+                        String[] choices = new String[materials.size()];
+                        for (int i = 0; i < materials.size(); i++) {
+                            choices[i] = materials.get(i).getMaterialCode() + " - " + materials.get(i).getMaterialDescription();
+                        }
+                        String selection = (String) JOptionPane.showInputDialog(
+                            BinToBinTransferForm.this,
+                            "Multiple materials matched. Choose material:",
+                            "Select Material",
+                            JOptionPane.PLAIN_MESSAGE,
+                            null,
+                            choices,
+                            choices[0]
+                        );
+                        if (selection != null) {
+                            for (MaterialDTO m : materials) {
+                                if (selection.startsWith(m.getMaterialCode())) {
+                                    onMaterialSelected(m);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Material search failed", e);
+                StatusMessageHandler.showError(txtStatus, "Material search failed: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void onMaterialSelected(MaterialDTO material) {
+        this.selectedMaterial = material;
+        txtMaterialSearch.setText(material.getMaterialCode() + " - " + material.getMaterialDescription());
+        loadSourceBinsForMaterial(material.getMaterialId());
+    }
+
+    private void loadSourceBinsForMaterial(int materialId) {
+        int whId = getSelectedWarehouseId();
+        BackgroundTask task = new BackgroundTask(this, "Loading Source Bins") {
+            private List<BinToBinSourceBinDTO> sourceBins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching source bins with available stock...");
+                sourceBins = controller.getSourceBins(whId, materialId);
+                return sourceBins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                isProgrammaticChange = true;
+                cmbSourceBin.removeAllItems();
+                loadedSourceBins = sourceBins != null ? sourceBins : new ArrayList<>();
+
+                for (BinToBinSourceBinDTO b : loadedSourceBins) {
+                    String label = b.getBinCode();
+                    if (b.getBatchNumber() != null && !b.getBatchNumber().isEmpty()) {
+                        label += " (" + b.getBatchNumber() + ")";
+                    }
+                    cmbSourceBin.addItem(label);
+                }
+                isProgrammaticChange = false;
+
+                if (loadedSourceBins.isEmpty()) {
+                    StatusMessageHandler.showWarning(txtStatus, "No available non-frozen stock found for this material.");
+                    clearBinFields();
+                } else {
+                    cmbSourceBin.setSelectedIndex(0);
+                    onSourceBinSelected();
+                    StatusMessageHandler.showSuccess(txtStatus, "Material and source bins loaded. Specify transfer quantity.");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load source bins", e);
+                StatusMessageHandler.showError(txtStatus, "Failed to load source bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private BinToBinSourceBinDTO getSelectedSourceBin() {
+        int idx = cmbSourceBin.getSelectedIndex();
+        if (idx >= 0 && idx < loadedSourceBins.size()) {
+            return loadedSourceBins.get(idx);
+        }
+        return null;
+    }
+
+    private BinToBinDestinationBinDTO getSelectedDestinationBin() {
+        int idx = cmbDestinationWarehouse.getSelectedIndex();
+        if (idx >= 0 && idx < loadedDestBins.size()) {
+            return loadedDestBins.get(idx);
+        }
+        return null;
+    }
+
+    private double calculateRemainingAvailableSourceQty(BinToBinSourceBinDTO bin) {
+        if (bin == null) return 0.0;
+        double available = bin.getAvailableQty();
+        for (BinToBinTransferItemDTO item : transferItems) {
+            if (item.getFromBinId() == bin.getBinId()) {
+                if ((bin.getBatchId() == null && item.getBatchId() == null) ||
+                    (bin.getBatchId() != null && bin.getBatchId().equals(item.getBatchId()))) {
+                    available -= item.getQuantity();
+                }
+            }
+        }
+        return Math.max(0.0, available);
+    }
+
+    private double calculateRemainingDestCapacity(BinToBinDestinationBinDTO bin) {
+        if (bin == null) return 0.0;
+        double remaining = bin.getRemainingCapacity();
+        for (BinToBinTransferItemDTO item : transferItems) {
+            if (item.getToBinId() == bin.getBinId()) {
+                remaining -= item.getQuantity();
+            }
+        }
+        return Math.max(0.0, remaining);
+    }
+
+    private void onSourceBinSelected() {
+        BinToBinSourceBinDTO bin = getSelectedSourceBin();
+        if (bin == null) {
+            clearBinFields();
+            return;
+        }
+
+        txtBatchNumber.setText(bin.getBatchNumber() != null ? bin.getBatchNumber() : "N/A");
+        String details = "";
+        if (bin.getExpiryDate() != null) {
+            details += "Exp: " + bin.getExpiryDate();
+        }
+        if (bin.getBatchStatus() != null) {
+            details = details.isEmpty() ? bin.getBatchStatus() : (details + " (" + bin.getBatchStatus() + ")");
+        }
+        txtBatchDetails.setText(details.isEmpty() ? "Standard" : details);
+
+        lblCurrentQty.setText(String.format("%.2f", bin.getQuantity()));
+
+        double remAvail = calculateRemainingAvailableSourceQty(bin);
+        lblAvailableQty.setText(String.format("%.2f", remAvail));
+
+        double initialVal = remAvail > 0 ? Math.min(1.0, remAvail) : 0.0;
+        spinTransferQty.setModel(new SpinnerNumberModel(initialVal, 0.0, Math.max(0.0, remAvail), 1.0));
+    }
+
+    private String formatDestBinLabel(BinToBinDestinationBinDTO bin) {
+        double remCap = calculateRemainingDestCapacity(bin);
+        return bin.getBinCode() + "  [" + (bin.getZoneCode() != null ? bin.getZoneCode() : "") + " | "
+            + (bin.getBinType() != null ? bin.getBinType() : "") + "]  "
+            + String.format("%.0f", remCap) + "/" + String.format("%.0f", bin.getMaxCapacity());
+    }
+
+    private void refreshDestBinComboLabels() {
+        isProgrammaticChange = true;
+        int currentIdx = cmbDestinationWarehouse.getSelectedIndex();
+        cmbDestinationWarehouse.removeAllItems();
+        for (BinToBinDestinationBinDTO b : loadedDestBins) {
+            cmbDestinationWarehouse.addItem(formatDestBinLabel(b));
+        }
+        if (currentIdx >= 0 && currentIdx < cmbDestinationWarehouse.getItemCount()) {
+            cmbDestinationWarehouse.setSelectedIndex(currentIdx);
+        }
+        isProgrammaticChange = false;
+    }
+
+    private void onDestinationBinSelected() {
+        BinToBinDestinationBinDTO bin = getSelectedDestinationBin();
+        if (bin == null) {
+            cmbDestinationZone.setText("");
+            lblBinCapacity.setText("");
+            return;
+        }
+
+        // Show zone and bin type together
+        String zone = bin.getZoneCode() != null ? bin.getZoneCode() : "";
+        String type = bin.getBinType() != null ? bin.getBinType() : "";
+        cmbDestinationZone.setText(zone + (!zone.isEmpty() && !type.isEmpty() ? " | " : "") + type);
+
+        // Show remaining / max capacity
+        double remCap = calculateRemainingDestCapacity(bin);
+        lblBinCapacity.setText(String.format("%.2f", remCap) + " / " + String.format("%.2f", bin.getMaxCapacity()));
+    }
+
+    private void addToTransfer() {
+        if (!detailsConfirmed) {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Transfer details are not confirmed yet. Confirm now?",
+                "Confirm Transfer Details",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (confirm == JOptionPane.YES_OPTION) {
+                confirmTransferDetails();
+            } else {
+                return;
+            }
+        }
+
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            txtMaterialSearch.requestFocus();
+            return;
+        }
+
+        BinToBinSourceBinDTO srcBin = getSelectedSourceBin();
+        if (srcBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a source bin.");
+            return;
+        }
+
+        BinToBinDestinationBinDTO destBin = getSelectedDestinationBin();
+        if (destBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination bin.");
+            return;
+        }
+
+        // Rule 1: Source and destination must be different
+        if (srcBin.getBinId() == destBin.getBinId()) {
+            StatusMessageHandler.showError(txtStatus, "Source and destination bins must be different.");
+            JOptionPane.showMessageDialog(this, "Source and destination bins must be different.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Rule 2: Cannot transfer from or to frozen bins
+        if (srcBin.isFrozen()) {
+            StatusMessageHandler.showError(txtStatus, "Source bin " + srcBin.getBinCode() + " is frozen. Transfer not allowed.");
+            return;
+        }
+        if (destBin.isFrozen()) {
+            StatusMessageHandler.showError(txtStatus, "Destination bin " + destBin.getBinCode() + " is frozen. Transfer not allowed.");
+            return;
+        }
+
+        // Rule 3: Cannot transfer directly from RECEIVING bin to active STORAGE location via bin-to-bin (use putaway)
+        if ("RECEIVING".equalsIgnoreCase(srcBin.getBinType()) && "STORAGE".equalsIgnoreCase(destBin.getBinType())) {
+            StatusMessageHandler.showError(txtStatus, "Cannot transfer from RECEIVING to STORAGE using bin-to-bin. Use Putaway instead.");
+            JOptionPane.showMessageDialog(this, "Cannot transfer from RECEIVING to STORAGE using bin-to-bin. Use Putaway instead.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Transfer quantity validation
+        double qty = 0.0;
+        try {
+            qty = Double.parseDouble(spinTransferQty.getValue().toString());
+        } catch (Exception ex) {
+            StatusMessageHandler.showError(txtStatus, "Invalid transfer quantity.");
+            return;
+        }
+
+        if (qty <= 0.0) {
+            StatusMessageHandler.showWarning(txtStatus, "Transfer quantity must be greater than 0.");
+            return;
+        }
+
+        double remSourceAvail = calculateRemainingAvailableSourceQty(srcBin);
+        if (qty > remSourceAvail) {
+            StatusMessageHandler.showError(txtStatus, "Insufficient stock in source bin. Available: " + String.format("%.2f", remSourceAvail));
+            JOptionPane.showMessageDialog(this, "Insufficient stock in source bin " + srcBin.getBinCode() + ".\nAvailable: " + String.format("%.2f", remSourceAvail) + "\nRequested: " + qty, "Insufficient Stock", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double remDestCap = calculateRemainingDestCapacity(destBin);
+        if (qty > remDestCap) {
+            StatusMessageHandler.showError(txtStatus, "Destination bin does not have enough capacity. Remaining: " + String.format("%.2f", remDestCap));
+            JOptionPane.showMessageDialog(this, "Destination bin " + destBin.getBinCode() + " does not have enough capacity.\nRemaining Capacity: " + String.format("%.2f", remDestCap) + "\nRequested: " + qty, "Capacity Exceeded", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Create transfer line item
+        String uom = selectedMaterial.getBaseUom() != null ? selectedMaterial.getBaseUom() : "EA";
+        BinToBinTransferItemDTO item = new BinToBinTransferItemDTO(
+            selectedMaterial.getMaterialId(),
+            selectedMaterial.getMaterialCode(),
+            selectedMaterial.getMaterialDescription(),
+            srcBin.getBinId(),
+            srcBin.getBinCode(),
+            destBin.getBinId(),
+            destBin.getBinCode(),
+            destBin.getZoneCode(),
+            qty,
+            uom,
+            srcBin.getBatchId(),
+            srcBin.getBatchNumber()
+        );
+
+        transferItems.add(item);
+
+        tableModel.addRow(new Object[]{
+            item.getMaterialCode(),
+            item.getFromBinCode(),
+            item.getToBinCode(),
+            String.format("%.2f", item.getQuantity()),
+            item.getBatchNumber() != null ? item.getBatchNumber() : "N/A",
+            item.getStatus()
+        });
+
+        // Update remaining displays and refresh combo labels with new capacity
+        onSourceBinSelected();
+        onDestinationBinSelected();
+        refreshDestBinComboLabels();
+
+        StatusMessageHandler.showSuccess(txtStatus, "Added " + item.getMaterialCode() + " (" + qty + " " + uom + ") to transfer list.");
+    }
+
+    private void removeSelectedTransferItem() {
+        int selectedRow = jTable1.getSelectedRow();
+        if (selectedRow < 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Select an item from the table to remove.");
+            return;
+        }
+
+        if (selectedRow < transferItems.size()) {
+            BinToBinTransferItemDTO removed = transferItems.remove(selectedRow);
+            tableModel.removeRow(selectedRow);
+
+            onSourceBinSelected();
+            onDestinationBinSelected();
+            refreshDestBinComboLabels();
+            StatusMessageHandler.showInfo(txtStatus, "Removed " + removed.getMaterialCode() + " from transfer list.");
+        }
+    }
+
+    private void completeTransfer() {
+        if (transferItems.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please add materials to transfer.");
+            JOptionPane.showMessageDialog(this, "Please add materials to transfer.", "Empty Transfer List", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Transfer " + transferItems.size() + " items between bins?\nInventory locations will be updated immediately.",
             "Confirm Bin-to-Bin Transfer",
-            JOptionPane.YES_NO_OPTION);
+            JOptionPane.YES_NO_OPTION
+        );
 
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
 
-        String reason = cmbTransferReason.getSelectedItem().toString();
+        String reason = cmbTransferReason.getSelectedItem() != null ? cmbTransferReason.getSelectedItem().toString() : "Internal Transfer";
         String remarks = txtaRemarks.getText().trim();
 
-        BackgroundTask task = new BackgroundTask(this, "Processing Bin-to-Bin Transfer") {
-            private String toNumber;
+        BackgroundTask task = new BackgroundTask(this, "Processing Transfer") {
+            private com.google.gson.JsonObject result;
 
             @Override
             protected Boolean performTask() throws Exception {
-                updateProgress("Validating transfer order items...");
-                Thread.sleep(150);
-                updateProgress("Posting bin-to-bin transfer to server...");
-                toNumber = controller.completeBinToBinTransfer(transferSummaryList, reason, remarks);
-                updateProgress("Updating inventory and bin allocations...");
-                return toNumber != null;
+                updateProgress("Completing bin-to-bin transfer order...");
+                result = controller.completeBinToBinTransfer(transferItems, reason, remarks);
+                return result != null;
             }
 
             @Override
             protected void onSuccess() {
-                lastTransferNumber = toNumber;
-                StatusMessageHandler.showSuccess(txtStatus, "Bin-to-Bin transfer completed! Transfer Number: " + toNumber);
+                try {
+                    String toNumber = "N/A";
+                    if (result != null && result.has("data") && result.get("data").isJsonObject()) {
+                        com.google.gson.JsonObject data = result.getAsJsonObject("data");
+                        if (data.has("to_number")) {
+                            toNumber = data.get("to_number").getAsString();
+                        }
+                    }
+                    lastTransferNumber = toNumber;
 
-                int printConfirm = JOptionPane.showConfirmDialog(
-                    BinToBinTransferForm.this,
-                    "Bin-to-Bin transfer completed successfully.\nTransfer Number: " + toNumber + "\n\nPrint transfer note?",
-                    "Transfer Complete",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE);
+                    // Update table status to Completed
+                    for (int i = 0; i < tableModel.getRowCount(); i++) {
+                        tableModel.setValueAt("Completed", i, 5);
+                    }
 
-                if (printConfirm == JOptionPane.YES_OPTION) {
-                    printTransferNote(toNumber);
+                    StatusMessageHandler.showSuccess(txtStatus, "Bin-to-Bin transfer completed successfully. Transfer Number: " + lastTransferNumber);
+
+                    int printConfirm = JOptionPane.showConfirmDialog(
+                        BinToBinTransferForm.this,
+                        "Bin-to-Bin transfer completed successfully!\n\nTransfer Order Number: " + lastTransferNumber + "\n\nDo you want to print the Transfer Note?",
+                        "Transfer Completed",
+                        JOptionPane.YES_NO_OPTION
+                    );
+
+                    if (printConfirm == JOptionPane.YES_OPTION) {
+                        printTransferNote();
+                    }
+
+                    clearFormAfterTransfer();
+
+                } catch (Exception ex) {
+                    Logger.errlog("Error handling transfer completion", ex);
                 }
-
-                clearForm();
             }
 
             @Override
             protected void onFailure(Exception e) {
+                Logger.errlog("Bin-to-bin transfer failed", e);
                 StatusMessageHandler.showError(txtStatus, "Transfer failed: " + e.getMessage());
+                JOptionPane.showMessageDialog(BinToBinTransferForm.this, "Transfer failed: " + e.getMessage(), "Transfer Error", JOptionPane.ERROR_MESSAGE);
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btnCompleteTransferActionPerformed
+    }
 
-    private void btnAddToTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToTransferActionPerformed
-        // validate material selected
-        if (selectedMaterial == null) {
-            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+    private void printTransferNote() {
+        if (lastTransferNumber == null && transferItems.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No transfer note to print.");
+            JOptionPane.showMessageDialog(this, "No transfer note available to print.", "Print Note", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // validate source bin
-        int srcIdx = cmbSourceBin.getSelectedIndex();
-        if (srcIdx <= 0 || (srcIdx - 1) >= currentSourceBins.size()) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a source bin.");
-            return;
-        }
-        SourceBinInfo srcBin = currentSourceBins.get(srcIdx - 1);
+        String noteId = lastTransferNumber != null ? lastTransferNumber : "Draft";
+        StatusMessageHandler.showSuccess(txtStatus, "Transfer note generated for " + noteId + ".");
+        JOptionPane.showMessageDialog(
+            this,
+            "Transfer Note Generated Successfully!\n\n" +
+            "Document: Transfer Note\n" +
+            "Transfer Order: " + noteId + "\n" +
+            "Date: " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()) + "\n" +
+            "Warehouse: " + cmbSourceWarehouse.getSelectedItem() + "\n" +
+            "Reason: " + cmbTransferReason.getSelectedItem() + "\n" +
+            "Status: COMPLETED",
+            "Print Transfer Note",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+    }
 
-        // validate frozen source bin
-        if (srcBin.getIsFrozen() != null && srcBin.getIsFrozen()) {
-            StatusMessageHandler.showWarning(txtStatus, "Cannot transfer from a frozen bin.");
-            return;
-        }
+    private void clearFormAfterTransfer() {
+        transferItems.clear();
+        tableModel.setRowCount(0);
+        clearMaterialSelection();
+        resetTransferDetails();
 
-        // validate destination bin
-        int destIdx = cmbDestinationWarehouse.getSelectedIndex();
-        if (destIdx <= 0 || (destIdx - 1) >= currentDestBins.size()) {
-            StatusMessageHandler.showWarning(txtStatus, "Please select a destination bin.");
-            return;
+        int whId = getSelectedWarehouseId();
+        if (whId > 0) {
+            loadDestinationBins(whId);
         }
-        DestBinInfo destBin = currentDestBins.get(destIdx - 1);
+    }
 
-        // validate source != destination
-        if (srcBin.getBinId().equals(destBin.getBinId())) {
-            StatusMessageHandler.showWarning(txtStatus, "Source and destination bins must be different.");
-            return;
-        }
+    private void clearMaterialSelection() {
+        selectedMaterial = null;
+        txtMaterialSearch.setText("");
+        isProgrammaticChange = true;
+        cmbSourceBin.removeAllItems();
+        isProgrammaticChange = false;
+        clearBinFields();
+    }
 
-        // validate transfer quantity
-        String qtyStr = spinTransferQty.getText().trim();
-        double transferQty;
-        try {
-            transferQty = Double.parseDouble(qtyStr);
-        } catch (NumberFormatException e) {
-            StatusMessageHandler.showWarning(txtStatus, "Please enter a valid transfer quantity.");
-            return;
-        }
+    private void clearBinFields() {
+        txtBatchNumber.setText("");
+        txtBatchDetails.setText("");
+        lblCurrentQty.setText("");
+        lblAvailableQty.setText("");
+        spinTransferQty.setValue(0.0);
+    }
 
-        if (transferQty <= 0) {
-            StatusMessageHandler.showWarning(txtStatus, "Transfer quantity must be greater than 0.");
-            return;
-        }
-
-        // validate against available qty
-        double available = srcBin.getAvailableQty() != null ? srcBin.getAvailableQty() : 0;
-        // subtract already added to summary for same source bin & material
-        for (BinTransferItem existing : transferSummaryList) {
-            if (existing.getMaterialId().equals(selectedMaterial.getMaterialId())
-                && existing.getFromBinId().equals(srcBin.getBinId())) {
-                available -= existing.getQuantity();
-            }
-        }
-
-        if (transferQty > available) {
-            StatusMessageHandler.showWarning(txtStatus,
-                String.format("Transfer quantity (%.2f) exceeds available stock (%.2f) in source bin.", transferQty, available));
-            return;
-        }
-
-        // validate destination capacity
-        if (destBin.getMaxCapacity() != null && destBin.getMaxCapacity() > 0) {
-            double destRemaining = destBin.getMaxCapacity() - (destBin.getUsedCapacity() != null ? destBin.getUsedCapacity() : 0);
-            // account for items already added to this dest bin
-            for (BinTransferItem existing : transferSummaryList) {
-                if (existing.getToBinId().equals(destBin.getBinId())) {
-                    destRemaining -= existing.getQuantity();
-                }
-            }
-            if (transferQty > destRemaining) {
-                StatusMessageHandler.showWarning(txtStatus,
-                    String.format("Destination bin capacity insufficient. Remaining: %.0f, Requested: %.2f", destRemaining, transferQty));
+    private void cancelForm() {
+        if (!transferItems.isEmpty()) {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "There are queued transfer items. Are you sure you want to exit?",
+                "Confirm Exit",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (confirm != JOptionPane.YES_OPTION) {
                 return;
             }
         }
-
-        // create transfer item
-        BinTransferItem item = new BinTransferItem();
-        item.setMaterialId(selectedMaterial.getMaterialId());
-        item.setMaterialCode(selectedMaterial.getMaterialCode());
-        item.setMaterialDescription(selectedMaterial.getMaterialDescription());
-        item.setFromBinId(srcBin.getBinId());
-        item.setFromBinCode(srcBin.getBinCode());
-        item.setToBinId(destBin.getBinId());
-        item.setToBinCode(destBin.getBinCode());
-        item.setQuantity(transferQty);
-        item.setUom(selectedMaterial.getBaseUom());
-        item.setBatchId(srcBin.getBatchId());
-        item.setBatchNumber(srcBin.getBatchNumber());
-        item.setStatus("Pending");
-
-        transferSummaryList.add(item);
-        refreshTransferSummaryTable();
-
-        // reset qty input
-        spinTransferQty.setText("");
-        StatusMessageHandler.showSuccess(txtStatus, "Item added to transfer list.");
-    }//GEN-LAST:event_btnAddToTransferActionPerformed
+        this.dispose();
+    }
 
     /**
      * @param args the command line arguments
@@ -1314,9 +1389,6 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton CancelBtn;
-    private javax.swing.JPanel PrintServiceBtn;
-    private javax.swing.JButton addtoTransferBtn;
     private javax.swing.JButton btnAddToTransfer;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCompleteTransfer;
@@ -1327,9 +1399,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbSourceBin;
     private javax.swing.JComboBox<String> cmbSourceWarehouse;
     private javax.swing.JComboBox<String> cmbTransferReason;
-    private javax.swing.JButton completeBtn;
-    private javax.swing.JSpinner dtTransferDate;
-    private javax.swing.JButton jButton4;
+    private com.toedter.calendar.JDateChooser datepickerDate;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1345,25 +1417,24 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTextField lblAvailableQty;
     private javax.swing.JTextField lblBinCapacity;
     private javax.swing.JTextField lblCurrentQty;
-    private javax.swing.JTextField spinTransferQty;
+    private javax.swing.JSpinner spinTransferQty;
     private javax.swing.JTextField txtBatchDetails;
     private javax.swing.JTextField txtBatchNumber;
     private javax.swing.JTextField txtMaterialSearch;
+    private javax.swing.JLabel txtStatus;
     private javax.swing.JTextField txtaRemarks;
     // End of variables declaration//GEN-END:variables
 }
