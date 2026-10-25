@@ -4,17 +4,65 @@
  */
 package ui.reports;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JTable;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import models.dto.PerformanceReportDTO;
+import models.dto.PerformanceReportDTO.PerformanceTrendItem;
+import models.dto.PerformanceReportDTO.TaskBreakdownItem;
+import models.dto.PerformanceReportDTO.WorkerPerformanceItem;
+import models.dto.UserDTO;
+import models.dto.WarehouseDTO;
+import reports.controllers.PerformanceReportController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import core.utils.export.PerformanceReportExportUtils;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 /**
  *
  * @author Sanod D. Mendis
  */
 public class PerformanceReportForm extends javax.swing.JFrame {
 
+    private PerformanceReportController controller;
+    private PerformanceReportDTO currentReportData;
+
     /**
      * Creates new form PerformanceReportForm
      */
     public PerformanceReportForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new PerformanceReportController();
+        initCustomLogic();
     }
 
     /**
@@ -26,21 +74,958 @@ public class PerformanceReportForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        popupExportBtn = new javax.swing.JPopupMenu();
+        menuitemPDF = new javax.swing.JMenuItem();
+        menuitemXLSX = new javax.swing.JMenuItem();
+        jPanel1 = new javax.swing.JPanel();
+        datepickerFrom = new com.toedter.calendar.JDateChooser();
+        jLabel1 = new javax.swing.JLabel();
+        datepickerTo = new com.toedter.calendar.JDateChooser();
+        jLabel2 = new javax.swing.JLabel();
+        cmbWarehouse = new ui.components.CheckedComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        cmbWorker = new ui.components.CheckedComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        cmbTaskType = new ui.components.CheckedComboBox<>();
+        jLabel5 = new javax.swing.JLabel();
+        btnGenerate = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        lblTotalTasksCompleted = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        lblAverageTasksPerHour = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        lblOverallAccuracyRate = new javax.swing.JLabel();
+        jPanel8 = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
+        lblAverageTimePerTask = new javax.swing.JLabel();
+        jPanel9 = new javax.swing.JPanel();
+        jLabel10 = new javax.swing.JLabel();
+        lblErrorRate = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblWorkerPerformance = new javax.swing.JTable();
+        jPanel4 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblTaskBreakdown = new javax.swing.JTable();
+        jPanel10 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+        jPanel11 = new javax.swing.JPanel();
+        chartTrends = new javax.swing.JPanel();
+
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png"))); // NOI18N
+        menuitemPDF.setText("  Export as PDF");
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemPDFActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png"))); // NOI18N
+        menuitemXLSX.setText("  Export as XLSX");
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemXLSX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemXLSXActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemXLSX);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Reports - Performance (REP64)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setText("From");
+
+        jLabel2.setText("To");
+
+        jLabel3.setText("Warehouse");
+
+        jLabel4.setText("Worker");
+
+        jLabel5.setText("Task Type");
+
+        btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
+        btnGenerate.setText("Generate");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbWorker, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbTaskType, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(datepickerFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(datepickerTo, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addGap(29, 29, 29)
+                .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3)
+                    .addComponent(cmbWorker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(cmbTaskType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel2)
+                    .addComponent(datepickerTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(datepickerFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(21, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnGenerate)
+                    .addComponent(btnClear)
+                    .addComponent(btnExport))
+                .addGap(21, 21, 21))
+        );
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel6.setText("Total Tasks Completed");
+
+        lblTotalTasksCompleted.setText("[count]");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblTotalTasksCompleted)
+                    .addComponent(jLabel6))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTotalTasksCompleted)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel7.setText("Average Tasks per Hour");
+
+        lblAverageTasksPerHour.setText("[rate]");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblAverageTasksPerHour)
+                    .addComponent(jLabel7))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(jLabel7)
+                .addGap(18, 18, 18)
+                .addComponent(lblAverageTasksPerHour)
+                .addContainerGap(16, Short.MAX_VALUE))
+        );
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel8.setText("Overall Accuracy Rate");
+
+        lblOverallAccuracyRate.setText("[percentage]");
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblOverallAccuracyRate)
+                    .addComponent(jLabel8))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblOverallAccuracyRate)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel9.setText("Average Time per Task");
+
+        lblAverageTimePerTask.setText("[duration]");
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel9))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(91, 91, 91)
+                        .addComponent(lblAverageTimePerTask)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblAverageTimePerTask)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel10.setText("Error Rate");
+
+        lblErrorRate.setText("[percentage]");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(jLabel10))
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGap(60, 60, 60)
+                        .addComponent(lblErrorRate)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblErrorRate)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Worker Performance"));
+
+        tblWorkerPerformance.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Worker Name", "Tasks Completed", "Tasks/Hour", "Accuracy %", "Avg Time/Task", "Errors", "Rating"
+            }
+        ));
+        jScrollPane2.setViewportView(tblWorkerPerformance);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE))
+        );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Task Type Breakdown"));
+
+        tblTaskBreakdown.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Task Type", "Count", "Avg Time", "Accuracy %", "Total Qty Handled"
+            }
+        ));
+        jScrollPane1.setViewportView(tblTaskBreakdown);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+        );
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder("Efficiency Trends"));
+
+        javax.swing.GroupLayout chartTrendsLayout = new javax.swing.GroupLayout(chartTrends);
+        chartTrends.setLayout(chartTrendsLayout);
+        chartTrendsLayout.setHorizontalGroup(
+            chartTrendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        chartTrendsLayout.setVerticalGroup(
+            chartTrendsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 224, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chartTrends, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chartTrends, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(9, 9, 9)
+                        .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void menuitemPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemPDFActionPerformed
+        exportReport("PDF");
+    }//GEN-LAST:event_menuitemPDFActionPerformed
+
+    private void menuitemXLSXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemXLSXActionPerformed
+        exportReport("XLSX");
+    }//GEN-LAST:event_menuitemXLSXActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        generateReport();
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        initDefaultFilters();
+        resetFormDisplay();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void initCustomLogic() {
+        initDefaultFilters();
+
+        // Enforce chartTrends preferred size (224 height matching NetBeans form design)
+        Dimension panelDim = new Dimension(0, 224);
+        chartTrends.setPreferredSize(panelDim);
+        chartTrends.setMinimumSize(new Dimension(0, 0));
+
+        // Load dropdown options
+        loadWarehouses();
+        loadWorkers();
+
+        // Configure table sorting and cell renderers
+        tblWorkerPerformance.setAutoCreateRowSorter(true);
+        tblTaskBreakdown.setAutoCreateRowSorter(true);
+
+        // Rating column renderer (Column 6): Color-coded badges for ratings
+        tblWorkerPerformance.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    try {
+                        int modelRow = table.convertRowIndexToModel(row);
+                        Object ratingVal = table.getModel().getValueAt(modelRow, 6);
+                        String rating = ratingVal != null ? ratingVal.toString().trim() : "";
+
+                        if (column == 6) { // Rating column
+                            if ("Excellent".equalsIgnoreCase(rating)) {
+                                c.setBackground(new Color(236, 253, 245)); // Soft green
+                                c.setForeground(new Color(6, 95, 70));
+                            } else if ("Good".equalsIgnoreCase(rating)) {
+                                c.setBackground(new Color(254, 243, 199)); // Soft amber
+                                c.setForeground(new Color(146, 64, 14));
+                            } else {
+                                c.setBackground(new Color(254, 226, 226)); // Soft red
+                                c.setForeground(new Color(153, 27, 27));
+                            }
+                        } else {
+                            c.setBackground(Color.WHITE);
+                            c.setForeground(new Color(30, 41, 59));
+                        }
+                    } catch (Exception ex) {
+                        c.setBackground(Color.WHITE);
+                        c.setForeground(Color.BLACK);
+                    }
+                }
+                return c;
+            }
+        });
+
+        // Initialize empty state
+        resetFormDisplay();
+    }
+
+    private void initDefaultFilters() {
+        Calendar cal = Calendar.getInstance();
+        datepickerTo.setDate(cal.getTime());
+        cal.add(Calendar.DAY_OF_MONTH, -30);
+        datepickerFrom.setDate(cal.getTime());
+
+        // Setup Task Types combo
+        cmbTaskType.removeAllItems();
+        cmbTaskType.addItem("All");
+        cmbTaskType.addItem("Picking");
+        cmbTaskType.addItem("Putaway");
+        cmbTaskType.addItem("Transfer");
+        cmbTaskType.addItem("Counting");
+    }
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = controller.getWarehouses();
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.addItem("All");
+                if (warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        if (wh.getWarehouseName() != null) {
+                            cmbWarehouse.addItem(wh.getWarehouseName());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load warehouses in PerformanceReportForm", e);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void loadWorkers() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Workers") {
+            private List<UserDTO> workers;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching workers...");
+                workers = controller.getWorkers();
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbWorker.removeAllItems();
+                cmbWorker.addItem("All");
+                if (workers != null) {
+                    for (UserDTO u : workers) {
+                        String name = (u.getFullName() != null && !u.getFullName().trim().isEmpty())
+                                ? u.getFullName() : u.getUsername();
+                        if (name != null && !name.trim().isEmpty()) {
+                            cmbWorker.addItem(name);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load workers in PerformanceReportForm", e);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private String getSelectedFromDate() {
+        Date selectedDate = datepickerFrom.getDate();
+        if (selectedDate == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedToDate() {
+        Date selectedDate = datepickerTo.getDate();
+        if (selectedDate == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedWarehouseFilter() {
+        Set<String> selected = cmbWarehouse.getSelectedItems();
+        if (selected != null && !selected.isEmpty()) {
+            return String.join(",", selected);
+        }
+        Object item = cmbWarehouse.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private String getSelectedWorkerFilter() {
+        Set<String> selected = cmbWorker.getSelectedItems();
+        if (selected != null && !selected.isEmpty()) {
+            return String.join(",", selected);
+        }
+        Object item = cmbWorker.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private String getSelectedTaskTypeFilter() {
+        Set<String> selected = cmbTaskType.getSelectedItems();
+        if (selected != null && !selected.isEmpty()) {
+            return String.join(",", selected);
+        }
+        Object item = cmbTaskType.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private void generateReport() {
+        String fromDate = getSelectedFromDate();
+        String toDate = getSelectedToDate();
+
+        if (fromDate == null) {
+            StatusMessageHandler.showError(txtStatus, "Please select a valid 'From' date.");
+            return;
+        }
+        if (toDate == null) {
+            StatusMessageHandler.showError(txtStatus, "Please select a valid 'To' date.");
+            return;
+        }
+        if (fromDate.compareTo(toDate) > 0) {
+            StatusMessageHandler.showError(txtStatus, "'From' date cannot be after 'To' date.");
+            return;
+        }
+
+        String warehouseFilter = getSelectedWarehouseFilter();
+        String workerFilter = getSelectedWorkerFilter();
+        String taskTypeFilter = getSelectedTaskTypeFilter();
+
+        BackgroundTask task = new BackgroundTask(this, "Calculating Worker Performance") {
+            private PerformanceReportDTO dto;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Querying worker performance metrics...");
+                dto = controller.generatePerformanceReport(
+                    fromDate, toDate, warehouseFilter, workerFilter, taskTypeFilter
+                );
+                return dto != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentReportData = dto;
+                populateReportData(dto);
+                StatusMessageHandler.showSuccess(txtStatus, "Performance report generated successfully.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to generate performance report: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateReportData(PerformanceReportDTO dto) {
+        if (dto == null) return;
+
+        // KPI Summary cards
+        lblTotalTasksCompleted.setText(String.format("%,d", dto.getTotalTasksCompleted()));
+        lblAverageTasksPerHour.setText(String.format("%.1f", dto.getAverageTasksPerHour()));
+        lblOverallAccuracyRate.setText(String.format("%.1f%%", dto.getOverallAccuracyRate()));
+        lblAverageTimePerTask.setText(dto.getAverageTimePerTask() != null ? dto.getAverageTimePerTask() : "0.0 min");
+        lblErrorRate.setText(String.format("%.1f%%", dto.getErrorRate()));
+
+        // Worker Performance table
+        DefaultTableModel wModel = (DefaultTableModel) tblWorkerPerformance.getModel();
+        wModel.setRowCount(0);
+        if (dto.getWorkers() != null) {
+            for (WorkerPerformanceItem w : dto.getWorkers()) {
+                wModel.addRow(new Object[]{
+                    w.getWorkerName(),
+                    w.getTasksCompleted(),
+                    String.format("%.1f", w.getTasksPerHour()),
+                    String.format("%.1f%%", w.getAccuracyPct()),
+                    w.getAvgTimePerTask(),
+                    w.getErrors(),
+                    w.getRating()
+                });
+            }
+        }
+
+        // Task Breakdown table
+        DefaultTableModel tModel = (DefaultTableModel) tblTaskBreakdown.getModel();
+        tModel.setRowCount(0);
+        if (dto.getTaskBreakdowns() != null) {
+            for (TaskBreakdownItem t : dto.getTaskBreakdowns()) {
+                tModel.addRow(new Object[]{
+                    t.getTaskType(),
+                    t.getCount(),
+                    t.getAvgTime(),
+                    String.format("%.1f%%", t.getAccuracyPct()),
+                    String.format("%.2f", t.getTotalQtyHandled())
+                });
+            }
+        }
+
+        // Render Efficiency Trends Line Chart
+        renderTrendsChart(dto);
+    }
+
+    private void renderTrendsChart(PerformanceReportDTO dto) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        if (dto.getTrends() != null && !dto.getTrends().isEmpty()) {
+            for (PerformanceTrendItem trend : dto.getTrends()) {
+                dataset.addValue(trend.getTasksCompleted(), "Tasks Completed", trend.getDate());
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createLineChart(
+            "Efficiency Trends (Daily Tasks Completed)",
+            "Date",
+            "Tasks Completed",
+            dataset,
+            PlotOrientation.VERTICAL,
+            false,
+            true,
+            false
+        );
+        styleLineChart(chart);
+        embedChart(chartTrends, chart);
+    }
+
+    private void styleLineChart(JFreeChart chart) {
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle title = chart.getTitle();
+        if (title != null) {
+            title.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            title.setPaint(new Color(30, 41, 59));
+            title.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setInsets(new RectangleInsets(2, 4, 4, 4));
+        plot.setRangeGridlinePaint(new Color(226, 232, 240));
+        plot.setDomainGridlinePaint(new Color(241, 245, 249));
+        plot.setDomainGridlinesVisible(true);
+
+        LineAndShapeRenderer renderer = new LineAndShapeRenderer();
+        renderer.setDefaultShapesVisible(true);
+        renderer.setDefaultShapesFilled(true);
+        renderer.setSeriesPaint(0, new Color(59, 130, 246));
+        renderer.setSeriesStroke(0, new BasicStroke(2.0f));
+        plot.setRenderer(renderer);
+
+        plot.getDomainAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 9));
+        plot.getRangeAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 9));
+    }
+
+    private void embedChart(javax.swing.JPanel panel, JFreeChart chart) {
+        panel.setLayout(new BorderLayout());
+        panel.removeAll();
+
+        // Enforce design height 224 and width 0/panel.getWidth() to auto-scale without overflowing
+        Dimension panelDim = new Dimension(panel.getWidth() > 0 ? panel.getWidth() : 0, 224);
+        panel.setPreferredSize(panelDim);
+        panel.setMinimumSize(new Dimension(0, 0));
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(panelDim);
+        chartPanel.setMinimumSize(new Dimension(0, 0));
+
+        // Eliminate minimum drawing boundaries so JFreeChart draws crisply to fit panel bounds
+        chartPanel.setMinimumDrawWidth(0);
+        chartPanel.setMinimumDrawHeight(0);
+        chartPanel.setMaximumDrawWidth(4000);
+        chartPanel.setMaximumDrawHeight(4000);
+        chartPanel.setMouseWheelEnabled(false);
+        chartPanel.setPopupMenu(null);
+        chartPanel.setDomainZoomable(false);
+        chartPanel.setRangeZoomable(false);
+
+        panel.add(chartPanel, BorderLayout.CENTER);
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private void resetFormDisplay() {
+        currentReportData = null;
+
+        lblTotalTasksCompleted.setText("0");
+        lblAverageTasksPerHour.setText("0.0");
+        lblOverallAccuracyRate.setText("0.0%");
+        lblAverageTimePerTask.setText("0.0 min");
+        lblErrorRate.setText("0.0%");
+
+        DefaultTableModel wModel = (DefaultTableModel) tblWorkerPerformance.getModel();
+        wModel.setRowCount(0);
+
+        DefaultTableModel tModel = (DefaultTableModel) tblTaskBreakdown.getModel();
+        tModel.setRowCount(0);
+
+        renderEmptyChart(chartTrends, "Efficiency Trends");
+        StatusMessageHandler.clearStatus(txtStatus);
+    }
+
+    private void renderEmptyChart(javax.swing.JPanel panel, String title) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        JFreeChart chart = ChartFactory.createLineChart(title, "Date", "Tasks", dataset, PlotOrientation.VERTICAL, false, false, false);
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle t = chart.getTitle();
+        if (t != null) {
+            t.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            t.setPaint(new Color(100, 116, 139));
+            t.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setNoDataMessage("No trend data available");
+        plot.setNoDataMessageFont(new Font("Segoe UI", Font.ITALIC, 10));
+        plot.setNoDataMessagePaint(new Color(148, 163, 184));
+
+        embedChart(panel, chart);
+    }
+
+    private void exportReport(String format) {
+        if (currentReportData == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please generate a report first before exporting.");
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save " + format + " Report");
+        String defaultFileName = "PerformanceReport_" + currentReportData.getFromDate() + "_to_" + currentReportData.getToDate() + ("XLSX".equalsIgnoreCase(format) ? ".xlsx" : ".pdf");
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel Workbook (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            final File fileToSave = fileChooser.getSelectedFile();
+            BackgroundTask task = new BackgroundTask(this, "Exporting Report as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " report file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        PerformanceReportExportUtils.exportToXLSX(currentReportData, fileToSave);
+                    } else {
+                        PerformanceReportExportUtils.exportToPDF(currentReportData, fileToSave);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " report exported: " + fileToSave.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export report as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +1063,48 @@ public class PerformanceReportForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnGenerate;
+    private javax.swing.JPanel chartTrends;
+    private ui.components.CheckedComboBox<String> cmbTaskType;
+    private ui.components.CheckedComboBox<String> cmbWarehouse;
+    private ui.components.CheckedComboBox<String> cmbWorker;
+    private com.toedter.calendar.JDateChooser datepickerFrom;
+    private com.toedter.calendar.JDateChooser datepickerTo;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblAverageTasksPerHour;
+    private javax.swing.JLabel lblAverageTimePerTask;
+    private javax.swing.JLabel lblErrorRate;
+    private javax.swing.JLabel lblOverallAccuracyRate;
+    private javax.swing.JLabel lblTotalTasksCompleted;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JTable tblTaskBreakdown;
+    private javax.swing.JTable tblWorkerPerformance;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
