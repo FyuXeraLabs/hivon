@@ -4,17 +4,43 @@
  */
 package ui.reports;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import models.dto.FinancialReportDTO;
+import reports.controllers.FinancialReportController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import core.utils.export.FinancialReportExportUtils;
+
 /**
  *
- * @author Ishani
+ * @author Sanod D. Mendis
  */
 public class FinancialReportForm extends javax.swing.JFrame {
+
+    private FinancialReportController controller;
+    private FinancialReportDTO currentReportData;
+    private static final DecimalFormat currencyFmt = new DecimalFormat("#,##0.00");
 
     /**
      * Creates new form FinancialReportForm
      */
     public FinancialReportForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new FinancialReportController();
+        initCustomLogic();
     }
 
     /**
@@ -26,21 +52,813 @@ public class FinancialReportForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        popupExportBtn = new javax.swing.JPopupMenu();
+        menuitemPDF = new javax.swing.JMenuItem();
+        menuitemXLSX = new javax.swing.JMenuItem();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        cmbReportType = new javax.swing.JComboBox<>();
+        jLabel2 = new javax.swing.JLabel();
+        datepickerFrom = new com.toedter.calendar.JDateChooser();
+        jLabel3 = new javax.swing.JLabel();
+        datepickerTo = new com.toedter.calendar.JDateChooser();
+        jLabel4 = new javax.swing.JLabel();
+        cmbValuationMethod = new javax.swing.JComboBox<>();
+        chkbxExcludeDamagedMaterials = new javax.swing.JCheckBox();
+        chkbxIncludeVarianceAnalysis = new javax.swing.JCheckBox();
+        btnGenerate = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        lblImpactPLCurrency = new javax.swing.JLabel();
+        lblImpactPL = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        lblBeginningBalance = new javax.swing.JLabel();
+        lblBeginningBalanceCurrency = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        lblAdditionsCurrency = new javax.swing.JLabel();
+        lblAdditions = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        lblEndingBalanceCurrency = new javax.swing.JLabel();
+        lblEndingBalance = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        lblAdjustmentsCurrency = new javax.swing.JLabel();
+        lblAdjustments = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jPanel8 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        lblReductionsCurrency = new javax.swing.JLabel();
+        lblReductions = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        pnlTable = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblReportTable = new javax.swing.JTable();
+        txtStatus = new javax.swing.JLabel();
+
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png"))); // NOI18N
+        menuitemPDF.setText("  Export as PDF");
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemPDFActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png"))); // NOI18N
+        menuitemXLSX.setText("  Export as XLSX");
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemXLSX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemXLSXActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemXLSX);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Reports - Financial Report (REP66)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setText("Report Type");
+
+        cmbReportType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Valuation", "Movement Impact", "Cost Variance", "Period Comparison" }));
+
+        jLabel2.setText("From");
+
+        jLabel3.setText("To");
+
+        jLabel4.setText("Valuation Method");
+
+        cmbValuationMethod.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FIFO", "LIFO", "WAC", "Standard Cost" }));
+
+        chkbxExcludeDamagedMaterials.setText("Exclude Damaged Materials");
+        chkbxExcludeDamagedMaterials.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbxExcludeDamagedMaterialsActionPerformed(evt);
+            }
+        });
+
+        chkbxIncludeVarianceAnalysis.setText("Include Variance Analysis");
+        chkbxIncludeVarianceAnalysis.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkbxIncludeVarianceAnalysisActionPerformed(evt);
+            }
+        });
+
+        btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
+        btnGenerate.setText("Generate");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbReportType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel2))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbValuationMethod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkbxExcludeDamagedMaterials)
+                        .addGap(18, 18, 18)
+                        .addComponent(chkbxIncludeVarianceAnalysis))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(datepickerFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(datepickerTo, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 189, Short.MAX_VALUE)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addGap(29, 29, 29)
+                .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                        .addComponent(jLabel2)
+                        .addComponent(jLabel3)
+                        .addComponent(datepickerFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(datepickerTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(cmbReportType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(chkbxExcludeDamagedMaterials)
+                        .addComponent(chkbxIncludeVarianceAnalysis))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                        .addComponent(jLabel4)
+                        .addComponent(cmbValuationMethod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(16, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnExport)
+                    .addComponent(btnClear)
+                    .addComponent(btnGenerate))
+                .addGap(34, 34, 34))
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel3.setPreferredSize(new java.awt.Dimension(185, 102));
+
+        jLabel13.setText("Impact on P&L");
+
+        lblImpactPLCurrency.setText("[cur]");
+
+        lblImpactPL.setText("[value]");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(lblImpactPLCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblImpactPL))
+                    .addComponent(jLabel13))
+                .addContainerGap(101, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblImpactPLCurrency)
+                    .addComponent(lblImpactPL))
+                .addContainerGap(26, Short.MAX_VALUE))
+        );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel4.setPreferredSize(new java.awt.Dimension(185, 102));
+
+        jLabel5.setText("Beginning Balance");
+
+        lblBeginningBalance.setText("[value]");
+
+        lblBeginningBalanceCurrency.setText("[cur]");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel4Layout.createSequentialGroup()
+                        .addComponent(lblBeginningBalanceCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblBeginningBalance))
+                    .addComponent(jLabel5))
+                .addContainerGap(66, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblBeginningBalance)
+                    .addComponent(lblBeginningBalanceCurrency))
+                .addContainerGap(21, Short.MAX_VALUE))
+        );
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel5.setPreferredSize(new java.awt.Dimension(185, 102));
+
+        jLabel6.setText("Additions (inbound)");
+
+        lblAdditionsCurrency.setText("[cur]");
+
+        lblAdditions.setText("[value]");
+
+        jLabel9.setText("+");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblAdditionsCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblAdditions)
+                        .addGap(6, 6, 6))
+                    .addComponent(jLabel6))
+                .addContainerGap(70, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblAdditionsCurrency)
+                    .addComponent(lblAdditions)
+                    .addComponent(jLabel9))
+                .addContainerGap(18, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel6.setPreferredSize(new java.awt.Dimension(185, 102));
+
+        jLabel12.setText("Ending Balance");
+
+        lblEndingBalanceCurrency.setText("[cur]");
+
+        lblEndingBalance.setText("[value]");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(lblEndingBalanceCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblEndingBalance))
+                    .addComponent(jLabel12))
+                .addContainerGap(96, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblEndingBalanceCurrency)
+                    .addComponent(lblEndingBalance))
+                .addContainerGap(17, Short.MAX_VALUE))
+        );
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel7.setPreferredSize(new java.awt.Dimension(185, 102));
+
+        jLabel8.setText("Adjustments");
+
+        lblAdjustmentsCurrency.setText("[cur]");
+
+        lblAdjustments.setText("[value]");
+
+        jLabel11.setText("-");
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblAdjustmentsCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblAdjustments))
+                    .addComponent(jLabel8))
+                .addContainerGap(93, Short.MAX_VALUE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblAdjustmentsCurrency)
+                    .addComponent(lblAdjustments)
+                    .addComponent(jLabel11))
+                .addContainerGap(18, Short.MAX_VALUE))
+        );
+
+        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel8.setPreferredSize(new java.awt.Dimension(185, 102));
+
+        jLabel7.setText("Reductions (outbound/scrap)");
+
+        lblReductionsCurrency.setText("[cur]");
+
+        lblReductions.setText("[value]");
+
+        jLabel10.setText("-");
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblReductionsCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblReductions))
+                    .addComponent(jLabel7))
+                .addContainerGap(21, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblReductionsCurrency)
+                    .addComponent(lblReductions)
+                    .addComponent(jLabel10))
+                .addContainerGap(17, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("[report title]"));
+
+        tblReportTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(tblReportTable);
+
+        javax.swing.GroupLayout pnlTableLayout = new javax.swing.GroupLayout(pnlTable);
+        pnlTable.setLayout(pnlTableLayout);
+        pnlTableLayout.setHorizontalGroup(
+            pnlTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1)
+        );
+        pnlTableLayout.setVerticalGroup(
+            pnlTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTableLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE))
+        );
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void menuitemPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemPDFActionPerformed
+        exportReport("PDF");
+    }//GEN-LAST:event_menuitemPDFActionPerformed
+
+    private void menuitemXLSXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemXLSXActionPerformed
+        exportReport("XLSX");
+    }//GEN-LAST:event_menuitemXLSXActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        generateReport();
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        initDefaultFilters();
+        resetFormDisplay();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void chkbxExcludeDamagedMaterialsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbxExcludeDamagedMaterialsActionPerformed
+        // Filter option toggled
+    }//GEN-LAST:event_chkbxExcludeDamagedMaterialsActionPerformed
+
+    private void chkbxIncludeVarianceAnalysisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkbxIncludeVarianceAnalysisActionPerformed
+        // Filter option toggled
+    }//GEN-LAST:event_chkbxIncludeVarianceAnalysisActionPerformed
+
+    private void initCustomLogic() {
+        initDefaultFilters();
+
+        tblReportTable.setAutoCreateRowSorter(true);
+
+        // Listener for cmbReportType to dynamically update table columns, pnlTable border title, and form title
+        cmbReportType.addActionListener(e -> onReportTypeChanged());
+
+        onReportTypeChanged();
+        resetFormDisplay();
+    }
+
+    private void initDefaultFilters() {
+        Calendar cal = Calendar.getInstance();
+        datepickerTo.setDate(cal.getTime());
+        cal.add(Calendar.DAY_OF_MONTH, -30);
+        datepickerFrom.setDate(cal.getTime());
+
+        chkbxExcludeDamagedMaterials.setSelected(false);
+        chkbxIncludeVarianceAnalysis.setSelected(false);
+    }
+
+    private void onReportTypeChanged() {
+        String reportType = getSelectedReportType();
+        String reportTitle = getReportTitleForType(reportType);
+
+        // 1. change/set pnlTable border title([report title])
+        pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder(reportTitle));
+
+        // 2. change/set form title(Reports - Financial Report (REP66))
+        setTitle("Reports - Financial Report (REP66) - " + reportType);
+
+        // 3. change tblReportTable columns as needed
+        updateTableColumnsForType(reportType);
+    }
+
+    private String getSelectedReportType() {
+        Object item = cmbReportType.getSelectedItem();
+        return item != null ? item.toString() : "Valuation";
+    }
+
+    private String getReportTitleForType(String reportType) {
+        if (reportType.equalsIgnoreCase("Movement Impact") || reportType.contains("Impact")) {
+            return "Movement Financial Impact";
+        } else if (reportType.equalsIgnoreCase("Cost Variance") || reportType.contains("Variance")) {
+            return "Cost Variance Analysis";
+        } else if (reportType.equalsIgnoreCase("Period Comparison") || reportType.contains("Comparison")) {
+            return "Period-over-Period Financial Comparison";
+        } else {
+            return "Inventory Valuation Details";
+        }
+    }
+
+    private void updateTableColumnsForType(String reportType) {
+        String[] cols;
+        if (reportType.equalsIgnoreCase("Movement Impact") || reportType.contains("Impact")) {
+            cols = new String[]{"Movement No", "Date", "Movement Type", "Category", "Material Code", "Quantity", "Unit Cost", "Total Impact", "P&L Effect"};
+        } else if (reportType.equalsIgnoreCase("Cost Variance") || reportType.contains("Variance")) {
+            cols = new String[]{"Material Code", "Material Name", "Current Qty", "Standard Cost", "Actual Cost", "Unit Variance", "Variance %", "Total Variance"};
+        } else if (reportType.equalsIgnoreCase("Period Comparison") || reportType.contains("Comparison")) {
+            cols = new String[]{"Financial Metric", "Current Period", "Prior Period", "Variance ($)", "Change (%)"};
+        } else {
+            // Valuation
+            cols = new String[]{"Material Code", "Material Name", "Material Group", "Quantity", "Base UOM", "Unit Cost", "Total Value"};
+        }
+
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tblReportTable.setModel(model);
+    }
+
+    private String getSelectedFromDate() {
+        Date selectedDate = datepickerFrom.getDate();
+        if (selectedDate == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedToDate() {
+        Date selectedDate = datepickerTo.getDate();
+        if (selectedDate == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedValuationMethod() {
+        Object item = cmbValuationMethod.getSelectedItem();
+        return item != null ? item.toString() : "WAC";
+    }
+
+    private void generateReport() {
+        String fromDate = getSelectedFromDate();
+        String toDate = getSelectedToDate();
+
+        if (fromDate == null) {
+            StatusMessageHandler.showError(txtStatus, "Please select a valid 'From' date.");
+            return;
+        }
+        if (toDate == null) {
+            StatusMessageHandler.showError(txtStatus, "Please select a valid 'To' date.");
+            return;
+        }
+        if (fromDate.compareTo(toDate) > 0) {
+            StatusMessageHandler.showError(txtStatus, "'From' date cannot be after 'To' date.");
+            return;
+        }
+
+        String reportType = getSelectedReportType();
+        String valuationMethod = getSelectedValuationMethod();
+        boolean excludeDamaged = chkbxExcludeDamagedMaterials.isSelected();
+        boolean includeVariance = chkbxIncludeVarianceAnalysis.isSelected();
+
+        BackgroundTask task = new BackgroundTask(this, "Calculating Financial Report (" + reportType + ")") {
+            private FinancialReportDTO dto;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Querying financial report data...");
+                dto = controller.generateFinancialReport(
+                    reportType, fromDate, toDate, valuationMethod, excludeDamaged, includeVariance
+                );
+                return dto != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentReportData = dto;
+                populateReportData(dto);
+                StatusMessageHandler.showSuccess(txtStatus, "Financial report (" + reportType + ") generated successfully.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to generate financial report: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateReportData(FinancialReportDTO dto) {
+        if (dto == null) return;
+
+        String cur = (dto.getCurrency() != null && !dto.getCurrency().isEmpty()) ? dto.getCurrency() : "$";
+
+        // Summary Labels
+        lblBeginningBalanceCurrency.setText(cur);
+        lblBeginningBalance.setText(currencyFmt.format(dto.getBeginningBalance()));
+        lblAdditionsCurrency.setText(cur);
+        lblAdditions.setText(currencyFmt.format(dto.getAdditions()));
+        lblReductionsCurrency.setText(cur);
+        lblReductions.setText(currencyFmt.format(dto.getReductions()));
+        lblAdjustmentsCurrency.setText(cur);
+        lblAdjustments.setText(currencyFmt.format(dto.getAdjustments()));
+        lblEndingBalanceCurrency.setText(cur);
+        lblEndingBalance.setText(currencyFmt.format(dto.getEndingBalance()));
+        lblImpactPLCurrency.setText(cur);
+        lblImpactPL.setText(currencyFmt.format(dto.getImpactPL()));
+
+        // 1. change/set pnlTable border title([report title])
+        pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder(dto.getReportTitle()));
+
+        // 2. change/set form title(Reports - Financial Report (REP66))
+        setTitle("Reports - Financial Report (REP66) - " + dto.getReportType());
+
+        // 3. change tblReportTable columns and populate rows
+        List<String> cols = dto.getColumns();
+        String[] colArr = cols != null ? cols.toArray(new String[0]) : new String[]{"Title 1", "Title 2", "Title 3", "Title 4"};
+        DefaultTableModel model = new DefaultTableModel(colArr, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        if (dto.getRowData() != null) {
+            for (Object[] row : dto.getRowData()) {
+                model.addRow(row);
+            }
+        }
+        tblReportTable.setModel(model);
+    }
+
+    private void resetFormDisplay() {
+        currentReportData = null;
+
+        lblBeginningBalanceCurrency.setText("$");
+        lblBeginningBalance.setText("0.00");
+        lblAdditionsCurrency.setText("$");
+        lblAdditions.setText("0.00");
+        lblReductionsCurrency.setText("$");
+        lblReductions.setText("0.00");
+        lblAdjustmentsCurrency.setText("$");
+        lblAdjustments.setText("0.00");
+        lblEndingBalanceCurrency.setText("$");
+        lblEndingBalance.setText("0.00");
+        lblImpactPLCurrency.setText("$");
+        lblImpactPL.setText("0.00");
+
+        onReportTypeChanged();
+        StatusMessageHandler.clearStatus(txtStatus);
+    }
+
+    private void exportReport(String format) {
+        if (currentReportData == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please generate a report first before exporting.");
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save " + format + " Report");
+        String sanitizedType = currentReportData.getReportType().replaceAll("\\s+", "");
+        String defaultFileName = "FinancialReport_" + sanitizedType + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ("XLSX".equalsIgnoreCase(format) ? ".xlsx" : ".pdf");
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel Workbook (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            final File fileToSave = fileChooser.getSelectedFile();
+            BackgroundTask task = new BackgroundTask(this, "Exporting Report as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " report file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        FinancialReportExportUtils.exportToXLSX(currentReportData, fileToSave);
+                    } else {
+                        FinancialReportExportUtils.exportToPDF(currentReportData, fileToSave);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " report exported: " + fileToSave.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export report as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +896,54 @@ public class FinancialReportForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnGenerate;
+    private javax.swing.JCheckBox chkbxExcludeDamagedMaterials;
+    private javax.swing.JCheckBox chkbxIncludeVarianceAnalysis;
+    private javax.swing.JComboBox<String> cmbReportType;
+    private javax.swing.JComboBox<String> cmbValuationMethod;
+    private com.toedter.calendar.JDateChooser datepickerFrom;
+    private com.toedter.calendar.JDateChooser datepickerTo;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblAdditions;
+    private javax.swing.JLabel lblAdditionsCurrency;
+    private javax.swing.JLabel lblAdjustments;
+    private javax.swing.JLabel lblAdjustmentsCurrency;
+    private javax.swing.JLabel lblBeginningBalance;
+    private javax.swing.JLabel lblBeginningBalanceCurrency;
+    private javax.swing.JLabel lblEndingBalance;
+    private javax.swing.JLabel lblEndingBalanceCurrency;
+    private javax.swing.JLabel lblImpactPL;
+    private javax.swing.JLabel lblImpactPLCurrency;
+    private javax.swing.JLabel lblReductions;
+    private javax.swing.JLabel lblReductionsCurrency;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
+    private javax.swing.JPanel pnlTable;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JTable tblReportTable;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
