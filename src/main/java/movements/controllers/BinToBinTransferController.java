@@ -1,77 +1,80 @@
 package movements.controllers;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import core.api.dao.BinToBinTransferDAO;
-import core.api.dao.BinToBinTransferDAO.MaterialSearchResult;
-import core.api.dao.BinToBinTransferDAO.SourceBinInfo;
-import core.api.dao.BinToBinTransferDAO.DestBinInfo;
-import core.api.dao.BinToBinTransferDAO.BinTransferItem;
 import core.api.dao.WarehouseDAO;
-import core.logging.Logger;
-import core.security.UserSession;
-import core.utils.RetryHelper;
+import models.dto.BinToBinDestinationBinDTO;
+import models.dto.BinToBinSourceBinDTO;
+import models.dto.BinToBinTransferItemDTO;
+import models.dto.MaterialDTO;
 import models.dto.WarehouseDTO;
 
 import java.util.List;
 
 /**
  * Controller for Bin-to-Bin Transfer operations.
- * Handles material search, bin lookups, and posting transfers.
+ * Coordinates warehouse retrieval, material searching within a warehouse,
+ * source bin inventory lookups, destination bin validation, and transfer order processing.
  *
- * @author Ishani
+ * @author Sanod
  */
 public class BinToBinTransferController {
 
-    private final String username = UserSession.getInstance().getUsername();
+    private final WarehouseDAO warehouseDAO;
+    private final BinToBinTransferDAO transferDAO;
 
     public BinToBinTransferController() {
+        this.warehouseDAO = WarehouseDAO.getInstance();
+        this.transferDAO = BinToBinTransferDAO.getInstance();
     }
 
-    // fetches all active warehouses
     public List<WarehouseDTO> getWarehouses() throws Exception {
-        return RetryHelper.executeWithRetry(
-            () -> WarehouseDAO.getInstance().getWarehouses(),
-            "failed to load warehouses"
-        );
+        return warehouseDAO.getWarehouses();
     }
 
-    // searches materials with available stock in a warehouse
-    public List<MaterialSearchResult> searchMaterialsInWarehouse(int warehouseId, String query) throws Exception {
-        return RetryHelper.executeWithRetry(
-            () -> BinToBinTransferDAO.getInstance().searchMaterialsInWarehouse(warehouseId, query),
-            "failed to search materials in warehouse"
-        );
+    public List<MaterialDTO> searchMaterialsInWarehouse(int warehouseId, String query) throws Exception {
+        return transferDAO.searchMaterialsInWarehouse(warehouseId, query);
     }
 
-    // fetches source bins that have stock of a specific material
-    public List<SourceBinInfo> getSourceBins(int warehouseId, int materialId) throws Exception {
-        return RetryHelper.executeWithRetry(
-            () -> BinToBinTransferDAO.getInstance().getSourceBinsWithStock(warehouseId, materialId),
-            "failed to load source bins"
-        );
+    public List<BinToBinSourceBinDTO> getSourceBins(int warehouseId, int materialId) throws Exception {
+        return transferDAO.getSourceBins(warehouseId, materialId);
     }
 
-    // fetches destination bins available in a warehouse
-    public List<DestBinInfo> getDestinationBins(int warehouseId) throws Exception {
-        return RetryHelper.executeWithRetry(
-            () -> BinToBinTransferDAO.getInstance().getDestinationBins(warehouseId),
-            "failed to load destination bins"
-        );
+    public List<BinToBinDestinationBinDTO> getDestinationBins(int warehouseId) throws Exception {
+        return transferDAO.getDestinationBins(warehouseId);
     }
 
-    // posts a bin-to-bin transfer with multiple items
-    public String completeBinToBinTransfer(List<BinTransferItem> items, String reason, String remarks) throws Exception {
+    public JsonObject completeBinToBinTransfer(List<BinToBinTransferItemDTO> items, String reason, String remarks) throws Exception {
         if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Transfer items list cannot be empty.");
+            throw new Exception("No transfer items to process");
         }
 
-        String toNumber = RetryHelper.executeWithRetry(
-            () -> BinToBinTransferDAO.getInstance().completeBinToBinTransfer(items, reason, remarks),
-            "failed to complete bin-to-bin transfer"
-        );
-
-        if (toNumber != null) {
-            Logger.log(username, "bin-to-bin transfer completed successfully: " + toNumber);
+        JsonObject payload = new JsonObject();
+        String docInfo = "";
+        if (reason != null && !reason.trim().isEmpty()) {
+            docInfo += reason.trim();
         }
-        return toNumber;
+        if (remarks != null && !remarks.trim().isEmpty()) {
+            docInfo = docInfo.isEmpty() ? remarks.trim() : (docInfo + " - " + remarks.trim());
+        }
+        payload.addProperty("source_document", docInfo);
+
+        JsonArray itemsArray = new JsonArray();
+        for (BinToBinTransferItemDTO item : items) {
+            JsonObject itemObj = new JsonObject();
+            itemObj.addProperty("material_id", item.getMaterialId());
+            itemObj.addProperty("from_bin_id", item.getFromBinId());
+            itemObj.addProperty("to_bin_id", item.getToBinId());
+            itemObj.addProperty("quantity", item.getQuantity());
+            itemObj.addProperty("uom", item.getUom() != null && !item.getUom().isEmpty() ? item.getUom() : "EA");
+            if (item.getBatchId() != null) {
+                itemObj.addProperty("batch_id", item.getBatchId());
+            }
+            itemsArray.add(itemObj);
+        }
+        payload.add("items", itemsArray);
+
+        return transferDAO.completeBinToBinTransfer(payload);
     }
 }
