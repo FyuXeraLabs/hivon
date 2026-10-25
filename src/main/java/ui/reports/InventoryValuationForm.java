@@ -4,17 +4,66 @@
  */
 package ui.reports;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import models.dto.InventoryValuationReportDTO;
+import models.dto.InventoryValuationReportDTO.CategoryBreakdownItem;
+import models.dto.InventoryValuationReportDTO.TopMaterialItem;
+import models.dto.InventoryValuationReportDTO.ValuationItem;
+import models.dto.InventoryValuationReportDTO.WarehouseBreakdownItem;
+import models.dto.WarehouseDTO;
+import reports.controllers.InventoryValuationController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import core.logging.Logger;
+import core.utils.export.InventoryValuationReportExportUtils;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+
 /**
  *
- * @author Ishani
+ * @author Sanod D. Mendis
  */
 public class InventoryValuationForm extends javax.swing.JFrame {
+
+    private InventoryValuationController controller;
+    private InventoryValuationReportDTO currentReportData;
+    private static final DecimalFormat currencyFmt = new DecimalFormat("#,##0.00");
+    private static final DecimalFormat qtyFmt = new DecimalFormat("#,##0.000");
 
     /**
      * Creates new form InventoryValuationForm
      */
     public InventoryValuationForm() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.controller = new InventoryValuationController();
+        initCustomLogic();
     }
 
     /**
@@ -26,21 +75,850 @@ public class InventoryValuationForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        popupExportBtn = new javax.swing.JPopupMenu();
+        menuitemPDF = new javax.swing.JMenuItem();
+        menuitemXLSX = new javax.swing.JMenuItem();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        datepickerValuationDate = new com.toedter.calendar.JDateChooser();
+        jLabel2 = new javax.swing.JLabel();
+        cmbWarehouse = new ui.components.CheckedComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        cmbValuationMethod = new javax.swing.JComboBox<>();
+        btnGenerate = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        chkbxDamagedMaterials = new javax.swing.JCheckBox();
+        chkbxGroupByMaterialGroup = new javax.swing.JCheckBox();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        lblTotalMaterialsInInventoryCount = new javax.swing.JLabel();
+        ByCategoryBreakdownPieChart = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        lblTotalQuantity = new javax.swing.JLabel();
+        lblTotalQuantityUOM = new javax.swing.JLabel();
+        PercentageOfTotalHorizontalBarchart = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        ByWarehouseBreakdownBarchart = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        lblTotalInventoryValue = new javax.swing.JLabel();
+        lblTotalInventoryValueCurrency = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        txtStatus = new javax.swing.JLabel();
+
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png"))); // NOI18N
+        menuitemPDF.setText("  Export as PDF");
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemPDFActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png"))); // NOI18N
+        menuitemXLSX.setText("  Export as XLSX");
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setPreferredSize(new java.awt.Dimension(140, 22));
+        menuitemXLSX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuitemXLSXActionPerformed(evt);
+            }
+        });
+        popupExportBtn.add(menuitemXLSX);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Reports - Inventory Valuation (REP62)");
+        setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setText("Valuation Date");
+
+        jLabel2.setText("Warehouse");
+
+        jLabel3.setText("Valuation Method");
+
+        btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
+        btnGenerate.setText("Generate");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
+        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        chkbxDamagedMaterials.setText("Include Damaged Materials");
+
+        chkbxGroupByMaterialGroup.setText("Group by \"Material Group\"");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkbxDamagedMaterials)
+                        .addGap(18, 18, 18)
+                        .addComponent(chkbxGroupByMaterialGroup))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(datepickerValuationDate, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbValuationMethod, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnClear)
+                .addGap(29, 29, 29)
+                .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnGenerate)
+                    .addComponent(btnClear)
+                    .addComponent(btnExport))
+                .addGap(22, 22, 22))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(jLabel1)
+                            .addComponent(datepickerValuationDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkbxDamagedMaterials)
+                            .addComponent(chkbxGroupByMaterialGroup)))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2)
+                        .addComponent(jLabel3)
+                        .addComponent(cmbValuationMethod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Valuation Results"));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Material Code", "Material Name", "Qty", "Unit Cost", "Total Value"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Summary"));
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        jLabel4.setText("Total Materials in Inventory:");
+
+        lblTotalMaterialsInInventoryCount.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        lblTotalMaterialsInInventoryCount.setText("[count]");
+
+        javax.swing.GroupLayout ByCategoryBreakdownPieChartLayout = new javax.swing.GroupLayout(ByCategoryBreakdownPieChart);
+        ByCategoryBreakdownPieChart.setLayout(ByCategoryBreakdownPieChartLayout);
+        ByCategoryBreakdownPieChartLayout.setHorizontalGroup(
+            ByCategoryBreakdownPieChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        ByCategoryBreakdownPieChartLayout.setVerticalGroup(
+            ByCategoryBreakdownPieChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 246, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(ByCategoryBreakdownPieChart, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jLabel4))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(60, 60, 60)
+                        .addComponent(lblTotalMaterialsInInventoryCount)))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblTotalMaterialsInInventoryCount)
+                .addGap(40, 40, 40)
+                .addComponent(ByCategoryBreakdownPieChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        jLabel5.setText("Total Quantity:");
+
+        lblTotalQuantity.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        lblTotalQuantity.setText("[qty]");
+
+        lblTotalQuantityUOM.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        lblTotalQuantityUOM.setText("[uom]");
+
+        javax.swing.GroupLayout PercentageOfTotalHorizontalBarchartLayout = new javax.swing.GroupLayout(PercentageOfTotalHorizontalBarchart);
+        PercentageOfTotalHorizontalBarchart.setLayout(PercentageOfTotalHorizontalBarchartLayout);
+        PercentageOfTotalHorizontalBarchartLayout.setHorizontalGroup(
+            PercentageOfTotalHorizontalBarchartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        PercentageOfTotalHorizontalBarchartLayout.setVerticalGroup(
+            PercentageOfTotalHorizontalBarchartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 247, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(PercentageOfTotalHorizontalBarchart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jLabel5)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                .addContainerGap(97, Short.MAX_VALUE)
+                .addComponent(lblTotalQuantity)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTotalQuantityUOM)
+                .addGap(54, 54, 54))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTotalQuantity)
+                    .addComponent(lblTotalQuantityUOM))
+                .addGap(39, 39, 39)
+                .addComponent(PercentageOfTotalHorizontalBarchart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        javax.swing.GroupLayout ByWarehouseBreakdownBarchartLayout = new javax.swing.GroupLayout(ByWarehouseBreakdownBarchart);
+        ByWarehouseBreakdownBarchart.setLayout(ByWarehouseBreakdownBarchartLayout);
+        ByWarehouseBreakdownBarchartLayout.setHorizontalGroup(
+            ByWarehouseBreakdownBarchartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        ByWarehouseBreakdownBarchartLayout.setVerticalGroup(
+            ByWarehouseBreakdownBarchartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 247, Short.MAX_VALUE)
+        );
+
+        jLabel6.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        jLabel6.setText("Total Inventory Value:");
+
+        lblTotalInventoryValue.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        lblTotalInventoryValue.setText("[value]");
+
+        lblTotalInventoryValueCurrency.setFont(new java.awt.Font("Segoe UI Semibold", 0, 13)); // NOI18N
+        lblTotalInventoryValueCurrency.setText("[cur]");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(ByWarehouseBreakdownBarchart, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblTotalInventoryValueCurrency)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTotalInventoryValue)
+                .addGap(59, 59, 59))
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jLabel6)
+                .addContainerGap(42, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTotalInventoryValue)
+                    .addComponent(lblTotalInventoryValueCurrency))
+                .addGap(39, 39, 39)
+                .addComponent(ByWarehouseBreakdownBarchart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(55, 55, 55)
+                                .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, 0))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void menuitemXLSXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemXLSXActionPerformed
+        exportReport("XLSX");
+    }//GEN-LAST:event_menuitemXLSXActionPerformed
+
+    private void menuitemPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuitemPDFActionPerformed
+        exportReport("PDF");
+    }//GEN-LAST:event_menuitemPDFActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        generateReport();
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        datepickerValuationDate.setDate(new Date());
+        if (cmbWarehouse.getItemCount() > 0) cmbWarehouse.setSelectedIndex(0);
+        if (cmbValuationMethod.getItemCount() > 0) cmbValuationMethod.setSelectedIndex(0);
+        chkbxDamagedMaterials.setSelected(false);
+        chkbxGroupByMaterialGroup.setSelected(false);
+        resetFormDisplay();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void initCustomLogic() {
+        datepickerValuationDate.setDate(new Date());
+
+        // Setup valuation methods
+        cmbValuationMethod.removeAllItems();
+        cmbValuationMethod.addItem("WAC");
+        cmbValuationMethod.addItem("FIFO");
+        cmbValuationMethod.addItem("LIFO");
+        cmbValuationMethod.addItem("Standard Cost");
+
+        // Set explicit preferred sizes matching design (0 width to let parent GroupLayout define width, 242 height)
+        Dimension panelDim = new Dimension(0, 242);
+        ByCategoryBreakdownPieChart.setPreferredSize(panelDim);
+        ByCategoryBreakdownPieChart.setMinimumSize(new Dimension(0, 0));
+        PercentageOfTotalHorizontalBarchart.setPreferredSize(panelDim);
+        PercentageOfTotalHorizontalBarchart.setMinimumSize(new Dimension(0, 0));
+        ByWarehouseBreakdownBarchart.setPreferredSize(panelDim);
+        ByWarehouseBreakdownBarchart.setMinimumSize(new Dimension(0, 0));
+
+        // Setup Warehouses combo
+        loadWarehouses();
+
+        // Reset display
+        resetFormDisplay();
+    }
+
+    private void loadWarehouses() {
+        BackgroundTask task = new BackgroundTask(this, "Loading Warehouses") {
+            private List<WarehouseDTO> warehouses;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching warehouses...");
+                warehouses = controller.getWarehouses();
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbWarehouse.removeAllItems();
+                cmbWarehouse.addItem("All");
+                if (warehouses != null) {
+                    for (WarehouseDTO wh : warehouses) {
+                        if (wh.getWarehouseName() != null) {
+                            cmbWarehouse.addItem(wh.getWarehouseName());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                Logger.errlog("Failed to load warehouses in InventoryValuationForm", e);
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private String getSelectedReportDate() {
+        Date selectedDate = datepickerValuationDate.getDate();
+        if (selectedDate == null) {
+            return null;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(selectedDate);
+    }
+
+    private String getSelectedWarehouseFilter() {
+        Set<String> selected = cmbWarehouse.getSelectedItems();
+        if (selected != null && !selected.isEmpty()) {
+            return String.join(",", selected);
+        }
+        Object item = cmbWarehouse.getSelectedItem();
+        if (item != null) {
+            return item.toString();
+        }
+        return "All";
+    }
+
+    private String getSelectedValuationMethod() {
+        Object item = cmbValuationMethod.getSelectedItem();
+        return item != null ? item.toString() : "WAC";
+    }
+
+    private void generateReport() {
+        String valuationDate = getSelectedReportDate();
+        if (valuationDate == null) {
+            StatusMessageHandler.showError(txtStatus, "Please select a valid valuation date.");
+            return;
+        }
+
+        String warehouseFilter = getSelectedWarehouseFilter();
+        String valuationMethod = getSelectedValuationMethod();
+        boolean includeDamaged = chkbxDamagedMaterials.isSelected();
+        boolean groupByGroup = chkbxGroupByMaterialGroup.isSelected();
+
+        BackgroundTask task = new BackgroundTask(this, "Calculating Inventory Valuation") {
+            private InventoryValuationReportDTO dto;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Querying inventory valuation data (" + valuationMethod + ")...");
+                dto = controller.generateInventoryValuationReport(
+                    valuationDate, warehouseFilter, valuationMethod, includeDamaged, groupByGroup
+                );
+                return dto != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                currentReportData = dto;
+                populateReportData(dto);
+                StatusMessageHandler.showSuccess(txtStatus, "Inventory valuation report generated successfully.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to generate valuation report: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    private void populateReportData(InventoryValuationReportDTO dto) {
+        if (dto == null) return;
+
+        String cur = (dto.getCurrency() != null && !dto.getCurrency().isEmpty()) ? dto.getCurrency() : "$";
+
+        // Summary labels
+        lblTotalMaterialsInInventoryCount.setText(String.format("%,d", dto.getTotalMaterialsCount()));
+        lblTotalQuantity.setText(qtyFmt.format(dto.getTotalQuantity()));
+        lblTotalQuantityUOM.setText("Units");
+        lblTotalInventoryValueCurrency.setText(cur);
+        lblTotalInventoryValue.setText(currencyFmt.format(dto.getTotalValue()));
+
+        // Results table
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+        if (dto.getItems() != null) {
+            for (ValuationItem item : dto.getItems()) {
+                model.addRow(new Object[]{
+                    item.getMaterialCode(),
+                    item.getMaterialName(),
+                    qtyFmt.format(item.getQuantity()),
+                    cur + " " + currencyFmt.format(item.getUnitCost()),
+                    cur + " " + currencyFmt.format(item.getTotalValue())
+                });
+            }
+        }
+
+        // Render JFreeChart Charts
+        renderCategoryPieChart(dto);
+        renderWarehouseBarChart(dto, cur);
+        renderTopMaterialsBarChart(dto);
+    }
+
+    private void renderCategoryPieChart(InventoryValuationReportDTO dto) {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        if (dto.getByCategoryList() != null && !dto.getByCategoryList().isEmpty()) {
+            int limit = Math.min(5, dto.getByCategoryList().size());
+            double otherVal = 0.0;
+            double otherPct = 0.0;
+            for (int i = 0; i < dto.getByCategoryList().size(); i++) {
+                CategoryBreakdownItem cat = dto.getByCategoryList().get(i);
+                if (i < limit) {
+                    dataset.setValue(cat.getCategoryName() + " (" + String.format("%.1f", cat.getPercentage()) + "%)", cat.getValue());
+                } else {
+                    otherVal += cat.getValue();
+                    otherPct += cat.getPercentage();
+                }
+            }
+            if (otherVal > 0) {
+                dataset.setValue("Other (" + String.format("%.1f", otherPct) + "%)", otherVal);
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createPieChart(
+            "Valuation by Category",
+            dataset,
+            true,
+            true,
+            false
+        );
+        stylePieChart(chart);
+        embedChart(ByCategoryBreakdownPieChart, chart);
+    }
+
+    private void renderWarehouseBarChart(InventoryValuationReportDTO dto, String cur) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        if (dto.getByWarehouseList() != null && !dto.getByWarehouseList().isEmpty()) {
+            for (WarehouseBreakdownItem wh : dto.getByWarehouseList()) {
+                String label = (wh.getWarehouseCode() != null && !wh.getWarehouseCode().isEmpty())
+                        ? wh.getWarehouseCode() : wh.getWarehouseName();
+                dataset.addValue(wh.getValue(), "Total Value", label);
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+            "Valuation by Warehouse",
+            null,
+            null,
+            dataset,
+            PlotOrientation.VERTICAL,
+            false,
+            true,
+            false
+        );
+        styleBarChart(chart, false);
+        embedChart(PercentageOfTotalHorizontalBarchart, chart);
+    }
+
+    private void renderTopMaterialsBarChart(InventoryValuationReportDTO dto) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        if (dto.getTopMaterialsList() != null && !dto.getTopMaterialsList().isEmpty()) {
+            int limit = Math.min(5, dto.getTopMaterialsList().size());
+            for (int i = 0; i < limit; i++) {
+                TopMaterialItem top = dto.getTopMaterialsList().get(i);
+                dataset.addValue(top.getPercentage(), "% of Total Value", top.getMaterialCode());
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+            "Top Materials (% of Total)",
+            null,
+            null,
+            dataset,
+            PlotOrientation.HORIZONTAL,
+            false,
+            true,
+            false
+        );
+        styleBarChart(chart, true);
+        embedChart(ByWarehouseBreakdownBarchart, chart);
+    }
+
+    private void embedChart(javax.swing.JPanel panel, JFreeChart chart) {
+        panel.setLayout(new BorderLayout());
+        panel.removeAll();
+
+        // The NetBeans form specifically designs these panels with height 242.
+        // We strictly enforce height 242 and width 0/panel.getWidth() so ChartPanel's
+        // default 680x420 size never blows up the panel, keeping it exactly in size of the panel.
+        Dimension panelDim = new Dimension(panel.getWidth() > 0 ? panel.getWidth() : 0, 242);
+        panel.setPreferredSize(panelDim);
+        panel.setMinimumSize(new Dimension(0, 0));
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(panelDim);
+        chartPanel.setMinimumSize(new Dimension(0, 0));
+
+        // Eliminate minimum drawing boundaries so JFreeChart draws crisply to fit panel bounds
+        chartPanel.setMinimumDrawWidth(0);
+        chartPanel.setMinimumDrawHeight(0);
+        chartPanel.setMaximumDrawWidth(4000);
+        chartPanel.setMaximumDrawHeight(4000);
+        chartPanel.setMouseWheelEnabled(false);
+        chartPanel.setPopupMenu(null);
+        chartPanel.setDomainZoomable(false);
+        chartPanel.setRangeZoomable(false);
+
+        panel.add(chartPanel, BorderLayout.CENTER);
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private void stylePieChart(JFreeChart chart) {
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle title = chart.getTitle();
+        if (title != null) {
+            title.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            title.setPaint(new Color(30, 41, 59));
+            title.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setShadowPaint(null);
+        plot.setInteriorGap(0.03);
+        plot.setLabelGenerator(null); // Clean appearance without bulky overlapping label boxes
+
+        if (chart.getLegend() != null) {
+            chart.getLegend().setItemFont(new Font("Segoe UI", Font.PLAIN, 9));
+            chart.getLegend().setPadding(new RectangleInsets(1, 1, 1, 1));
+        }
+    }
+
+    private void styleBarChart(JFreeChart chart, boolean horizontal) {
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle title = chart.getTitle();
+        if (title != null) {
+            title.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            title.setPaint(new Color(30, 41, 59));
+            title.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setInsets(new RectangleInsets(2, 4, 4, 4));
+        plot.setRangeGridlinePaint(new Color(226, 232, 240));
+
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setBarPainter(new StandardBarPainter());
+        renderer.setShadowVisible(false);
+        renderer.setMaximumBarWidth(0.25);
+        renderer.setItemMargin(0.05);
+        renderer.setSeriesPaint(0, horizontal ? new Color(59, 130, 246) : new Color(16, 185, 129));
+
+        plot.getDomainAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 9));
+        plot.getRangeAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 9));
+    }
+
+    private void resetFormDisplay() {
+        currentReportData = null;
+
+        lblTotalMaterialsInInventoryCount.setText("0");
+        lblTotalQuantity.setText("0.000");
+        lblTotalQuantityUOM.setText("Units");
+        lblTotalInventoryValueCurrency.setText("$");
+        lblTotalInventoryValue.setText("0.00");
+
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+
+        renderEmptyChart(ByCategoryBreakdownPieChart, "Valuation by Category");
+        renderEmptyChart(PercentageOfTotalHorizontalBarchart, "Valuation by Warehouse");
+        renderEmptyChart(ByWarehouseBreakdownBarchart, "Top Materials (% of Total)");
+    }
+
+    private void renderEmptyChart(javax.swing.JPanel panel, String title) {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        JFreeChart chart = ChartFactory.createPieChart(title, dataset, false, false, false);
+        chart.setBackgroundPaint(new Color(250, 250, 252));
+        chart.setPadding(new RectangleInsets(2, 2, 2, 2));
+
+        TextTitle t = chart.getTitle();
+        if (t != null) {
+            t.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            t.setPaint(new Color(100, 116, 139));
+            t.setPadding(new RectangleInsets(2, 2, 2, 2));
+        }
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setNoDataMessage("No data available");
+        plot.setNoDataMessageFont(new Font("Segoe UI", Font.ITALIC, 10));
+        plot.setNoDataMessagePaint(new Color(148, 163, 184));
+
+        embedChart(panel, chart);
+    }
+
+    private void exportReport(String format) {
+        if (currentReportData == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please generate a report first before exporting.");
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save " + format + " Report");
+        String defaultFileName = "InventoryValuationReport_" + currentReportData.getValuationDate() + ("XLSX".equalsIgnoreCase(format) ? ".xlsx" : ".pdf");
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel Workbook (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            final File fileToSave = fileChooser.getSelectedFile();
+            BackgroundTask task = new BackgroundTask(this, "Exporting Report as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " report file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        InventoryValuationReportExportUtils.exportToXLSX(currentReportData, fileToSave);
+                    } else {
+                        InventoryValuationReportExportUtils.exportToPDF(currentReportData, fileToSave);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " report exported: " + fileToSave.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export report as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +956,40 @@ public class InventoryValuationForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel ByCategoryBreakdownPieChart;
+    private javax.swing.JPanel ByWarehouseBreakdownBarchart;
+    private javax.swing.JPanel PercentageOfTotalHorizontalBarchart;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnGenerate;
+    private javax.swing.JCheckBox chkbxDamagedMaterials;
+    private javax.swing.JCheckBox chkbxGroupByMaterialGroup;
+    private javax.swing.JComboBox<String> cmbValuationMethod;
+    private ui.components.CheckedComboBox<String> cmbWarehouse;
+    private com.toedter.calendar.JDateChooser datepickerValuationDate;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel lblTotalInventoryValue;
+    private javax.swing.JLabel lblTotalInventoryValueCurrency;
+    private javax.swing.JLabel lblTotalMaterialsInInventoryCount;
+    private javax.swing.JLabel lblTotalQuantity;
+    private javax.swing.JLabel lblTotalQuantityUOM;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
