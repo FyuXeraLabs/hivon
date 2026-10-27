@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import core.api.ApiClient;
 import core.logging.Logger;
+import core.offline.OfflineDatabaseManager;
+import core.offline.OfflinePasswordManager;
 import ui.LoginFrame;
 
 /**
@@ -37,6 +39,8 @@ public class LogoutManager {
             // invalidate the session
             UserSession.getInstance().invalidate();
             ApiClient.getInstance().clearTokens();
+            OfflineDatabaseManager.getInstance().closeDatabase();
+            OfflinePasswordManager.getInstance().clear();
             Logger.log(username, "User session invalidated");
 
             clearSavedState();
@@ -68,6 +72,8 @@ public class LogoutManager {
             // invalidate session and clear tokens
             UserSession.getInstance().invalidate();
             ApiClient.getInstance().clearTokens();
+            OfflineDatabaseManager.getInstance().closeDatabase();
+            OfflinePasswordManager.getInstance().clear();
 
             // close all windows
             closeAllWindows();

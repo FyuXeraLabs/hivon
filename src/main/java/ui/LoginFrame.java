@@ -9,6 +9,13 @@ import core.api.ApiClient;
 import core.api.dao.UserDAO;
 import core.api.dao.PermissionDAO;
 import core.security.*;
+import core.offline.DeviceManager;
+import core.offline.OfflineDatabaseManager;
+import core.offline.OfflineDbConfig;
+import core.offline.OfflinePasswordManager;
+import core.offline.OfflineQueueDAO;
+import core.offline.SyncManager;
+import java.nio.file.Path;
 import core.workers.BackgroundTask;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -294,6 +301,47 @@ public class LoginFrame extends javax.swing.JFrame {
                     return false;
                 }
 
+                // Initialize temporary session so authenticated calls (offline key & sync) succeed
+                UserSession.getInstance().initialize(user, permissions, accessToken, refreshToken);
+
+                String deviceId = DeviceManager.getDeviceId();
+                Path dbPath = OfflineDbConfig.getDatabasePath(user.getUserId());
+                OfflineDatabaseManager dbMgr = OfflineDatabaseManager.getInstance();
+
+                // 1. Process previous offline database if one exists
+                if (dbMgr.databaseExists(dbPath)) {
+                    updateProgress("Checking for pending offline data...");
+                    String oldPassword = api.getOfflineDbKey(deviceId);
+
+                    if (oldPassword != null && !oldPassword.isEmpty()) {
+                        updateProgress("Opening encrypted offline database...");
+                        dbMgr.openDatabase(dbPath, oldPassword);
+
+                        int pendingCount = OfflineQueueDAO.getInstance().getPendingCount();
+                        if (pendingCount > 0) {
+                            updateProgress("Syncing " + pendingCount + " pending offline requests...");
+                            SyncManager.getInstance().syncAll((current, total, id) -> {
+                                updateProgress("Syncing offline data (" + current + "/" + total + "): " + id);
+                            });
+                        }
+
+                        dbMgr.closeDatabase();
+                        dbMgr.deleteDatabaseFile(dbPath);
+                    } else {
+                        // Key missing or previously rotated out
+                        dbMgr.deleteDatabaseFile(dbPath);
+                    }
+                }
+
+                // 2. Rotate password and generate new encrypted database for current session
+                updateProgress("Configuring secure offline database...");
+                OfflinePasswordManager pwdMgr = OfflinePasswordManager.getInstance();
+                String newPassword = pwdMgr.generateSecurePassword();
+                api.saveOfflineDbKey(deviceId, newPassword);
+                pwdMgr.setCurrentPassword(newPassword);
+
+                dbMgr.openDatabase(dbPath, newPassword);
+
                 return true;
             }
 
@@ -317,6 +365,15 @@ public class LoginFrame extends javax.swing.JFrame {
             @Override
             protected void onFailure(Exception e) {
 
+                if (e != null && e.getMessage() != null && e.getMessage().contains("Connection interrupted")) {
+                    JOptionPane.showMessageDialog(btnLogin,
+                            "Sync halted due to network issues:\n" + e.getMessage()
+                            + "\n\nYour offline data has been preserved.\nPlease check your connection and login again to finish syncing.",
+                            "Sync Incomplete",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 loginAttempts++;
 
                 UserAuthentication auth = new UserAuthentication();
@@ -327,7 +384,11 @@ public class LoginFrame extends javax.swing.JFrame {
                     return;
                 }
 
-                JOptionPane.showMessageDialog(btnLogin, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                String errorMsg = (e != null && e.getMessage() != null && !e.getMessage().isEmpty())
+                        ? e.getMessage()
+                        : "Invalid username or password";
+
+                JOptionPane.showMessageDialog(btnLogin, errorMsg, "Login Failed", JOptionPane.ERROR_MESSAGE);
 
                 clearFields();
                 txtUsername.requestFocus();
