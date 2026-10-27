@@ -113,6 +113,18 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.fyuxera.hivon.Hivon</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.7.1</version>
                 <configuration>
@@ -132,26 +144,6 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>make-test-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>hivon-tests</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <archive>
-                                <manifest>
-                                    <mainClass>test.framework.TestCli</mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs combine.self="override"/>
-                            <descriptors>
-                                <descriptor>src/assembly/test-jar.xml</descriptor>
-                            </descriptors>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
