@@ -31,6 +31,7 @@ public class ApiConfig {
     public static final String AUTH_REFRESH = "/auth/refresh";
     public static final String AUTH_ME = "/auth/me";
     public static final String USERS = "/users";
+    public static final String USERS_OFFLINE_DB_KEY = "/users/offline-db-key";
     public static final String PERMISSIONS = "/permissions";
 
     // masterdata endpoints
@@ -46,6 +47,15 @@ public class ApiConfig {
     public static final String INVENTORY = "/inventory";
     public static final String PURCHASE_ORDERS = "/purchase-orders";
     public static final String SALES_ORDERS = "/sales-orders";
+    public static final String CYCLE_COUNTS = "/cycle-counts";
+    public static final String TO_BIN_TO_BIN = "/transfer-orders/bin-to-bin";
+    public static final String TO_BIN_TO_BIN_MATERIALS = "/transfer-orders/bin-to-bin/materials";
+    public static final String TO_BIN_TO_BIN_SOURCE_BINS = "/transfer-orders/bin-to-bin/source-bins";
+    public static final String TO_BIN_TO_BIN_DEST_BINS = "/transfer-orders/bin-to-bin/dest-bins";
+    public static final String MOVEMENTS_SPLITTING = "/movements/splitting";
+    public static final String MOVEMENTS_SPLITTING_MATERIALS = "/movements/splitting/materials";
+    public static final String MOVEMENTS_SPLITTING_SOURCE_BINS = "/movements/splitting/source-bins";
+    public static final String MOVEMENTS_SPLITTING_DEST_BINS = "/movements/splitting/dest-bins";
 
     static {
         String url = SystemParameters.API_BASE_URL;
