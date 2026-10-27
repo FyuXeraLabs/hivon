@@ -58,12 +58,21 @@ public class BinDAO {
     }
 
     public List<StorageBinDTO> getBinsByZoneCode(String zoneCode) throws Exception {
-        String endpoint = ApiConfig.BINS;
+        return getBins(null, zoneCode);
+    }
+
+    public List<StorageBinDTO> getBins(Integer warehouseId, String zoneCode) throws Exception {
+        StringBuilder endpoint = new StringBuilder(ApiConfig.BINS);
+        boolean hasParam = false;
+        if (warehouseId != null) {
+            endpoint.append("?warehouse_id=").append(warehouseId);
+            hasParam = true;
+        }
         if (zoneCode != null && !zoneCode.trim().isEmpty()) {
-            endpoint += "?zone_code=" + java.net.URLEncoder.encode(zoneCode, "UTF-8");
+            endpoint.append(hasParam ? "&" : "?").append("zone_code=").append(java.net.URLEncoder.encode(zoneCode.trim(), "UTF-8"));
         }
 
-        HttpRequest request = apiClient.authRequest(endpoint).GET().build();
+        HttpRequest request = apiClient.authRequest(endpoint.toString()).GET().build();
         JsonObject body = apiClient.executeWithAuth(request);
 
         List<StorageBinDTO> bins = new ArrayList<>();
@@ -125,6 +134,24 @@ public class BinDAO {
     public boolean deleteBin(int binId) throws Exception {
         HttpRequest request = apiClient.authRequest(ApiConfig.BINS + "/" + binId)
                 .DELETE().build();
+
+        JsonObject body = apiClient.executeWithAuth(request);
+        return "success".equals(body.get("status").getAsString());
+    }
+
+    public boolean freezeBin(int binId) throws Exception {
+        HttpRequest request = apiClient.authRequest(ApiConfig.BINS + "/" + binId + "/freeze")
+                .PUT(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        JsonObject body = apiClient.executeWithAuth(request);
+        return "success".equals(body.get("status").getAsString());
+    }
+
+    public boolean unfreezeBin(int binId) throws Exception {
+        HttpRequest request = apiClient.authRequest(ApiConfig.BINS + "/" + binId + "/unfreeze")
+                .PUT(HttpRequest.BodyPublishers.noBody())
+                .build();
 
         JsonObject body = apiClient.executeWithAuth(request);
         return "success".equals(body.get("status").getAsString());

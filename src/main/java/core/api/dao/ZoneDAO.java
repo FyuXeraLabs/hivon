@@ -37,6 +37,24 @@ public class ZoneDAO {
         return instance;
     }
 
+    // GET /api/zones
+    public List<ZoneDTO> getAllZones() throws Exception {
+        String endpoint = ApiConfig.ZONES;
+
+        HttpRequest request = apiClient.authRequest(endpoint).GET().build();
+        JsonObject body = apiClient.executeWithAuth(request);
+
+        List<ZoneDTO> zones = new ArrayList<>();
+        JsonArray dataArray = body.getAsJsonArray("data");
+
+        if (dataArray != null) {
+            for (JsonElement elem : dataArray) {
+                zones.add(jsonToZoneDTO(elem.getAsJsonObject()));
+            }
+        }
+        return zones;
+    }
+
     // GET /api/zones?warehouse_id={warehouseId}
     public List<ZoneDTO> getZonesByWarehouse(int warehouseId) throws Exception {
         String endpoint = ApiConfig.ZONES + "?warehouse_id=" + warehouseId;
