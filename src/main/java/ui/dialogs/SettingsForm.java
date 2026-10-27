@@ -70,10 +70,53 @@ public class SettingsForm extends javax.swing.JFrame {
         {"Solarized Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedLightIJTheme"},
     };
 
+    private static SettingsForm instance;
+
+    /**
+     * Shows the single instance of SettingsForm.
+     * If an instance is already open, it is brought to the front and focused.
+     */
+    public static void showSettings() {
+        if (instance == null || !instance.isDisplayable()) {
+            instance = new SettingsForm();
+            instance.setVisible(true);
+        } else {
+            if (instance.getState() == java.awt.Frame.ICONIFIED) {
+                instance.setState(java.awt.Frame.NORMAL);
+            }
+            instance.setVisible(true);
+            instance.toFront();
+            instance.requestFocus();
+        }
+    }
+
+    public static void showForm() {
+        showSettings();
+    }
+
+    public static SettingsForm getInstance() {
+        return instance;
+    }
+
     /**
      * Creates new form Settings
      */
     public SettingsForm() {
+        // Ensure previously opened instance is cleaned up if a new instance is created directly
+        if (instance != null && instance.isDisplayable() && instance != this) {
+            instance.dispose();
+        }
+        instance = this;
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                if (instance == SettingsForm.this) {
+                    instance = null;
+                }
+            }
+        });
+
         initComponents();
         this.setLocationRelativeTo(null);
 
