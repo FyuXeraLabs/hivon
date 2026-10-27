@@ -30,6 +30,7 @@ import javax.swing.KeyStroke;
 import java.awt.event.InputEvent;
 import models.entity.User;
 import ui.dialogs.SettingsForm;
+import ui.dialogs.SystemTrayPanel;
 
 /**
  *
@@ -145,6 +146,7 @@ public class MainFrame extends javax.swing.JFrame {
         lblCap4Title = new javax.swing.JLabel();
         lblCap4Desc = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        btnSyncPanel = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -588,6 +590,14 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        btnSyncPanel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/sinchronize-14.png"))); // NOI18N
+        btnSyncPanel.setText(" Sync");
+        btnSyncPanel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSyncPanelActionPerformed(evt);
+            }
+        });
+
         jMenuBar1.setMinimumSize(new java.awt.Dimension(70, 28));
         jMenuBar1.setPreferredSize(new java.awt.Dimension(70, 28));
 
@@ -642,6 +652,8 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 415, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnSyncPanel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3)
@@ -662,7 +674,9 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnUser, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSyncPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
@@ -874,9 +888,20 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_btnWhatsNewToggleActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        new SettingsForm().setVisible(true);
+        SettingsForm.showSettings();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private static long lastPanelOpenTime = 0;
+    
+    private void btnSyncPanelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSyncPanelActionPerformed
+        // TODO add your handling code here:
+        long now = System.currentTimeMillis();
+        if (now - lastPanelOpenTime < 350) {
+            return;
+        }
+        lastPanelOpenTime = now;
+        SystemTrayPanel.showInDialog();
+    }//GEN-LAST:event_btnSyncPanelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -915,6 +940,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConfirm;
+    private javax.swing.JButton btnSyncPanel;
     private javax.swing.JButton btnUser;
     private javax.swing.JButton btnWhatsNewToggle;
     private javax.swing.JComboBox<String> cmbMovement;

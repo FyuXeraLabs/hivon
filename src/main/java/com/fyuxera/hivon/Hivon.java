@@ -48,6 +48,10 @@ public class Hivon {
             }
         }
 
+        // Initialize system tray
+        core.workers.SystemTray.init();
+
+        /*
         // Check internet connection with retry support
         while (!isInternetAvailable()) {
             Logger.errlog("Startup Check Failed: No internet connection detected.", null);
@@ -70,6 +74,7 @@ public class Hivon {
                 System.exit(1);
             }
         }
+        */
 
         // Check API health with retry support
         boolean healthCheckPassed = false;
