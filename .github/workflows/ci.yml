@@ -1,0 +1,521 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - develop
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - master
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target Environment"
+        required: true
+        type: choice
+        default: "production"
+        options:
+          - production
+          - staging
+          - development
+      build_installers:
+        description: "Build OS Installers (EXE, DEB, DMG)"
+        required: true
+        type: boolean
+        default: true
+      publish_release:
+        description: "Publish GitHub Release"
+        required: true
+        type: boolean
+        default: false
+      custom_version:
+        description: "Custom version override (e.g. 1.0.0)"
+        required: false
+        type: string
+        default: ""
+
+# Cancel in-progress runs on new commits; keep release tag runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+
+env:
+  PROJECT_NAME: "Hivon"
+  JAVA_VERSION: "17"
+  JAVA_DISTRIBUTION: "temurin"
+
+jobs:
+  # Compile and run unit tests
+  ci-validate:
+    name: "Validate & Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Skip test assembly if descriptor is missing
+        shell: bash
+        run: |
+          if [ ! -f src/assembly/test-jar.xml ]; then
+            echo "::warning::src/assembly/test-jar.xml not found - skipping maven-assembly-plugin"
+            echo "MAVEN_ARGS=-Dassembly.skipAssembly=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Compile and Run Unit Tests
+        run: mvn -B clean verify
+
+  # Determine version, environment, and release flags
+  resolve-metadata:
+    name: "Resolve Build Metadata"
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      app_version: ${{ steps.meta.outputs.app_version }}
+      target_env: ${{ steps.meta.outputs.target_env }}
+      is_release: ${{ steps.meta.outputs.is_release }}
+      should_build_installers: ${{ steps.meta.outputs.should_build_installers }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Determine Version and Environment
+        id: meta
+        shell: bash
+        run: |
+          # Resolve target environment
+          if [ -n "${{ inputs.environment }}" ]; then
+            TARGET_ENV="${{ inputs.environment }}"
+          elif [[ "$GITHUB_REF" =~ ^refs/tags/v.*-(rc|beta|alpha|dev).* ]]; then
+            TARGET_ENV="staging"
+          elif [[ "$GITHUB_REF" =~ ^refs/tags/v ]]; then
+            TARGET_ENV="production"
+          elif [[ "$GITHUB_REF" == "refs/heads/master" || "$GITHUB_REF" == "refs/heads/main" ]]; then
+            TARGET_ENV="staging"
+          else
+            TARGET_ENV="development"
+          fi
+
+          # Resolve version string
+          if [ -n "${{ inputs.custom_version }}" ]; then
+            RAW_VERSION="${{ inputs.custom_version }}"
+          elif [[ "$GITHUB_REF" =~ ^refs/tags/v ]]; then
+            RAW_VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            POM_VER=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null || echo "1.0.0")
+            RAW_VERSION="${POM_VER}-build.${GITHUB_RUN_NUMBER}"
+          fi
+
+          # Sanitize version for jpackage (requires numeric x.y.z format)
+          APP_VER=$(echo "$RAW_VERSION" | sed -E 's/[^0-9.]+/./g' | sed -E 's/^\.+|\.+$//g' | awk -F. '{printf "%s.%s.%s", ($1!=""?$1:"1"), ($2!=""?$2:"0"), ($3!=""?$3:"0")}')
+
+          # Determine release and packaging flags
+          IS_RELEASE=false
+          if [[ "$GITHUB_REF" =~ ^refs/tags/v ]] || [ "${{ inputs.publish_release }}" = "true" ]; then
+            IS_RELEASE=true
+          fi
+
+          SHOULD_BUILD=false
+          if [ "$IS_RELEASE" = "true" ] || [ "${{ inputs.build_installers }}" = "true" ]; then
+            SHOULD_BUILD=true
+          fi
+
+          echo "version=$RAW_VERSION" >> $GITHUB_OUTPUT
+          echo "app_version=$APP_VER" >> $GITHUB_OUTPUT
+          echo "target_env=$TARGET_ENV" >> $GITHUB_OUTPUT
+          echo "is_release=$IS_RELEASE" >> $GITHUB_OUTPUT
+          echo "should_build_installers=$SHOULD_BUILD" >> $GITHUB_OUTPUT
+
+          echo "Target Environment: $TARGET_ENV"
+          echo "Version: $RAW_VERSION"
+          echo "App Version (jpackage): $APP_VER"
+          echo "Build Installers: $SHOULD_BUILD"
+          echo "Is Release: $IS_RELEASE"
+
+  # Package Windows EXE with embedded JRE and UAC elevation
+  build-windows:
+    name: "Package Windows (.exe)"
+    needs: [ci-validate, resolve-metadata]
+    if: needs.resolve-metadata.outputs.should_build_installers == 'true'
+    runs-on: windows-latest
+    environment: ${{ needs.resolve-metadata.outputs.target_env }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Skip test assembly if descriptor is missing
+        shell: bash
+        run: |
+          if [ ! -f src/assembly/test-jar.xml ]; then
+            echo "::warning::src/assembly/test-jar.xml not found - skipping maven-assembly-plugin"
+            echo "MAVEN_ARGS=-Dassembly.skipAssembly=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build Application Package
+        run: mvn -B package -DskipTests
+
+      - name: Detect Built JAR Filename
+        id: detectjar
+        shell: pwsh
+        run: |
+          $jar = Get-ChildItem -Path "target" -Filter "*-jar-with-dependencies.jar" | Select-Object -First 1
+          if (-not $jar) {
+            $jar = Get-ChildItem -Path "target" -Filter "*.jar" |
+                   Where-Object { $_.Name -notmatch "original" -and $_.Name -notmatch "tests" } |
+                   Select-Object -First 1
+          }
+          if (-not $jar) { throw "No valid JAR artifact found in target/ directory!"; }
+          echo "JAR_NAME=$($jar.Name)" >> $env:GITHUB_OUTPUT
+          Write-Host "Target JAR: $($jar.Name)"
+
+      - name: Prepare Embedded JRE
+        shell: pwsh
+        run: |
+          $javaHome = $env:JAVA_HOME
+          Write-Host "Bundling JRE from: $javaHome"
+          Copy-Item -Path $javaHome -Destination customjre -Recurse
+
+      - name: Package Windows EXE via jpackage
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          jpackage `
+            --type exe `
+            --input target `
+            --main-jar "${{ steps.detectjar.outputs.JAR_NAME }}" `
+            --runtime-image customjre `
+            --name "${{ env.PROJECT_NAME }}" `
+            --app-version "${{ needs.resolve-metadata.outputs.app_version }}" `
+            --win-shortcut `
+            --win-menu `
+            --win-dir-chooser `
+            --dest dist
+
+      - name: Apply Administrator Privilege & GUI Subsystem (rcedit)
+        shell: pwsh
+        run: |
+          $rceditUrl = "https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe"
+          $rceditPath = "rcedit.exe"
+          if (!(Test-Path $rceditPath)) {
+            Invoke-WebRequest -Uri $rceditUrl -OutFile $rceditPath
+          }
+          $exe = Get-ChildItem -Path "dist" -Filter "*.exe" | Select-Object -First 1
+          if ($exe) {
+            $args = @(
+              "`"$($exe.FullName)`"",
+              '--set-requested-execution-level', 'requireAdministrator',
+              '--set-subsystem', 'windows'
+            )
+            $process = Start-Process -FilePath ".\\$rceditPath" -ArgumentList $args -NoNewWindow -Wait -PassThru
+            Write-Host "Updated EXE manifest for $($exe.Name)"
+          } else {
+            throw "EXE artifact not found in dist/"
+          }
+
+      - name: Standardize Artifact Name and Generate SHA-256 Checksum
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path "dist" -Filter "*.exe" | Select-Object -First 1
+          $targetName = "dist/${{ env.PROJECT_NAME }}_${{ needs.resolve-metadata.outputs.version }}.exe"
+          if ($exe.FullName -ne (Resolve-Path -Path $targetName -ErrorAction SilentlyContinue).Path) {
+            Move-Item -Path $exe.FullName -Destination $targetName -Force
+          }
+          $finalExe = Get-Item $targetName
+          $hash = (Get-FileHash -Path $finalExe.FullName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $($finalExe.Name)" | Out-File -FilePath "$($finalExe.FullName).sha256" -Encoding ascii
+          Write-Host "Artifact: $($finalExe.Name) | SHA256: $hash"
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            dist/*.exe
+            dist/*.sha256
+          if-no-files-found: error
+
+  # Package Linux DEB with custom JRE and root launcher
+  build-linux:
+    name: "Package Linux (.deb)"
+    needs: [ci-validate, resolve-metadata]
+    if: needs.resolve-metadata.outputs.should_build_installers == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-metadata.outputs.target_env }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Skip test assembly if descriptor is missing
+        shell: bash
+        run: |
+          if [ ! -f src/assembly/test-jar.xml ]; then
+            echo "::warning::src/assembly/test-jar.xml not found - skipping maven-assembly-plugin"
+            echo "MAVEN_ARGS=-Dassembly.skipAssembly=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install Linux Packaging Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot binutils
+
+      - name: Build Application Package
+        run: mvn -B package -DskipTests
+
+      - name: Detect Built JAR Filename
+        id: detectjar
+        shell: bash
+        run: |
+          JAR=$(ls target/*-jar-with-dependencies.jar 2>/dev/null | head -n 1)
+          if [ -z "$JAR" ]; then
+            JAR=$(ls target/*.jar | grep -v original | grep -v tests | head -n 1)
+          fi
+          if [ -z "$JAR" ]; then
+            echo "No JAR found!" && exit 1
+          fi
+          JAR_NAME=$(basename "$JAR")
+          echo "JAR_NAME=$JAR_NAME" >> $GITHUB_OUTPUT
+          echo "Target JAR: $JAR_NAME"
+
+      - name: Create Modular JRE via jlink
+        shell: bash
+        run: |
+          jlink \
+            --add-modules ALL-MODULE-PATH \
+            --output customjre \
+            --compress=2 \
+            --no-header-files \
+            --no-man-pages
+
+      - name: Package Linux DEB via jpackage
+        shell: bash
+        run: |
+          mkdir -p dist
+          jpackage \
+            --type deb \
+            --input target \
+            --main-jar "${{ steps.detectjar.outputs.JAR_NAME }}" \
+            --runtime-image customjre \
+            --name "${{ env.PROJECT_NAME }}" \
+            --app-version "${{ needs.resolve-metadata.outputs.app_version }}" \
+            --linux-shortcut \
+            --linux-deb-maintainer "info@fyuxera.com" \
+            --linux-app-category "Office" \
+            --linux-menu-group "Office" \
+            --dest dist
+
+      - name: Generate Root Privilege Launcher Script
+        shell: bash
+        run: |
+          WRAPPER="dist/${{ env.PROJECT_NAME }}_run_as_root.sh"
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'if [[ $EUID -ne 0 ]]; then' \
+            '  echo "This application requires root privileges. Relaunching with sudo..."' \
+            '  exec sudo "$0" "$@"' \
+            'fi' \
+            "exec /opt/${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }} \"\$@\"" > "$WRAPPER"
+          chmod +x "$WRAPPER"
+          echo "Created Linux root launcher: $WRAPPER"
+
+      - name: Standardize Artifact Name and Generate SHA-256 Checksum
+        shell: bash
+        run: |
+          deb_file=$(ls dist/*.deb 2>/dev/null | head -n 1)
+          target_deb="dist/${{ env.PROJECT_NAME }}_${{ needs.resolve-metadata.outputs.version }}.deb"
+          if [ "$deb_file" != "$target_deb" ]; then
+            mv "$deb_file" "$target_deb"
+          fi
+          sha256sum "$target_deb" | awk '{print $1 "  " $2}' > "${target_deb}.sha256"
+          echo "Linux DEB: $target_deb"
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: |
+            dist/*.deb
+            dist/*.sh
+            dist/*.sha256
+          if-no-files-found: error
+
+  # Package macOS DMG with bundled JRE and admin launcher
+  build-macos:
+    name: "Package macOS (.dmg)"
+    needs: [ci-validate, resolve-metadata]
+    if: needs.resolve-metadata.outputs.should_build_installers == 'true'
+    runs-on: macos-latest
+    environment: ${{ needs.resolve-metadata.outputs.target_env }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Skip test assembly if descriptor is missing
+        shell: bash
+        run: |
+          if [ ! -f src/assembly/test-jar.xml ]; then
+            echo "::warning::src/assembly/test-jar.xml not found - skipping maven-assembly-plugin"
+            echo "MAVEN_ARGS=-Dassembly.skipAssembly=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build Application Package
+        run: mvn -B package -DskipTests
+
+      - name: Detect Built JAR Filename
+        id: detectjar
+        shell: bash
+        run: |
+          JAR=$(ls target/*-jar-with-dependencies.jar 2>/dev/null | head -n 1)
+          if [ -z "$JAR" ]; then
+            JAR=$(ls target/*.jar | grep -v original | grep -v tests | head -n 1)
+          fi
+          if [ -z "$JAR" ]; then
+            echo "No JAR found!" && exit 1
+          fi
+          JAR_NAME=$(basename "$JAR")
+          echo "JAR_NAME=$JAR_NAME" >> $GITHUB_OUTPUT
+          echo "Target JAR: $JAR_NAME"
+
+      - name: Prepare Embedded JRE
+        shell: bash
+        run: |
+          echo "Bundling JRE from: $JAVA_HOME"
+          cp -R "$JAVA_HOME" customjre
+
+      - name: Package macOS DMG via jpackage
+        shell: bash
+        run: |
+          mkdir -p dist
+          jpackage \
+            --type dmg \
+            --input target \
+            --main-jar "${{ steps.detectjar.outputs.JAR_NAME }}" \
+            --runtime-image customjre \
+            --name "${{ env.PROJECT_NAME }}" \
+            --app-version "${{ needs.resolve-metadata.outputs.app_version }}" \
+            --mac-package-name "${{ env.PROJECT_NAME }}" \
+            --dest dist
+
+      - name: Generate Administrator Launcher Script
+        shell: bash
+        run: |
+          LAUNCHER="dist/${{ env.PROJECT_NAME }}_run_as_admin.command"
+          APP_PATH="/Applications/${{ env.PROJECT_NAME }}.app"
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'echo "This application requires administrator privileges."' \
+            "osascript -e \"do shell script \\\"open -a '${APP_PATH}'\\\" with administrator privileges\"" > "$LAUNCHER"
+          chmod +x "$LAUNCHER"
+          echo "Created macOS admin launcher: $LAUNCHER"
+
+      - name: Standardize Artifact Name and Generate SHA-256 Checksum
+        shell: bash
+        run: |
+          dmg_file=$(ls dist/*.dmg 2>/dev/null | head -n 1)
+          target_dmg="dist/${{ env.PROJECT_NAME }}_${{ needs.resolve-metadata.outputs.version }}.dmg"
+          if [ "$dmg_file" != "$target_dmg" ]; then
+            mv "$dmg_file" "$target_dmg"
+          fi
+          shasum -a 256 "$target_dmg" | awk '{print $1 "  " $2}' > "${target_dmg}.sha256"
+          echo "macOS DMG: $target_dmg"
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: |
+            dist/*.dmg
+            dist/*.command
+            dist/*.sha256
+          if-no-files-found: error
+
+  # Publish release and installers to GitHub Releases
+  release:
+    name: "Publish GitHub Release"
+    needs: [resolve-metadata, build-windows, build-linux, build-macos]
+    if: needs.resolve-metadata.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-metadata.outputs.target_env }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: dist
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: dist
+
+      - name: Download macOS Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+          path: dist
+
+      - name: Aggregate SHA-256 Checksums
+        shell: bash
+        run: |
+          cd dist
+          cat *.sha256 > checksums.txt 2>/dev/null || true
+          rm -f *.sha256
+          echo "Consolidated checksums.txt:"
+          cat checksums.txt
+
+      - name: Publish Release to GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ env.PROJECT_NAME }} v${{ needs.resolve-metadata.outputs.version }}"
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.resolve-metadata.outputs.version) }}
+          generate_release_notes: true
+          files: |
+            dist/*
+          prerelease: ${{ contains(needs.resolve-metadata.outputs.version, '-rc') || contains(needs.resolve-metadata.outputs.version, '-beta') || contains(needs.resolve-metadata.outputs.version, '-alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
