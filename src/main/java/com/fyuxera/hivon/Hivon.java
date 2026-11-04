@@ -5,7 +5,6 @@
 package com.fyuxera.hivon;
 
 import javax.swing.UIManager;
-import javax.swing.JOptionPane;
 import ui.LoginFrame;
 import core.logging.Logger;
 import core.api.ApiClient;
@@ -16,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import core.config.SettingsManager;
+import core.workers.BackgroundTask;
 
 /**
  *
@@ -34,6 +34,9 @@ public class Hivon {
         }
     }
 
+    private static boolean internetCheckPassed = false;
+    private static boolean healthCheckPassed = false;
+
     public static void main(String[] args) {
         // Load config
         SettingsManager.init();
@@ -51,87 +54,96 @@ public class Hivon {
         // Initialize system tray
         core.workers.SystemTray.init();
 
-        /*
         // Check internet connection with retry support
-        while (!isInternetAvailable()) {
-            Logger.errlog("Startup Check Failed: No internet connection detected.", null);
-            
-            // Show retry/exit dialog
-            Object[] options = {"Retry", "Exit"};
-            int choice = JOptionPane.showOptionDialog(
-                    null,
-                    "No internet connection detected. Please check your network connection and try again!",
-                    "Connection Error",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.ERROR_MESSAGE,
-                    null,
-                    options,
-                    options[0]
-            );
-
-            // Exit if user didn't click Retry
-            if (choice != 0) {
-                System.exit(1);
-            }
+        while (!internetCheckPassed) {
+            createInternetCheckTask().executeWithRetry();
         }
-        */
 
         // Check API health with retry support
-        boolean healthCheckPassed = false;
         while (!healthCheckPassed) {
-            try {
-                JsonObject healthResponse = ApiClient.getInstance().checkHealth();
-                boolean success = healthResponse.has("success") && healthResponse.get("success").getAsBoolean();
-                String message = healthResponse.has("message") ? healthResponse.get("message").getAsString() : "No message provided";
-                
-                if (success) {
-                    Logger.log("System", "API health check passed: " + healthResponse.toString());
-                    healthCheckPassed = true;
-                } else {
-                    Logger.errlog("API health check failed: " + healthResponse.toString(), null);
-                    
-                    // Show retry/exit dialog for server maintenance issues
-                    Object[] options = {"Retry", "Exit"};
-                    int choice = JOptionPane.showOptionDialog(
-                            null,
-                            "The application server is experiencing issues or undergoing maintenance. Please try again later!",
-                            "System Health Error",
-                            JOptionPane.DEFAULT_OPTION,
-                            JOptionPane.ERROR_MESSAGE,
-                            null,
-                            options,
-                            options[0]
-                    );
-                    
-                    // Exit if user didn't click Retry
-                    if (choice != 0) {
-                        System.exit(1);
-                    }
-                }
-            } catch (Exception e) {
-                Logger.errlog("API health check request failed: " + e.getMessage(), e);
-                
-                // Show retry/exit dialog for connection failure
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        null,
-                        "Unable to connect to the application server. Please verify your connection or try again later!",
-                        "Connection Error",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                
-                // Exit if user didn't click Retry
-                if (choice != 0) {
-                    System.exit(1);
-                }
-            }
+            createHealthCheckTask().executeWithRetry();
         }
                 
         LoginFrame login = new LoginFrame();
         login.setVisible(true);
+    }
+
+    private static BackgroundTask createInternetCheckTask() {
+        return new BackgroundTask((java.awt.Component) null, "Checking Internet") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Checking internet connection...");
+                if (!isInternetAvailable()) {
+                    throw new Exception("No internet connection detected. Please check your network connection!");
+                }
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                internetCheckPassed = true;
+                Logger.log("System", "Internet connection check passed.");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
+
+            @Override
+            protected void onCancel() {
+                System.exit(1);
+            }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createInternetCheckTask();
+            }
+        };
+    }
+
+    private static BackgroundTask createHealthCheckTask() {
+        return new BackgroundTask((java.awt.Component) null, "API Health Check") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Checking API health...");
+                JsonObject healthResponse;
+                try {
+                    healthResponse = ApiClient.getInstance().checkHealth();
+                } catch (Exception e) {
+                    Logger.errlog("API health check request failed: " + e.getMessage(), e);
+                    throw new Exception("Unable to connect to application server. Please verify your connection!");
+                }
+                boolean success = healthResponse != null && healthResponse.has("success") && healthResponse.get("success").getAsBoolean();
+                
+                if (success) {
+                    Logger.log("System", "API health check passed: " + healthResponse.toString());
+                    return true;
+                } else {
+                    Logger.errlog("API health check failed: " + (healthResponse != null ? healthResponse.toString() : "null"), null);
+                    throw new Exception("Application server is undergoing maintenance or experiencing issues!");
+                }
+            }
+
+            @Override
+            protected void onSuccess() {
+                healthCheckPassed = true;
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
+
+            @Override
+            protected void onCancel() {
+                System.exit(1);
+            }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createHealthCheckTask();
+            }
+        };
     }
 }

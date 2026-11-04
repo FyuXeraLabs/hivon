@@ -612,58 +612,45 @@ public class CustomerForm extends javax.swing.JFrame {
     // loads and populates customer data into the table
 
     private void loadCustomerList() {
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        createLoadCustomersTask().executeWithRetry();
+    }
 
-            BackgroundTask task = new BackgroundTask(this, "Loading Customers") {
-                private List<CustomerDTO> customers;
+    private BackgroundTask createLoadCustomersTask() {
+        return new BackgroundTask(this, "Loading Customers") {
+            private List<CustomerDTO> customers;
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    updateProgress("Fetching customers...");
-                    customers = controller.getAllCustomers();
-                    return customers != null;
-                }
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching customers...");
+                customers = controller.getAllCustomers();
+                return customers != null;
+            }
 
-                @Override
-                protected void onSuccess() {
-                    populateCustomerTable(customers);
-                    success[0] = true;
-                }
+            @Override
+            protected void onSuccess() {
+                populateCustomerTable(customers);
+            }
 
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
-            task.executeWithDialog();
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
 
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load customers: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    if (isInitializing) {
-                        dispose();
-                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
-                    } else {
-                        StatusMessageHandler.showError(txtStatus, "Failed to load customers!");
-                        break;
-                    }
+            @Override
+            protected void onCancel() {
+                if (isInitializing) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                } else {
+                    StatusMessageHandler.showError(txtStatus, "Failed to load customers!");
                 }
             }
-        }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createLoadCustomersTask();
+            }
+        };
     }
 
     private void populateCustomerTable(List<CustomerDTO> customers) {

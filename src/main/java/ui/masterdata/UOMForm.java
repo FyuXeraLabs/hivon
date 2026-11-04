@@ -492,58 +492,45 @@ public class UOMForm extends javax.swing.JFrame {
     // loads and populates UOM data into the table
 
     private void loadUOMList() {
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        createLoadUOMsTask().executeWithRetry();
+    }
 
-            BackgroundTask task = new BackgroundTask(this, "Loading UOMs") {
-                private List<UOMDTO> uoms;
+    private BackgroundTask createLoadUOMsTask() {
+        return new BackgroundTask(this, "Loading UOMs") {
+            private List<UOMDTO> uoms;
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    updateProgress("Fetching UOMs...");
-                    uoms = controller.getAllUOMs();
-                    return uoms != null;
-                }
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching UOMs...");
+                uoms = controller.getAllUOMs();
+                return uoms != null;
+            }
 
-                @Override
-                protected void onSuccess() {
-                    populateUOMTable(uoms);
-                    success[0] = true;
-                }
+            @Override
+            protected void onSuccess() {
+                populateUOMTable(uoms);
+            }
 
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
-            task.executeWithDialog();
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
 
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load UOMs: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    if (isInitializing) {
-                        dispose();
-                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
-                    } else {
-                        StatusMessageHandler.showError(txtStatus, "Failed to load UOMs!");
-                        break;
-                    }
+            @Override
+            protected void onCancel() {
+                if (isInitializing) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                } else {
+                    StatusMessageHandler.showError(txtStatus, "Failed to load UOMs!");
                 }
             }
-        }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createLoadUOMsTask();
+            }
+        };
     }
 
     private void populateUOMTable(List<UOMDTO> uoms) {

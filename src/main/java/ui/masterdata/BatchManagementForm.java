@@ -707,88 +707,75 @@ public class BatchManagementForm extends javax.swing.JFrame {
     }
 
     private void loadMaterials() {
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        createLoadMaterialsTask().executeWithRetry();
+    }
 
-            BackgroundTask task = new BackgroundTask(this, "Loading Materials") {
-                private List<MaterialDTO> materialsList;
+    private BackgroundTask createLoadMaterialsTask() {
+        return new BackgroundTask(this, "Loading Materials") {
+            private List<MaterialDTO> materialsList;
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    updateProgress("Loading materials list...");
-                    masterdata.controllers.MaterialController matController = new masterdata.controllers.MaterialController();
-                    materialsList = matController.getAllMaterials();
-                    return materialsList != null;
-                }
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Loading materials list...");
+                masterdata.controllers.MaterialController matController = new masterdata.controllers.MaterialController();
+                materialsList = matController.getAllMaterials();
+                return materialsList != null;
+            }
 
-                @Override
-                protected void onSuccess() {
-                    // Filter to only batch-managed materials
-                    List<MaterialDTO> batchManagedMaterials = new ArrayList<>();
-                    if (materialsList != null) {
-                        for (MaterialDTO mat : materialsList) {
-                            if (mat.isBatchManaged()) {
-                                batchManagedMaterials.add(mat);
-                            }
+            @Override
+            protected void onSuccess() {
+                // Filter to only batch-managed materials
+                List<MaterialDTO> batchManagedMaterials = new ArrayList<>();
+                if (materialsList != null) {
+                    for (MaterialDTO mat : materialsList) {
+                        if (mat.isBatchManaged()) {
+                            batchManagedMaterials.add(mat);
                         }
                     }
-                    allMaterialsList = batchManagedMaterials;
-
-                    isPopulating = true;
-                    try {
-                        // Populate cmbMaterial (filter)
-                        cmbMaterial.removeAllItems();
-                        cmbMaterial.setSelectAllLabel("All");
-                        cmbMaterial.addItem("All");
-                        for (MaterialDTO mat : allMaterialsList) {
-                            cmbMaterial.addItem(mat.getMaterialCode());
-                        }
-
-                        // Populate cmbMaterialDetail
-                        cmbMaterialDetail.removeAllItems();
-                        for (MaterialDTO mat : allMaterialsList) {
-                            cmbMaterialDetail.addItem(mat.getMaterialCode() + " - " + mat.getMaterialDescription());
-                        }
-                        cmbMaterialDetail.setSelectedIndex(-1);
-                    } finally {
-                        isPopulating = false;
-                    }
-                    success[0] = true;
                 }
+                allMaterialsList = batchManagedMaterials;
 
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
-            task.executeWithDialog();
-
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load materials: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    if (isInitializing) {
-                        dispose();
-                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
-                    } else {
-                        StatusMessageHandler.showError(txtStatus, "Failed to load materials!");
-                        break;
+                isPopulating = true;
+                try {
+                    // Populate cmbMaterial (filter)
+                    cmbMaterial.removeAllItems();
+                    cmbMaterial.setSelectAllLabel("All");
+                    cmbMaterial.addItem("All");
+                    for (MaterialDTO mat : allMaterialsList) {
+                        cmbMaterial.addItem(mat.getMaterialCode());
                     }
+
+                    // Populate cmbMaterialDetail
+                    cmbMaterialDetail.removeAllItems();
+                    for (MaterialDTO mat : allMaterialsList) {
+                        cmbMaterialDetail.addItem(mat.getMaterialCode() + " - " + mat.getMaterialDescription());
+                    }
+                    cmbMaterialDetail.setSelectedIndex(-1);
+                } finally {
+                    isPopulating = false;
                 }
             }
-        }
+
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
+
+            @Override
+            protected void onCancel() {
+                if (isInitializing) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                } else {
+                    StatusMessageHandler.showError(txtStatus, "Failed to load materials!");
+                }
+            }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createLoadMaterialsTask();
+            }
+        };
     }
 
     private void setupTttFieldNavigation() {
@@ -903,58 +890,45 @@ public class BatchManagementForm extends javax.swing.JFrame {
     // loads and populates batch data into the table
 
     private void loadBatchList() {
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        createLoadBatchesTask().executeWithRetry();
+    }
 
-            BackgroundTask task = new BackgroundTask(this, "Loading Batches") {
-                private List<BatchDTO> batches;
+    private BackgroundTask createLoadBatchesTask() {
+        return new BackgroundTask(this, "Loading Batches") {
+            private List<BatchDTO> batches;
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    updateProgress("Fetching batches...");
-                    batches = controller.getAllBatches();
-                    return batches != null;
-                }
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching batches...");
+                batches = controller.getAllBatches();
+                return batches != null;
+            }
 
-                @Override
-                protected void onSuccess() {
-                    populateBatchTable(batches);
-                    success[0] = true;
-                }
+            @Override
+            protected void onSuccess() {
+                populateBatchTable(batches);
+            }
 
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
-            task.executeWithDialog();
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
 
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load batches: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    if (isInitializing) {
-                        dispose();
-                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
-                    } else {
-                        StatusMessageHandler.showError(txtStatus, "Failed to load batches!");
-                        break;
-                    }
+            @Override
+            protected void onCancel() {
+                if (isInitializing) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                } else {
+                    StatusMessageHandler.showError(txtStatus, "Failed to load batches!");
                 }
             }
-        }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createLoadBatchesTask();
+            }
+        };
     }
 
     private void populateBatchTable(List<BatchDTO> batches) {

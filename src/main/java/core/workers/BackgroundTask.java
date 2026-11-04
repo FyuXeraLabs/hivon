@@ -18,9 +18,10 @@ import core.logging.Logger;
  */
 public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
     
-    private final ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
     private final java.awt.Component parentComponent;
     private final String taskName;
+    private boolean retryOnFailure = false;
     
     public BackgroundTask(JFrame parentFrame, String taskName) {
         this.parentComponent = parentFrame;
@@ -32,6 +33,21 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
         this.parentComponent = parentDialog;
         this.taskName = taskName;
         this.progressDialog = new ProgressDialog(parentDialog, true);
+    }
+
+    public BackgroundTask(java.awt.Component parentComponent, String taskName) {
+        this.parentComponent = parentComponent;
+        this.taskName = taskName;
+        java.awt.Window window = parentComponent instanceof java.awt.Window
+                ? (java.awt.Window) parentComponent
+                : (parentComponent != null ? javax.swing.SwingUtilities.getWindowAncestor(parentComponent) : null);
+        if (window instanceof javax.swing.JDialog) {
+            this.progressDialog = new ProgressDialog((javax.swing.JDialog) window, true);
+        } else if (window instanceof java.awt.Frame) {
+            this.progressDialog = new ProgressDialog((java.awt.Frame) window, true);
+        } else {
+            this.progressDialog = new ProgressDialog((java.awt.Frame) null, true);
+        }
     }
     
     /**
@@ -64,6 +80,14 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
     protected void onComplete() {
         // override in subclass if needed
     }
+
+    /**
+     * override this to handle cancel from progress dialog
+     * called when user clicks Cancel button during retry mode
+     */
+    protected void onCancel() {
+        // override in subclass if needed
+    }
     
     /**
      * update progress message (call from performTask)
@@ -72,6 +96,18 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
         publish(message);
     }
     
+    /**
+     * Attach an existing progress dialog to avoid re-opening / flickering on retry.
+     */
+    public void attachProgressDialog(ProgressDialog dialog) {
+        if (dialog != null) {
+            if (this.progressDialog != null && this.progressDialog != dialog) {
+                this.progressDialog.dispose();
+            }
+            this.progressDialog = dialog;
+        }
+    }
+
     /**
      * execute the task and show progress dialog
      */
@@ -83,8 +119,27 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
         // execute the worker
         super.execute();
         
-        // show modal dialog
-        progressDialog.setVisible(true);
+        // show modal dialog if not already visible
+        if (!progressDialog.isVisible()) {
+            progressDialog.setVisible(true);
+        }
+    }
+
+    /**
+     * execute the task with retry/cancel support on the progress dialog.
+     * on failure, the dialog stays open showing Retry and Cancel buttons
+     * instead of closing and showing a JOptionPane.
+     */
+    public void executeWithRetry() {
+        this.retryOnFailure = true;
+        executeWithDialog();
+    }
+
+    /**
+     * get the progress dialog (for external configuration)
+     */
+    public ProgressDialog getProgressDialog() {
+        return progressDialog;
     }
     
     @Override
@@ -109,25 +164,61 @@ public abstract class BackgroundTask extends SwingWorker<Boolean, String> {
     
     @Override
     protected void done() {
-        // close progress dialog
-        progressDialog.closeDialog();
-        
         try {
             // get result
             Boolean success = get();
             
             if (success != null && success) {
+                progressDialog.closeDialog();
                 onSuccess();
+                onComplete();
             } else {
-                onFailure(new Exception("Operation returned false"));
+                handleFailure(new Exception("Operation returned false"));
             }
             
         } catch (Exception e) {
-            onFailure(e);
-        } finally {
-            onComplete();
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            handleFailure(cause instanceof Exception ? (Exception) cause : new Exception(cause));
         }
         
         Logger.log("BackgroundTask", taskName + " finished");
+    }
+
+    private void handleFailure(Exception e) {
+        if (retryOnFailure) {
+            // show retry/cancel on the progress dialog instead of closing
+            String errorMsg = e.getMessage() != null && !e.getMessage().equals("Operation returned false")
+                    ? e.getMessage()
+                    : taskName + " failed. Please check and try again!";
+            progressDialog.setMessage(taskName + " Failed");
+            progressDialog.showRetryCancel(errorMsg);
+            
+            // set up retry: reuse existing dialog, create new task, execute it
+            progressDialog.setOnRetryAction(() -> {
+                BackgroundTask retryTask = createRetryTask();
+                retryTask.attachProgressDialog(progressDialog);
+                retryTask.executeWithRetry();
+            });
+            
+            // set up cancel: call onCancel and onComplete
+            progressDialog.setOnCancelAction(() -> {
+                onCancel();
+                onComplete();
+            });
+            // dialog stays open — buttons will handle closing
+        } else {
+            progressDialog.closeDialog();
+            onFailure(e);
+            onComplete();
+        }
+    }
+
+    /**
+     * create a new task instance for retry.
+     * subclasses must override this when using executeWithRetry().
+     */
+    protected BackgroundTask createRetryTask() {
+        throw new UnsupportedOperationException(
+            "createRetryTask() must be overridden when using executeWithRetry()");
     }
 }

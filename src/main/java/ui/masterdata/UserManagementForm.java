@@ -66,67 +66,51 @@ public class UserManagementForm extends javax.swing.JFrame {
     }
 
     private void loadUserList() {
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        createLoadUsersTask().executeWithRetry();
+    }
 
-            BackgroundTask task = new BackgroundTask(this, "Loading Users") {
+    private BackgroundTask createLoadUsersTask() {
+        return new BackgroundTask(this, "Loading Users") {
 
-                // store the fetched users
-                private List<UserDTO> users;
+            // store the fetched users
+            private List<UserDTO> users;
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    
-                    updateProgress("Fetching users from database...");
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching users from database...");
 
-                    // fetch all users from database
-                    UserManagementController controller = new UserManagementController();
-                    users = controller.getAllUsers();
+                // fetch all users from database
+                UserManagementController controller = new UserManagementController();
+                users = controller.getAllUsers();
 
-                    return users != null;
-                }
+                return users != null;
+            }
 
-                @Override
-                protected void onSuccess() {
-                    populateUserTable(users);
-                    success[0] = true;
-                }
+            @Override
+            protected void onSuccess() {
+                populateUserTable(users);
+            }
 
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
 
-            // execute the task
-            task.executeWithDialog();
-
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load users: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    if (isInitializing) {
-                        dispose();
-                        throw new RuntimeException("Cancelled form loading due to fetch failure.");
-                    } else {
-                        StatusMessageHandler.showError(txtStatus, "Failed to load users!");
-                        break;
-                    }
+            @Override
+            protected void onCancel() {
+                if (isInitializing) {
+                    dispose();
+                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
+                } else {
+                    StatusMessageHandler.showError(txtStatus, "Failed to load users!");
                 }
             }
-        }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createLoadUsersTask();
+            }
+        };
     }
 
     private void populateUserTable(List<UserDTO> users) {
