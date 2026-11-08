@@ -242,31 +242,37 @@ public class UserManagementForm extends javax.swing.JFrame {
     }
 
     private void populateDefaultPermissionsForRole(String role) {
-        // get defaults for this role
-        List<String> defaultPermissions = getDefaultPermissionsForRole(role);
-
-        // fetch all system permissions from API (async)
+        // fetch all system permissions and default permissions from API (async)
         BackgroundTask task = new BackgroundTask(this, "Loading Permissions") {
 
             private Set<String> allPermissions;
+            private Set<String> defaultPermissions;
 
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Fetching system permissions...");
                 allPermissions = permissionManager.getAllSystemPermissions();
+                try {
+                    defaultPermissions = permissionManager.getDefaultPermissionsForRole(role);
+                } catch (Exception ignored) {
+                }
                 return allPermissions != null;
             }
 
             @Override
             protected void onSuccess() {
+                List<String> defs = (defaultPermissions != null && !defaultPermissions.isEmpty())
+                        ? new ArrayList<>(defaultPermissions)
+                        : getDefaultPermissionsForRole(role);
+
                 // assigned = defaults
-                List<String> assignedList = new ArrayList<>(defaultPermissions);
+                List<String> assignedList = new ArrayList<>(defs);
                 assignedList.sort(String::compareTo);
 
                 // available = all minus defaults
                 List<String> availableList = new ArrayList<>();
                 for (String p : allPermissions) {
-                    if (!defaultPermissions.contains(p)) {
+                    if (!defs.contains(p)) {
                         availableList.add(p);
                     }
                 }
@@ -342,6 +348,7 @@ public class UserManagementForm extends javax.swing.JFrame {
                 permissions.add("PROCESS_PUTAWAY");
                 permissions.add("PROCESS_PICKING");
                 permissions.add("PROCESS_REPLENISHMENT");
+                permissions.add("QUERY_INVENTORY");
                 break;
         }
 

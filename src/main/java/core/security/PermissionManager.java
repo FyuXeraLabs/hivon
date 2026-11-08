@@ -58,6 +58,20 @@ public class PermissionManager {
         return allPermissions;
     }
 
+    // get default permissions for role from API
+    public Set<String> getDefaultPermissionsForRole(String role) {
+        if (role == null || role.trim().isEmpty()) {
+            return new HashSet<>();
+        }
+
+        try {
+            return PermissionDAO.getInstance().getDefaultPermissionsForRole(role);
+        } catch (Exception e) {
+            Logger.errlog("error loading default permissions for role " + role, e);
+            return new HashSet<>();
+        }
+    }
+
     // assign permission to user
     public boolean assignPermission(Integer userId, String permissionCode) {
         try {

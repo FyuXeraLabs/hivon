@@ -374,6 +374,12 @@ public class LoginFrame extends javax.swing.JFrame {
                     return;
                 }
 
+                if (e != null && e.getMessage() != null && e.getMessage().toLowerCase().contains("too many failed login attempts")) {
+                    loginAttempts = 5;
+                    JOptionPane.showMessageDialog(btnLogin, e.getMessage(), "Too Many Attempts", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 loginAttempts++;
 
                 UserAuthentication auth = new UserAuthentication();

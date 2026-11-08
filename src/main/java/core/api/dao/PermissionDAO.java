@@ -51,6 +51,21 @@ public class PermissionDAO {
         return permissions;
     }
 
+    // GET /permissions/defaults/{role}
+    public Set<String> getDefaultPermissionsForRole(String role) throws Exception {
+        HttpRequest request = apiClient.authRequest(ApiConfig.PERMISSIONS + "/defaults/" + role).GET().build();
+        JsonObject body = apiClient.executeWithAuth(request);
+
+        Set<String> permissions = new HashSet<>();
+        JsonArray dataArray = body.getAsJsonArray("data");
+        if (dataArray != null) {
+            for (JsonElement elem : dataArray) {
+                permissions.add(elem.getAsString());
+            }
+        }
+        return permissions;
+    }
+
     // GET /users/{userId}/permissions
     public Set<String> getUserPermissions(int userId) throws Exception {
         HttpRequest request = apiClient.authRequest(ApiConfig.USERS + "/" + userId + "/permissions")
