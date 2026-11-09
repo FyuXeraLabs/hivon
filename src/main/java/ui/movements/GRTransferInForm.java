@@ -89,6 +89,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         btnCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         btnReceiveGoods = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Goods Receipt - Transfer In (IN13)");
@@ -249,6 +250,15 @@ public class GRTransferInForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText(" Print");
+        btnPrint.setToolTipText("Print Return Authorization");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelActionsLayout = new javax.swing.GroupLayout(jPanelActions);
         jPanelActions.setLayout(jPanelActionsLayout);
         jPanelActionsLayout.setHorizontalGroup(
@@ -260,7 +270,9 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addComponent(btnCompleteReceipt, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(37, 37, 37)
+                .addComponent(btnPrint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 208, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -272,7 +284,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnCompleteReceipt)
                         .addComponent(btnCancel)
-                        .addComponent(btnReceiveGoods))
+                        .addComponent(btnReceiveGoods)
+                        .addComponent(btnPrint))
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -339,6 +352,42 @@ public class GRTransferInForm extends javax.swing.JFrame {
     private void btnReceiveGoodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReceiveGoodsActionPerformed
         submitGoodsReceipt(true);
     }//GEN-LAST:event_btnReceiveGoodsActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (currentTO == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Transfer Order first.");
+            return;
+        }
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblTOItems.getModel();
+        if (model.getRowCount() == 0) {
+            StatusMessageHandler.showWarning(txtStatus, "No transfer order items to print.");
+            return;
+        }
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Goods Receipt - Transfer In (IN13)")
+                .subtitle("Transfer Order: " + txtTONumber.getText().trim())
+                .addDetail("Transfer Order", txtTONumber.getText())
+                .addDetail("From Warehouse", txtFromWarehouse.getText())
+                .addDetail("To Warehouse", txtToWarehouse.getText())
+                .addDetail("Expected Date", txtExpectedReceiptDate.getText())
+                .addDetail("Actual Date", txtActualReceiptDate.getText())
+                .addDetail("Expected Quantity", txtExpectedQuantity.getText())
+                .addDetail("Status", currentTO != null && currentTO.getStatus() != null ? currentTO.getStatus() : "Open")
+                .tableColumns(new String[]{"Material Code", "Description", "Expected Qty", "Received Qty"});
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     private void searchOpenTransferOrders() {
         BackgroundTask task = new BackgroundTask(this, "Searching Open TOs") {
@@ -553,6 +602,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 StatusMessageHandler.showSuccess(txtStatus, "Goods Receipt posted successfully!");
+                btnPrintActionPerformed(null);
                 // Reload Transfer Order to show updated status/quantities
                 loadTransferOrder(currentTO.getToNumber());
             }
@@ -604,6 +654,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCompleteReceipt;
     private javax.swing.JButton btnLoadTO;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnReceiveGoods;
     private javax.swing.JPanel jPanelActions;
     private javax.swing.JPanel jPanelDetails;

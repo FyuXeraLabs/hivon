@@ -79,11 +79,12 @@ public class CycleCountForm extends javax.swing.JFrame {
         cmbZone = new javax.swing.JComboBox<>();
         cmbBin = new javax.swing.JComboBox<>();
         jPanel8 = new javax.swing.JPanel();
-        btnCompleteCount = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnFreeze = new javax.swing.JButton();
         btnUnfreeze = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         lblBinCode = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
@@ -216,11 +217,11 @@ public class CycleCountForm extends javax.swing.JFrame {
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
-        btnCompleteCount.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteCount.setText("POST");
-        btnCompleteCount.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText("POST");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteCountActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -248,18 +249,28 @@ public class CycleCountForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCompleteCount)
+                .addComponent(btnPost)
                 .addGap(40, 40, 40)
                 .addComponent(btnFreeze)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnUnfreeze)
-                .addGap(44, 44, 44)
+                .addGap(45, 45, 45)
+                .addComponent(btnPrint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -272,10 +283,11 @@ public class CycleCountForm extends javax.swing.JFrame {
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCompleteCount)
+                        .addComponent(btnPost)
                         .addComponent(btnFreeze)
                         .addComponent(btnUnfreeze)
-                        .addComponent(jButton3)))
+                        .addComponent(jButton3)
+                        .addComponent(btnPrint)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -764,7 +776,7 @@ public class CycleCountForm extends javax.swing.JFrame {
 
         // Initial button states
         btnStartCount.setEnabled(true);
-        btnCompleteCount.setEnabled(false);
+        btnPost.setEnabled(false);
         btnFreeze.setEnabled(false);
         btnUnfreeze.setEnabled(false);
         btnNextMaterial.setEnabled(false);
@@ -1456,7 +1468,7 @@ public class CycleCountForm extends javax.swing.JFrame {
                     selectMaterialIndex(0);
                 }
 
-                btnCompleteCount.setEnabled(true);
+                btnPost.setEnabled(true);
                 btnStartCount.setEnabled(false);
                 cmbWarehouse.setEnabled(false);
                 cmbZone.setEnabled(false);
@@ -1473,7 +1485,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         task.executeWithDialog();
     }//GEN-LAST:event_btnStartCountActionPerformed
 
-    private void btnCompleteCountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteCountActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         if (currentCycleCount == null) {
             StatusMessageHandler.showError(txtStatus, "No active cycle count to complete.");
             return;
@@ -1524,7 +1536,7 @@ public class CycleCountForm extends javax.swing.JFrame {
                 tblBinStatus.setText("ACTIVE");
                 btnFreeze.setEnabled(true);
                 btnUnfreeze.setEnabled(false);
-                btnCompleteCount.setEnabled(false);
+                btnPost.setEnabled(false);
                 updateCountControlsEnabled(false);
 
                 JOptionPane.showMessageDialog(
@@ -1534,6 +1546,8 @@ public class CycleCountForm extends javax.swing.JFrame {
                         "Count Completed",
                         JOptionPane.INFORMATION_MESSAGE
                 );
+
+                btnPrintActionPerformed(null);
             }
 
             @Override
@@ -1542,7 +1556,49 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btnCompleteCountActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (currentCycleCount == null || countSummaryTableModel.getRowCount() == 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select and record a cycle count first.");
+            return;
+        }
+
+        String countNo = currentCycleCount != null ? currentCycleCount.getCountNumber() : "N/A";
+        String wh = cmbWarehouse.getSelectedItem() != null ? cmbWarehouse.getSelectedItem().toString() : "";
+        String zone = cmbZone.getSelectedItem() != null ? cmbZone.getSelectedItem().toString() : "";
+        String binCode = lblBinCode.getText();
+        String countReason = cmbCountReason.getSelectedItem() != null ? cmbCountReason.getSelectedItem().toString() : "";
+        String dateStr = datepickerDate.getDate() != null ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(datepickerDate.getDate()) : java.time.LocalDate.now().toString();
+        String binStatus = tblBinStatus.getText();
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Cycle Count Record (INT19)")
+                .subtitle("Count Number: " + countNo)
+                .addDetail("Count Number", countNo)
+                .addDetail("Warehouse", wh)
+                .addDetail("Zone", zone)
+                .addDetail("Bin Code", binCode)
+                .addDetail("Count Date", dateStr)
+                .addDetail("Reason", countReason)
+                .addDetail("Bin Status", binStatus)
+                .tableColumns(new String[]{"Bin", "Material", "System Qty", "Counted Qty", "Variance", "Variance %", "Status"});
+
+        for (int i = 0; i < countSummaryTableModel.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(countSummaryTableModel.getValueAt(i, 0)),
+                String.valueOf(countSummaryTableModel.getValueAt(i, 1)),
+                String.valueOf(countSummaryTableModel.getValueAt(i, 2)),
+                String.valueOf(countSummaryTableModel.getValueAt(i, 3)),
+                String.valueOf(countSummaryTableModel.getValueAt(i, 4)),
+                String.valueOf(countSummaryTableModel.getValueAt(i, 5)),
+                String.valueOf(countSummaryTableModel.getValueAt(i, 6))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1581,10 +1637,11 @@ public class CycleCountForm extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToSummary;
-    private javax.swing.JButton btnCompleteCount;
     private javax.swing.JButton btnFreeze;
     private javax.swing.JButton btnNextMaterial;
+    private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrevMaterial;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRecount;
     private javax.swing.JButton btnSkip;
     private javax.swing.JButton btnStartCount;

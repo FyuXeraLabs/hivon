@@ -343,9 +343,9 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
-        btncomplete = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
-        btnprint = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         btncancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -589,10 +589,10 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(jPanel1);
 
-        btncomplete.setText("Complete");
-        btncomplete.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setText("Complete");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btncompleteActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -601,11 +601,11 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        btnprint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnprint.setText("Print");
-        btnprint.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnprintActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -623,9 +623,9 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addComponent(btncomplete)
+                .addComponent(btnPost)
                 .addGap(18, 18, 18)
-                .addComponent(btnprint)
+                .addComponent(btnPrint)
                 .addGap(34, 34, 34)
                 .addComponent(btncancel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -639,8 +639,8 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btncomplete)
-                        .addComponent(btnprint)
+                        .addComponent(btnPost)
+                        .addComponent(btnPrint)
                         .addComponent(btncancel)))
                 .addContainerGap(10, Short.MAX_VALUE))
         );
@@ -865,7 +865,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         StatusMessageHandler.showSuccess(txtStatus, "Item added to return summary.");
     }
 
-    private void btncompleteActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {
         if (cmbVendor.getSelectedIndex() <= 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select a Vendor to return to.");
             return;
@@ -899,6 +899,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
             protected void onSuccess() {
                 StatusMessageHandler.showSuccess(txtStatus, "Return to Vendor completed and posted successfully!");
                 JOptionPane.showMessageDialog(ReturnToVendorForm.this, "Return to Vendor completed and posted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                btnPrintActionPerformed(null);
                 clearForm();
             }
 
@@ -916,7 +917,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
     }
 
     private void btnprintActionPerformed(java.awt.event.ActionEvent evt) {
-        StatusMessageHandler.showInfo(txtStatus, "Printing Return Note feature is not implemented yet.");
+        btnPrintActionPerformed(evt);
     }
 
     private void txtBatchNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchNumberActionPerformed
@@ -991,6 +992,38 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         task.executeWithDialog();
     }//GEN-LAST:event_btnSearchMaterialActionPerformed
 
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (returnItemList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The return summary is empty. Please add items first.");
+            return;
+        }
+
+        String vendor = cmbVendor.getSelectedItem() != null ? cmbVendor.getSelectedItem().toString() : "";
+        String returnDate = dateReturnDate.getText();
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Goods Issue - Return to Vendor (OUT14)")
+                .subtitle("Vendor: " + vendor)
+                .addDetail("Vendor", vendor)
+                .addDetail("Return Date", returnDate)
+                .addDetail("Total Items", String.valueOf(returnItemList.size()))
+                .tableColumns(new String[]{"Material", "Qty", "Batch", "Bin", "Return Reason"});
+
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) jTable1.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3)),
+                String.valueOf(model.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1035,13 +1068,13 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSearchMaterial;
     private javax.swing.JButton btnadd;
     private javax.swing.JButton btncancel;
-    private javax.swing.JButton btncomplete;
     private javax.swing.JButton btndelete;
     private javax.swing.JButton btnedit;
-    private javax.swing.JButton btnprint;
     private javax.swing.JComboBox<String> cmbReturnReason;
     private javax.swing.JComboBox<String> cmbVendor;
     private javax.swing.JTextField dateReturnDate;

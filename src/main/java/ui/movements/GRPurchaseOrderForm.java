@@ -573,7 +573,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanelActions = new javax.swing.JPanel();
-        btnCompleteReceipt = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnPrintGR = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
@@ -629,15 +629,19 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteReceipt.setText(" Post");
-        btnCompleteReceipt.setToolTipText("Complete Receipt");
-        btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setBackground(new java.awt.Color(46, 204, 113));
+        btnPost.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnPost.setForeground(new java.awt.Color(255, 255, 255));
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText(" Post");
+        btnPost.setToolTipText("Complete Receipt");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteReceiptActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
+        btnPrintGR.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrintGR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrintGR.setText(" Print");
         btnPrintGR.setToolTipText("Print GR");
@@ -647,6 +651,9 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
+        btnCancel.setBackground(new java.awt.Color(255, 107, 107));
+        btnCancel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText(" Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -664,7 +671,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addComponent(btnCompleteReceipt)
+                .addComponent(btnPost)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrintGR)
                 .addGap(18, 18, 18)
@@ -680,18 +687,21 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCompleteReceipt)
+                        .addComponent(btnPost)
                         .addComponent(btnPrintGR)
                         .addComponent(btnCancel)))
                 .addContainerGap(10, Short.MAX_VALUE))
         );
 
-        jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Purchase Order"));
+        jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Search Purchase Order", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
 
         lblPONumber.setText("PO Number");
 
         lblVendorFilter.setText("Vendor");
 
+        btnSearch.setBackground(new java.awt.Color(46, 204, 113));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText(" Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -714,8 +724,8 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtVendor, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(556, Short.MAX_VALUE))
+                .addComponent(btnSearch)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelSearchLayout.setVerticalGroup(
             jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -730,7 +740,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addContainerGap(12, Short.MAX_VALUE))
         );
 
-        jPanelPODetails.setBorder(javax.swing.BorderFactory.createTitledBorder("PO Details"));
+        jPanelPODetails.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "PO Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
 
         lblPONumberDisplay.setText("PO Number");
 
@@ -813,7 +823,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jScrollPanePOItems.setBorder(javax.swing.BorderFactory.createTitledBorder("PO Items"));
+        jScrollPanePOItems.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "PO Items", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
 
         tblPOItems.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -835,7 +845,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         tblPOItems.getTableHeader().setReorderingAllowed(false);
         jScrollPanePOItems.setViewportView(tblPOItems);
 
-        jPanelReceiptDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Receipt Details"));
+        jPanelReceiptDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Receipt Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
 
         lblMaterial.setText("Material");
 
@@ -861,6 +871,9 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         lblRemarks.setText("Remarks");
 
+        btnAddToReceipt.setBackground(new java.awt.Color(46, 204, 113));
+        btnAddToReceipt.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnAddToReceipt.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToReceipt.setText("Add");
         btnAddToReceipt.setToolTipText("Add to Receipt");
@@ -870,6 +883,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemoveRecieptItem.setBackground(new java.awt.Color(255, 107, 107));
         btnRemoveRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemoveRecieptItem.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemoveRecieptItem.addActionListener(new java.awt.event.ActionListener() {
@@ -970,7 +984,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jScrollPaneReceiptSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Receipt Summary"));
+        jScrollPaneReceiptSummary.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Receipt Summary", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
 
         tblReceiptSummary.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1147,7 +1161,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSearchActionPerformed
 
-    private void btnCompleteReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteReceiptActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         if (selectedPO == null) {
             StatusMessageHandler.showWarning(txtStatus, "Please load a Purchase Order first.");
             return;
@@ -1188,6 +1202,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 StatusMessageHandler.showSuccess(txtStatus, "Goods Receipt posted successfully!");
+                btnPrintGRActionPerformed(null);
                 loadPurchaseOrderDetails(poNumber);
             }
 
@@ -1197,14 +1212,43 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btnCompleteReceiptActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
 
     private void btnPrintGRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintGRActionPerformed
         if (selectedPO == null) {
             StatusMessageHandler.showWarning(txtStatus, "Please load a Purchase Order first.");
             return;
         }
-        StatusMessageHandler.showInfo(txtStatus, "Printing Goods Receipt feature is not implemented yet.");
+        if (receiptSummaryList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The receipt summary is empty. Please add items first.");
+            return;
+        }
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Goods Receipt - Purchase Order (IN11)")
+                .subtitle("PO Number: " + txtPONumberDisplay.getText().trim())
+                .addDetail("PO Number", txtPONumberDisplay.getText())
+                .addDetail("PO Date", txtPODate.getText())
+                .addDetail("Vendor Name", txtVendorName.getText())
+                .addDetail("Vendor Code", txtVendorCode.getText())
+                .addDetail("Address", txtAddress.getText())
+                .addDetail("Contact Person", txtContactPerson.getText())
+                .tableColumns(new String[]{"Material", "Qty", "Batch", "Bin", "Quality"});
+
+        // populate table rows from tblReceiptSummary
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblReceiptSummary.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3)),
+                String.valueOf(model.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintGRActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
@@ -1496,7 +1540,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToReceipt;
     private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnCompleteReceipt;
+    private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrintGR;
     private javax.swing.JButton btnRemoveRecieptItem;
     private javax.swing.JButton btnSearch;

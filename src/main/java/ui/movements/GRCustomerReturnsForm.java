@@ -104,60 +104,47 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             Logger.errlog("Could not read warehouse ID from session", e);
         }
         
-        final Integer whId = warehouseId;
-        while (true) {
-            final boolean[] success = new boolean[1];
-            final Exception[] error = new Exception[1];
+        createLoadReceivingBinsTask(warehouseId).executeWithRetry();
+    }
 
-            BackgroundTask task = new BackgroundTask(this, "Loading Receiving Bins") {
-                private List<StorageBinDTO> bins;
+    private BackgroundTask createLoadReceivingBinsTask(Integer whId) {
+        return new BackgroundTask(this, "Loading Receiving Bins") {
+            private List<StorageBinDTO> bins;
 
-                @Override
-                protected Boolean performTask() throws Exception {
-                    updateProgress("Fetching active receiving bins...");
-                    bins = controller.getReceivingBins(whId);
-                    return bins != null;
-                }
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching active receiving bins...");
+                bins = controller.getReceivingBins(whId);
+                return bins != null;
+            }
 
-                @Override
-                protected void onSuccess() {
-                    cmbReceivingBin.removeAllItems();
-                    cmbReceivingBin.addItem("-- Select Bin --");
-                    if (bins != null) {
-                        for (StorageBinDTO bin : bins) {
-                            cmbReceivingBin.addItem(bin);
-                        }
+            @Override
+            protected void onSuccess() {
+                cmbReceivingBin.removeAllItems();
+                cmbReceivingBin.addItem("-- Select Bin --");
+                if (bins != null) {
+                    for (StorageBinDTO bin : bins) {
+                        cmbReceivingBin.addItem(bin);
                     }
-                    success[0] = true;
-                }
-
-                @Override
-                protected void onFailure(Exception e) {
-                    error[0] = e;
-                }
-            };
-            task.executeWithDialog();
-
-            if (success[0]) {
-                break;
-            } else {
-                Object[] options = {"Retry", "Exit"};
-                int choice = JOptionPane.showOptionDialog(
-                        this,
-                        "Failed to load receiving bins: " + (error[0] != null ? error[0].getMessage() : "Unknown error") + "\nPlease check and try again!",
-                        "Loading Failed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        options,
-                        options[0]
-                );
-                if (choice != 0) {
-                    dispose();
-                    throw new RuntimeException("Cancelled form loading due to fetch failure.");
                 }
             }
-        }
+
+            @Override
+            protected void onFailure(Exception e) {
+                // handled by retry/cancel on progress dialog
+            }
+
+            @Override
+            protected void onCancel() {
+                dispose();
+                throw new RuntimeException("Cancelled form loading due to fetch failure.");
+            }
+
+            @Override
+            protected BackgroundTask createRetryTask() {
+                return createLoadReceivingBinsTask(whId);
+            }
+        };
     }
 
     // searches sales orders by SO number or customer name
@@ -715,8 +702,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         buttonGroupQuality = new javax.swing.ButtonGroup();
         jPanelActions = new javax.swing.JPanel();
-        btnCompleteReturn = new javax.swing.JButton();
-        btnPrintReturnAuthorization = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         jScrollPaneMain = new javax.swing.JScrollPane();
@@ -767,21 +754,21 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        btnCompleteReturn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteReturn.setText("Post");
-        btnCompleteReturn.setToolTipText("Complete Return");
-        btnCompleteReturn.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText("Post");
+        btnPost.setToolTipText("Complete Return");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteReturnActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
-        btnPrintReturnAuthorization.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintReturnAuthorization.setText(" Print");
-        btnPrintReturnAuthorization.setToolTipText("Print Return Authorization");
-        btnPrintReturnAuthorization.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText(" Print");
+        btnPrint.setToolTipText("Print Return Authorization");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintReturnAuthorizationActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -802,9 +789,9 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addComponent(btnCompleteReturn)
+                .addComponent(btnPost)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnPrintReturnAuthorization)
+                .addComponent(btnPrint)
                 .addGap(33, 33, 33)
                 .addComponent(btnCancel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -818,8 +805,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCompleteReturn)
-                        .addComponent(btnPrintReturnAuthorization)
+                        .addComponent(btnPost)
+                        .addComponent(btnPrint)
                         .addComponent(btnCancel)))
                 .addContainerGap(10, Short.MAX_VALUE))
         );
@@ -1245,7 +1232,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         StatusMessageHandler.showSuccess(txtStatus, "Item added to return summary.");
     }//GEN-LAST:event_btnAddToReturnActionPerformed
 
-    private void btnCompleteReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteReturnActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         if (selectedSO == null) {
             StatusMessageHandler.showWarning(txtStatus, "Please load a Sales Order first.");
             return;
@@ -1298,6 +1285,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 StatusMessageHandler.showSuccess(txtStatus, "Customer return processed successfully!");
+                btnPrintActionPerformed(null);
                 clearForm();
             }
 
@@ -1307,15 +1295,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btnCompleteReturnActionPerformed
-
-    private void btnPrintReturnAuthorizationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintReturnAuthorizationActionPerformed
-        if (selectedSO == null) {
-            StatusMessageHandler.showWarning(txtStatus, "Please load a Sales Order first.");
-            return;
-        }
-        StatusMessageHandler.showWarning(txtStatus, "Printing Return Authorization is not implemented yet.");
-    }//GEN-LAST:event_btnPrintReturnAuthorizationActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
@@ -1431,6 +1411,43 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         
         StatusMessageHandler.showSuccess(txtStatus, "Selected item(s) removed from return summary.");
     }//GEN-LAST:event_btnRemoveRecieptItemActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (selectedSO == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please load a Sales Order first.");
+            return;
+        }
+        if (returnSummaryList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The return summary is empty. Please add items first.");
+            return;
+        }
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+        core.utils.export.FormSummaryPdfExporter.builder()
+        .title("Goods Receipt - Customer Returns (IN12)")
+        .subtitle("Return Authorization: " + txtReturnAuthNumber.getText().trim())
+        .addDetail("SO Number", txtSONumberDisplay.getText())
+        .addDetail("Customer Name", txtCustomerNameDisplay.getText())
+        .addDetail("SO Date", txtSODate.getText())
+        .addDetail("Return Auth No", txtReturnAuthNumber.getText())
+        .addDetail("Return Reason", cmbReturnReason.getSelectedItem() != null ? cmbReturnReason.getSelectedItem().toString() : "")
+        .addDetail("Return Date", txtReturnDate.getText())
+        .tableColumns(new String[]{"Material", "Qty", "Quality", "Bin", "Status"});
+
+        // populate table rows from tblReturnSummary
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblReturnSummary.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3)),
+                String.valueOf(model.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1592,8 +1609,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToReturn;
     private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnCompleteReturn;
-    private javax.swing.JButton btnPrintReturnAuthorization;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemoveRecieptItem;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdateRecieptItem;

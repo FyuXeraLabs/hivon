@@ -50,14 +50,14 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnCreateTo" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnPost" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
                   <Component id="btnAutoSuggest" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="btnPrintTo" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnPrint" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="174" max="-2" attributes="0"/>
                   <Component id="btnCancle" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="63" max="32767" attributes="0"/>
+                  <EmptySpace pref="81" max="32767" attributes="0"/>
                   <Component id="txtStatus" min="-2" pref="400" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -70,8 +70,8 @@
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="txtStatus" min="-2" pref="25" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="btnCreateTo" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="btnPrintTo" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnPost" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnPrint" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnAutoSuggest" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnCancle" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -82,12 +82,12 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="btnCreateTo">
+        <Component class="javax.swing.JButton" name="btnPost">
           <Properties>
             <Property name="text" type="java.lang.String" value="Create TO"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreateToActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPostActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnAutoSuggest">
@@ -98,15 +98,15 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAutoSuggestActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="btnPrintTo">
+        <Component class="javax.swing.JButton" name="btnPrint">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/btnicn/printer-14.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Print TO"/>
+            <Property name="text" type="java.lang.String" value="Print"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPrintToActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPrintActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnCancle">
@@ -381,10 +381,8 @@
                                   <Component id="txtSequence" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="btnAddTo" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="btnRemove" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="btnUpdate" alignment="0" max="32767" attributes="0"/>
-                              </Group>
+                              <Component id="btnRemove" alignment="0" max="32767" attributes="0"/>
+                              <Component id="btnUpdate" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>

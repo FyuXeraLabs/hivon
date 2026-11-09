@@ -341,9 +341,9 @@ public class PickingTOForm extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanelActions = new javax.swing.JPanel();
-        btnCreateTo = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnAutoSequence = new javax.swing.JButton();
-        btnPrintTo = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         btnCancle = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         jScrollPaneMain = new javax.swing.JScrollPane();
@@ -382,10 +382,10 @@ public class PickingTOForm extends javax.swing.JFrame {
         setTitle("Picking Transfer Order (TR23)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
-        btnCreateTo.setText("Create TO");
-        btnCreateTo.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setText("Create TO");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateToActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -396,11 +396,11 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
-        btnPrintTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintTo.setText("Print TO");
-        btnPrintTo.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintToActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -421,11 +421,11 @@ public class PickingTOForm extends javax.swing.JFrame {
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateTo)
+                .addComponent(btnPost)
                 .addGap(42, 42, 42)
                 .addComponent(btnAutoSequence)
                 .addGap(79, 79, 79)
-                .addComponent(btnPrintTo)
+                .addComponent(btnPrint)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancle)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -439,9 +439,9 @@ public class PickingTOForm extends javax.swing.JFrame {
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCreateTo)
+                        .addComponent(btnPost)
                         .addComponent(btnAutoSequence)
-                        .addComponent(btnPrintTo)
+                        .addComponent(btnPrint)
                         .addComponent(btnCancle)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -585,7 +585,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
-        btnUpdate.setText("Update");
+        btnUpdate.setToolTipText("Save Changes");
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateActionPerformed(evt);
@@ -593,7 +593,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
-        btnRemove.setText("Remove");
+        btnRemove.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRemoveActionPerformed(evt);
@@ -618,13 +618,13 @@ public class PickingTOForm extends javax.swing.JFrame {
                         .addGap(56, 56, 56)
                         .addComponent(lblSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(53, 53, 53)
                         .addComponent(btnAddTo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnUpdate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnRemove))
+                        .addGap(71, 71, 71)
+                        .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelPickingPlanningLayout.createSequentialGroup()
                         .addComponent(lblMaterials)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -641,7 +641,7 @@ public class PickingTOForm extends javax.swing.JFrame {
                         .addComponent(lblSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(55, Short.MAX_VALUE))
+                .addContainerGap(115, Short.MAX_VALUE))
         );
         jPanelPickingPlanningLayout.setVerticalGroup(
             jPanelPickingPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -657,17 +657,20 @@ public class PickingTOForm extends javax.swing.JFrame {
                     .addComponent(lblSuggestedBins)
                     .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(jPanelPickingPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPickQty)
-                    .addComponent(spinPickQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblSequence)
-                    .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblSelectedBin)
-                    .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAddTo)
-                    .addComponent(btnUpdate)
-                    .addComponent(btnRemove))
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addGroup(jPanelPickingPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelPickingPlanningLayout.createSequentialGroup()
+                        .addGroup(jPanelPickingPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblPickQty)
+                            .addComponent(spinPickQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblSequence)
+                            .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblSelectedBin)
+                            .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnAddTo))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jScrollPanePickingSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Picking Summary"));
@@ -872,7 +875,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         task.executeWithDialog();
     }//GEN-LAST:event_btnAddToActionPerformed
 
-    private void btnCreateToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateToActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         if (pickingSummaryList.isEmpty()) {
             StatusMessageHandler.showWarning(txtStatus, "Please add at least one item to the Picking Summary before creating a TO.");
             return;
@@ -914,17 +917,7 @@ public class PickingTOForm extends javax.swing.JFrame {
                 generatedToNumber = responseData.has("to_number") ? responseData.get("to_number").getAsString() : "TO-PICK-CREATED";
                 StatusMessageHandler.showSuccess(txtStatus, "Picking TO Created Successfully: " + generatedToNumber);
 
-                int printConfirm = JOptionPane.showConfirmDialog(
-                        PickingTOForm.this,
-                        "Picking Transfer Order created successfully!\n\nTO Number: " + generatedToNumber + "\n\nWould you like to print the Picking Sheet now?",
-                        "Transfer Order Created",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
-                if (printConfirm == JOptionPane.YES_OPTION) {
-                    btnPrintToActionPerformed(null);
-                }
+                btnPrintActionPerformed(null);
 
                 clearForm();
             }
@@ -936,7 +929,7 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btnCreateToActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
 
     private void btnAutoSequenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAutoSequenceActionPerformed
         if (pickingSummaryList.isEmpty()) {
@@ -954,21 +947,6 @@ public class PickingTOForm extends javax.swing.JFrame {
         refreshPickingSummaryTable();
         StatusMessageHandler.showSuccess(txtStatus, "Picking route optimized by bin sequence.");
     }//GEN-LAST:event_btnAutoSequenceActionPerformed
-
-    private void btnPrintToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintToActionPerformed
-        if (generatedToNumber == null || generatedToNumber.trim().isEmpty()) {
-            StatusMessageHandler.showWarning(txtStatus, "No Transfer Order available to print. Please create a TO first.");
-            return;
-        }
-
-        StatusMessageHandler.showInfo(txtStatus, "Sending Transfer Order " + generatedToNumber + " to printer...");
-        JOptionPane.showMessageDialog(
-                this,
-                "Printing Transfer Order Document...\nTO Number: " + generatedToNumber + "\nStatus: Sent to default printer.",
-                "Print Transfer Order",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-    }//GEN-LAST:event_btnPrintToActionPerformed
 
     private void btnCancleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancleActionPerformed
         int confirm = JOptionPane.showConfirmDialog(
@@ -1067,6 +1045,39 @@ public class PickingTOForm extends javax.swing.JFrame {
         StatusMessageHandler.showSuccess(txtStatus, "Selected item(s) removed from Picking Summary.");
     }//GEN-LAST:event_btnRemoveActionPerformed
 
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (pickingSummaryList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The picking summary is empty. Please add items first.");
+            return;
+        }
+
+        String soNum = getSelectedSoNumber() != null ? getSelectedSoNumber() : "";
+        String toNum = generatedToNumber != null ? generatedToNumber : "Draft";
+        String giDoc = cmbGiDocument.getSelectedItem() != null ? cmbGiDocument.getSelectedItem().toString() : "";
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Picking Transfer Order (OUT12)")
+                .subtitle("TO Number: " + toNum + (soNum.isEmpty() ? "" : " | Sales Order: " + soNum))
+                .addDetail("TO Number", toNum)
+                .addDetail("SO Number", soNum)
+                .addDetail("GI Document", giDoc)
+                .addDetail("Total Items", String.valueOf(pickingSummaryList.size()))
+                .tableColumns(new String[]{"Material", "From Bin", "Pick Qty", "Sequence"});
+
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblPickingSummary.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1106,8 +1117,8 @@ public class PickingTOForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAddTo;
     private javax.swing.JButton btnAutoSequence;
     private javax.swing.JButton btnCancle;
-    private javax.swing.JButton btnCreateTo;
-    private javax.swing.JButton btnPrintTo;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;

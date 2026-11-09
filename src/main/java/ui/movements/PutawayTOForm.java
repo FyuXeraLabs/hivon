@@ -391,9 +391,9 @@ public class PutawayTOForm extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanelActions = new javax.swing.JPanel();
-        btnCreateTo = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnAutoSuggest = new javax.swing.JButton();
-        btnPrintTo = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         btnCancle = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         jScrollPaneMain = new javax.swing.JScrollPane();
@@ -428,10 +428,10 @@ public class PutawayTOForm extends javax.swing.JFrame {
         setTitle("Putaway Transfer Order (TR22)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
-        btnCreateTo.setText("Create TO");
-        btnCreateTo.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setText("Create TO");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateToActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -442,11 +442,11 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
-        btnPrintTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintTo.setText("Print TO");
-        btnPrintTo.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintToActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -467,14 +467,14 @@ public class PutawayTOForm extends javax.swing.JFrame {
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateTo)
+                .addComponent(btnPost)
                 .addGap(42, 42, 42)
                 .addComponent(btnAutoSuggest)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnPrintTo)
+                .addComponent(btnPrint)
                 .addGap(174, 174, 174)
                 .addComponent(btnCancle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -485,8 +485,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCreateTo)
-                        .addComponent(btnPrintTo)
+                        .addComponent(btnPost)
+                        .addComponent(btnPrint)
                         .addComponent(btnAutoSuggest)
                         .addComponent(btnCancle)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -660,9 +660,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
                         .addComponent(lblSequence)
                         .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnAddTo))
-                    .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -727,7 +726,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCreateToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateToActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         if (putawaySummaryList.isEmpty()) {
             StatusMessageHandler.showWarning(txtStatus, "Please add items to transfer order first.");
             return;
@@ -776,13 +775,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
                 
                 StatusMessageHandler.showSuccess(txtStatus, "Transfer Order created successfully! TO: " + generatedToNumber);
 
-                int printConfirm = JOptionPane.showConfirmDialog(PutawayTOForm.this, 
-                        "Do you want to print the Transfer Order document now?", 
-                        "Print TO", JOptionPane.YES_NO_OPTION);
-
-                if (printConfirm == JOptionPane.YES_OPTION) {
-                    btnPrintToActionPerformed(null);
-                }
+                btnPrintActionPerformed(null);
 
                 // Clear summary list and refresh materials
                 putawaySummaryList.clear();
@@ -799,7 +792,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btnCreateToActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
 
     private void btnAutoSuggestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAutoSuggestActionPerformed
         if (selectedMaterial != null) {
@@ -829,11 +822,6 @@ public class PutawayTOForm extends javax.swing.JFrame {
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         searchMaterialsInBin();
     }//GEN-LAST:event_btnSearchActionPerformed
-
-    private void btnPrintToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintToActionPerformed
-        String toNumber = generatedToNumber != null ? generatedToNumber : "TO-PUTAWAY-DRAFT";
-        StatusMessageHandler.showInfo(txtStatus, "Sending Transfer Order document (" + toNumber + ") to printer...");
-    }//GEN-LAST:event_btnPrintToActionPerformed
 
     private void btnAddToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToActionPerformed
         if (selectedMaterial == null) {
@@ -1078,6 +1066,41 @@ public class PutawayTOForm extends javax.swing.JFrame {
         StatusMessageHandler.showSuccess(txtStatus, "Selected item(s) removed from Putaway Summary.");
     }//GEN-LAST:event_btnRemoveActionPerformed
 
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (putawaySummaryList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The putaway summary is empty. Please add items first.");
+            return;
+        }
+
+        String toNum = generatedToNumber != null ? generatedToNumber : "Draft";
+        String wh = "Warehouse #" + getWarehouseId();
+        String recvBin = cmbRecevingBin.getSelectedItem() != null ? cmbRecevingBin.getSelectedItem().toString() : "";
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Putaway Transfer Order (TR22)")
+                .subtitle("TO Number: " + toNum)
+                .addDetail("TO Number", toNum)
+                .addDetail("Warehouse", wh)
+                .addDetail("Source Receiving Bin", recvBin)
+                .addDetail("Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Items", String.valueOf(putawaySummaryList.size()))
+                .tableColumns(new String[]{"Material", "From Bin", "To Bin", "Required Qty", "Sequence"});
+
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblPutawaySummary.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3)),
+                String.valueOf(model.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1117,8 +1140,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAddTo;
     private javax.swing.JButton btnAutoSuggest;
     private javax.swing.JButton btnCancle;
-    private javax.swing.JButton btnCreateTo;
-    private javax.swing.JButton btnPrintTo;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;

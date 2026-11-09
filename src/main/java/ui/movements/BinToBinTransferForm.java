@@ -68,9 +68,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
 
         jPanel4 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
-        btnCompleteTransfer = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        btnPrintTransferNote = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -129,11 +129,11 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         setTitle("Internal - Bin-to-Bin Transfer (INT17)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
-        btnCompleteTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btnCompleteTransfer.setText("POST");
-        btnCompleteTransfer.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText("POST");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCompleteTransferActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -145,11 +145,11 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             }
         });
 
-        btnPrintTransferNote.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintTransferNote.setText("Print");
-        btnPrintTransferNote.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintTransferNoteActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -162,9 +162,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCompleteTransfer)
+                .addComponent(btnPost)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnPrintTransferNote)
+                .addComponent(btnPrint)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCancel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -178,9 +178,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCompleteTransfer)
+                        .addComponent(btnPost)
                         .addComponent(btnCancel)
-                        .addComponent(btnPrintTransferNote)))
+                        .addComponent(btnPrint)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -560,13 +560,46 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         addToTransfer();
     }//GEN-LAST:event_btnAddToTransferActionPerformed
 
-    private void btnCompleteTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteTransferActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         completeTransfer();
-    }//GEN-LAST:event_btnCompleteTransferActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
 
-    private void btnPrintTransferNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintTransferNoteActionPerformed
-        printTransferNote();
-    }//GEN-LAST:event_btnPrintTransferNoteActionPerformed
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (tableModel.getRowCount() == 0 && transferItems.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The transfer list is empty. Please add items first.");
+            return;
+        }
+
+        String toNum = lastTransferNumber != null ? lastTransferNumber : "Draft";
+        String wh = cmbSourceWarehouse.getSelectedItem() != null ? cmbSourceWarehouse.getSelectedItem().toString() : "";
+        String dateStr = datepickerDate.getDate() != null ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(datepickerDate.getDate()) : java.time.LocalDate.now().toString();
+        String reason = cmbTransferReason.getSelectedItem() != null ? cmbTransferReason.getSelectedItem().toString() : "";
+        String remarks = txtaRemarks.getText().trim();
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Bin-to-Bin Transfer (IM11)")
+                .subtitle("Transfer Order: " + toNum)
+                .addDetail("Transfer Order", toNum)
+                .addDetail("Warehouse", wh)
+                .addDetail("Transfer Date", dateStr)
+                .addDetail("Reason", reason)
+                .addDetail("Remarks", remarks)
+                .tableColumns(new String[]{"Material", "From Bin", "To Bin", "Qty", "Batch", "Status"});
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(tableModel.getValueAt(i, 0)),
+                String.valueOf(tableModel.getValueAt(i, 1)),
+                String.valueOf(tableModel.getValueAt(i, 2)),
+                String.valueOf(tableModel.getValueAt(i, 3)),
+                String.valueOf(tableModel.getValueAt(i, 4)),
+                String.valueOf(tableModel.getValueAt(i, 5))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         cancelForm();
@@ -1258,16 +1291,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
 
                     StatusMessageHandler.showSuccess(txtStatus, "Bin-to-Bin transfer completed successfully. Transfer Number: " + lastTransferNumber);
 
-                    int printConfirm = JOptionPane.showConfirmDialog(
-                        BinToBinTransferForm.this,
-                        "Bin-to-Bin transfer completed successfully!\n\nTransfer Order Number: " + lastTransferNumber + "\n\nDo you want to print the Transfer Note?",
-                        "Transfer Completed",
-                        JOptionPane.YES_NO_OPTION
-                    );
-
-                    if (printConfirm == JOptionPane.YES_OPTION) {
-                        printTransferNote();
-                    }
+                    btnPrintActionPerformed(null);
 
                     clearFormAfterTransfer();
 
@@ -1391,8 +1415,8 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToTransfer;
     private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnCompleteTransfer;
-    private javax.swing.JButton btnPrintTransferNote;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSearchMaterial;
     private javax.swing.JComboBox<String> cmbDestinationWarehouse;
     private javax.swing.JTextField cmbDestinationZone;

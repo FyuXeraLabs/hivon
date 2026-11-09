@@ -39,6 +39,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     private DefaultTableModel tableModel;
     private boolean isProgrammaticChange = false;
     private boolean isCalculating = false;
+    private String lastMovementNumber;
 
     /**
      * Creates new form SplittingPackBreakForm
@@ -90,6 +91,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         txtStatus = new javax.swing.JLabel();
         btnPost = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSummary = new javax.swing.JTable();
@@ -279,6 +281,15 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText(" Print");
+        btnPrint.setToolTipText("Print Return Authorization");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -288,7 +299,9 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                 .addComponent(btnPost)
                 .addGap(28, 28, 28)
                 .addComponent(btnCancel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(btnPrint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 403, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -299,7 +312,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnPost)
-                        .addComponent(btnCancel))
+                        .addComponent(btnCancel)
+                        .addComponent(btnPrint))
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -379,6 +393,44 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         cancelOrReset();
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (tableModel.getRowCount() == 0 && breakingItems.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The package breaking summary is empty.");
+            return;
+        }
+
+        String user = "System";
+        try {
+            if (UserSession.getInstance().getCurrentUser() != null) {
+                user = UserSession.getInstance().getCurrentUser().getUsername();
+            }
+        } catch (Exception ignored) {}
+
+        String docNo = lastMovementNumber != null ? lastMovementNumber : "Draft";
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Splitting & Pack Break (INT18)")
+                .subtitle("Movement Number: " + docNo)
+                .addDetail("Movement Number", docNo)
+                .addDetail("Date", java.time.LocalDate.now().toString())
+                .addDetail("Processed By", user)
+                .addDetail("Total Items", String.valueOf(tableModel.getRowCount()))
+                .tableColumns(new String[]{"Material", "Source Bin", "Packs", "Base Units", "Destination Bin"});
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(tableModel.getValueAt(i, 0)),
+                String.valueOf(tableModel.getValueAt(i, 1)),
+                String.valueOf(tableModel.getValueAt(i, 2)),
+                String.valueOf(tableModel.getValueAt(i, 3)),
+                String.valueOf(tableModel.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     private void initCustomComponents() {
         txtMaterialName.setEditable(false);
@@ -941,6 +993,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
 
             @Override
             protected void onSuccess() {
+                lastMovementNumber = movementNumber;
                 StatusMessageHandler.showSuccess(txtStatus, "Package breaking completed successfully. Movement Number: " + movementNumber);
 
                 JOptionPane.showMessageDialog(
@@ -950,15 +1003,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                     JOptionPane.INFORMATION_MESSAGE
                 );
 
-                int printConfirm = JOptionPane.showConfirmDialog(
-                    SplittingPackBreakForm.this,
-                    "Print package breaking note?",
-                    "Print Breaking Note",
-                    JOptionPane.YES_NO_OPTION
-                );
-                if (printConfirm == JOptionPane.YES_OPTION) {
-                    printBreakingNote(movementNumber);
-                }
+                btnPrintActionPerformed(null);
 
                 clearForm();
             }
@@ -1101,6 +1146,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSearch;
     private javax.swing.JComboBox<String> cmbDestinationBin;
     private javax.swing.JComboBox<String> cmbSourceBin;

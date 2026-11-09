@@ -39,6 +39,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     private DefaultTableModel tableModel;
     private MaterialStockDTO currentSelectedMaterial = null;
     private final List<AdjustmentItemDTO> pendingAdjustments = new ArrayList<>();
+    private String lastMovementNumber;
 
     /**
      * Creates new form InventoryAdjustmentForm
@@ -333,9 +334,10 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         txtSourceBin = new javax.swing.JTextField();
         btnadd = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
-        btbSubmit = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Inventory Adjustment (ADJ20)");
@@ -620,11 +622,11 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(jPanel2);
 
-        btbSubmit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
-        btbSubmit.setText("POST");
-        btbSubmit.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText("POST");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btbSubmitActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -639,15 +641,26 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText(" Print");
+        btnPrint.setToolTipText("Print Return Authorization");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addComponent(btbSubmit)
+                .addComponent(btnPost)
                 .addGap(37, 37, 37)
                 .addComponent(btnCancel)
+                .addGap(40, 40, 40)
+                .addComponent(btnPrint)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -659,8 +672,9 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btbSubmit)
-                        .addComponent(btnCancel)))
+                        .addComponent(btnPost)
+                        .addComponent(btnCancel)
+                        .addComponent(btnPrint)))
                 .addContainerGap())
         );
 
@@ -774,7 +788,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnCancelActionPerformed
 
-    private void btbSubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btbSubmitActionPerformed
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         if (pendingAdjustments.isEmpty()) {
             // Check if current fields have un-added valid item
             if (currentSelectedMaterial != null && !txtCountedQty.getText().trim().isEmpty()) {
@@ -823,7 +837,9 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
 
             @Override
             protected void onSuccess() {
+                lastMovementNumber = movementNumber;
                 StatusMessageHandler.showSuccess(txtStatus, "Adjustment posted: " + movementNumber);
+                btnPrintActionPerformed(null);
                 clearAllForm();
             }
 
@@ -833,7 +849,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
-    }//GEN-LAST:event_btbSubmitActionPerformed
+    }//GEN-LAST:event_btnPostActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         performSearch();
@@ -864,6 +880,45 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
 
     private void txtMaterialNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaterialNameActionPerformed
     }//GEN-LAST:event_txtMaterialNameActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (tableModel.getRowCount() == 0 && pendingAdjustments.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "The adjustment list is empty.");
+            return;
+        }
+
+        String user = "admin";
+        try {
+            if (UserSession.getInstance().getUsername() != null) {
+                user = UserSession.getInstance().getUsername();
+            }
+        } catch (Exception ignored) {}
+
+        String docNo = lastMovementNumber != null ? lastMovementNumber : "Draft";
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Inventory Adjustment (INT11)")
+                .subtitle("Adjustment Authorization - " + docNo)
+                .addDetail("Movement No", docNo)
+                .addDetail("Date", java.time.LocalDate.now().toString())
+                .addDetail("Authorized By", user)
+                .addDetail("Remarks", txtRemarks.getText().trim())
+                .addDetail("Total Items", String.valueOf(tableModel.getRowCount()))
+                .tableColumns(new String[]{"Material Code", "System Qty", "Counted Qty", "Variance", "Reason"});
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(tableModel.getValueAt(i, 0)),
+                String.valueOf(tableModel.getValueAt(i, 1)),
+                String.valueOf(tableModel.getValueAt(i, 2)),
+                String.valueOf(tableModel.getValueAt(i, 3)),
+                String.valueOf(tableModel.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     /**
      * @param args the command line arguments
@@ -905,8 +960,9 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     private javax.swing.JPanel JpanelButtons;
     private javax.swing.JPanel JpanelMaterialDetails;
     private javax.swing.JPanel JpanelSearch;
-    private javax.swing.JButton btbSubmit;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnadd;
     private javax.swing.JComboBox<String> jComboVarianceReason;

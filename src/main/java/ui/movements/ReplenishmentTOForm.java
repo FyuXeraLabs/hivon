@@ -31,6 +31,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     private List<ReplenishmentSummaryItem> summaryList = new ArrayList<>();
     private int selectedRequirementIndex = -1;
     private int editingSummaryIndex = -1;
+    private String lastCreatedToNumber;
 
     public static class ReplenishmentSummaryItem {
         private int materialId;
@@ -108,10 +109,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanelActions = new javax.swing.JPanel();
-        btnCreateTO = new javax.swing.JButton();
+        btnPost = new javax.swing.JButton();
         btnAutoPlan = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        btnPrintTO = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         jScrollPaneMain = new javax.swing.JScrollPane();
         jPanelMain = new javax.swing.JPanel();
@@ -149,11 +150,11 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         setTitle("Transfer - Replenishment TO (TR24)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
-        btnCreateTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/create-14.png"))); // NOI18N
-        btnCreateTO.setText("Create TO");
-        btnCreateTO.addActionListener(new java.awt.event.ActionListener() {
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/create-14.png"))); // NOI18N
+        btnPost.setText("Create TO");
+        btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateTOActionPerformed(evt);
+                btnPostActionPerformed(evt);
             }
         });
 
@@ -173,11 +174,11 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             }
         });
 
-        btnPrintTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintTO.setText("Print TO");
-        btnPrintTO.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintTOActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
 
@@ -190,11 +191,11 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateTO)
+                .addComponent(btnPost)
                 .addGap(41, 41, 41)
                 .addComponent(btnAutoPlan)
                 .addGap(70, 70, 70)
-                .addComponent(btnPrintTO)
+                .addComponent(btnPrint)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCancel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -208,10 +209,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                 .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanelActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnCreateTO)
+                        .addComponent(btnPost)
                         .addComponent(btnAutoPlan)
                         .addComponent(btnCancel)
-                        .addComponent(btnPrintTO)))
+                        .addComponent(btnPrint)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -474,6 +475,39 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (summaryList.isEmpty()) {
+            ui.components.StatusMessageHandler.showWarning(txtStatus, "The replenishment summary is empty. Please add items first.");
+            return;
+        }
+
+        String toNum = lastCreatedToNumber != null ? lastCreatedToNumber : "Draft";
+        String bin = cmbPickingBin.getSelectedItem() != null ? cmbPickingBin.getSelectedItem().toString() : "";
+
+        core.utils.export.FormSummaryPdfExporter.Builder builder =
+                core.utils.export.FormSummaryPdfExporter.builder()
+                .title("Replenishment Transfer Order (INT12)")
+                .subtitle("TO Number: " + toNum)
+                .addDetail("TO Number", toNum)
+                .addDetail("Picking Bin", bin)
+                .addDetail("Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Items", String.valueOf(summaryList.size()))
+                .tableColumns(new String[]{"Material", "From Bin", "To Bin", "Quantity", "Sequence"});
+
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblReplenishmentSummary.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            builder.addTableRow(new String[]{
+                String.valueOf(model.getValueAt(i, 0)),
+                String.valueOf(model.getValueAt(i, 1)),
+                String.valueOf(model.getValueAt(i, 2)),
+                String.valueOf(model.getValueAt(i, 3)),
+                String.valueOf(model.getValueAt(i, 4))
+            });
+        }
+
+        builder.showExportDialog(this);
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     private void loadFilters() {
         core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Filters") {
@@ -955,18 +989,13 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                 if (result != null && result.has("to_number")) {
                     toNumber = result.get("to_number").getAsString();
                 }
+                lastCreatedToNumber = toNumber;
                 javax.swing.JOptionPane.showMessageDialog(ReplenishmentTOForm.this,
                     "Replenishment TO created successfully. TO Number: " + toNumber,
                     "Success",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-                int printConfirm = javax.swing.JOptionPane.showConfirmDialog(ReplenishmentTOForm.this,
-                    "Print replenishment list?",
-                    "Print TO",
-                    javax.swing.JOptionPane.YES_NO_OPTION);
-                if (printConfirm == javax.swing.JOptionPane.YES_OPTION) {
-                    ui.components.StatusMessageHandler.showInfo(txtStatus, "Printing Transfer Order feature is not implemented yet.");
-                }
+                btnPrintActionPerformed(null);
                 clearForm();
             }
 
@@ -997,7 +1026,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         performSearch();
     }
 
-    private void btnCreateTOActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {
         createTO();
     }
 
@@ -1006,7 +1035,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     }
 
     private void btnPrintTOActionPerformed(java.awt.event.ActionEvent evt) {
-        ui.components.StatusMessageHandler.showInfo(txtStatus, "Printing Transfer Order feature is not implemented yet.");
+        btnPrintActionPerformed(evt);
     }
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {
@@ -1071,10 +1100,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAutoPlan;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnClear;
-    private javax.swing.JButton btnCreateTO;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
-    private javax.swing.JButton btnPrintTO;
+    private javax.swing.JButton btnPost;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSearch;
     private javax.swing.JComboBox<String> cmbDestBin;
     private javax.swing.JComboBox<String> cmbMaterial;
