@@ -37,6 +37,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     private MaterialStockDTO currentSelectedMaterial = null;
     private final List<ScrapItemDTO> pendingWriteoffs = new ArrayList<>();
     private String lastMovementNumber;
+    private int editingWriteoffIndex = -1;
+    private boolean isProgrammaticChange = false;
 
     /**
      * Creates new form ScrapWriteoffForm
@@ -59,6 +61,17 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         };
         jTable1.setModel(tableModel);
+
+        jTable1.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && !isProgrammaticChange) {
+                int row = jTable1.getSelectedRow();
+                if (row >= 0 && row < pendingWriteoffs.size()) {
+                    loadSummaryItemToForm(row);
+                } else {
+                    editingWriteoffIndex = -1;
+                }
+            }
+        });
 
         // Set read-only displays
         txtMaterialCode.setEditable(false);
@@ -320,6 +333,9 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         txtBatchnumber = new javax.swing.JTextField();
         cmbScrapReason = new javax.swing.JComboBox<>();
         btbAdd = new javax.swing.JButton();
+        btnRemoveSummaryItem = new javax.swing.JButton();
+        btnUpdateSummaryItem = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jPanelWriteoffHistory = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
@@ -377,7 +393,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                 .addComponent(btbCancel)
                 .addGap(18, 18, 18)
                 .addComponent(btnPrint)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 120, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -566,6 +582,30 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateSummaryItem.setToolTipText("Save Changes");
+        btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelWriteoffDetailsLayout = new javax.swing.GroupLayout(jPanelWriteoffDetails);
         jPanelWriteoffDetails.setLayout(jPanelWriteoffDetailsLayout);
         jPanelWriteoffDetailsLayout.setHorizontalGroup(
@@ -589,9 +629,15 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                         .addComponent(jLabel10)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtPONumber6)))
-                .addGap(177, 177, 177)
+                .addGap(80, 80, 80)
                 .addComponent(btbAdd)
-                .addContainerGap(77, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanelWriteoffDetailsLayout.setVerticalGroup(
             jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -604,14 +650,20 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                     .addComponent(cmbScrapReason, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel10)
-                        .addComponent(txtPONumber6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel9)
-                        .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btbAdd)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel10)
+                                .addComponent(txtPONumber6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btbAdd))
+                            .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel9)
+                                .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jPanelWriteoffHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Writeoff History Table"));
@@ -965,6 +1017,162 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void loadSummaryItemToForm(int row) {
+        if (row < 0 || row >= pendingWriteoffs.size()) return;
+        editingWriteoffIndex = row;
+        ScrapItemDTO item = pendingWriteoffs.get(row);
+
+        MaterialStockDTO dto = new MaterialStockDTO();
+        dto.setMaterialId(item.getMaterialId());
+        dto.setMaterialCode(item.getMaterialCode());
+        dto.setMaterialDescription(item.getMaterialName());
+        dto.setBaseUom(item.getBaseUom());
+        dto.setPrimaryBinId(item.getBinId());
+        dto.setPrimaryBinCode(item.getBinCode());
+        dto.setBatchId(item.getBatchId());
+        dto.setBatchNumber(item.getBatchNumber());
+        dto.setSystemQuantity(item.getCurrentQty());
+        this.currentSelectedMaterial = dto;
+
+        isProgrammaticChange = true;
+        txtMaterialCode.setText(item.getMaterialCode());
+        txtPMaterialName.setText(item.getMaterialName());
+        txtCurrentQty.setText(String.format("%.2f", item.getCurrentQty()));
+        txtBatchNumber.setText(item.getBatchNumber() != null ? item.getBatchNumber() : "N/A");
+        txtBatchnumber.setText(item.getBatchNumber() != null ? item.getBatchNumber() : "");
+        txtWriteoffQty.setText(String.format("%.2f", item.getWriteoffQty()));
+        txtPONumber6.setText(item.getRemarks() != null ? item.getRemarks() : "");
+
+        for (int i = 0; i < cmbScrapReason.getItemCount(); i++) {
+            String reasonStr = cmbScrapReason.getItemAt(i);
+            if (reasonStr.startsWith(item.getReasonCode())) {
+                cmbScrapReason.setSelectedIndex(i);
+                break;
+            }
+        }
+        isProgrammaticChange = false;
+    }
+
+    private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
+        int row = jTable1.getSelectedRow();
+        if (row < 0 || row >= pendingWriteoffs.size()) {
+            if (editingWriteoffIndex >= 0 && editingWriteoffIndex < pendingWriteoffs.size()) {
+                row = editingWriteoffIndex;
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Please select an item from the write-off summary to remove.");
+                return;
+            }
+        }
+
+        ScrapItemDTO removed = pendingWriteoffs.remove(row);
+        tableModel.removeRow(row);
+        if (editingWriteoffIndex == row) {
+            editingWriteoffIndex = -1;
+            clearItemFields();
+        } else if (editingWriteoffIndex > row) {
+            editingWriteoffIndex--;
+        }
+        jTable1.clearSelection();
+        if (pendingWriteoffs.isEmpty()) {
+            loadWriteoffHistory();
+        }
+        StatusMessageHandler.showSuccess(txtStatus, "Removed " + removed.getMaterialCode() + " from write-off list.");
+    }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
+
+    private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
+        int row = jTable1.getSelectedRow();
+        if (row < 0 || row >= pendingWriteoffs.size()) {
+            if (editingWriteoffIndex >= 0 && editingWriteoffIndex < pendingWriteoffs.size()) {
+                row = editingWriteoffIndex;
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Please select an item from the write-off summary to update.");
+                return;
+            }
+        }
+
+        ScrapItemDTO item = pendingWriteoffs.get(row);
+        String writeoffText = txtWriteoffQty.getText().trim();
+        if (writeoffText.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter write-off quantity.");
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        double writeoffQty;
+        try {
+            writeoffQty = Double.parseDouble(writeoffText);
+        } catch (NumberFormatException e) {
+            StatusMessageHandler.showError(txtStatus, "Please enter a valid numeric writeoff quantity.");
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        if (writeoffQty <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Writeoff quantity must be greater than zero.");
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        if (writeoffQty > item.getCurrentQty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Writeoff quantity (" + writeoffQty + ") cannot exceed available stock (" + item.getCurrentQty() + ").");
+            txtWriteoffQty.requestFocus();
+            return;
+        }
+
+        String remarks = txtPONumber6.getText().trim();
+        if (remarks.length() < 10) {
+            StatusMessageHandler.showWarning(txtStatus, "Remarks are mandatory for scrap/write-off (minimum 10 characters required).");
+            txtPONumber6.requestFocus();
+            return;
+        }
+
+        String selectedReasonStr = (String) cmbScrapReason.getSelectedItem();
+        String reasonCode = "DAMAGED";
+        String reasonDesc = "Physical Damage";
+        if (selectedReasonStr != null && selectedReasonStr.contains("-")) {
+            String[] parts = selectedReasonStr.split("-", 2);
+            reasonCode = parts[0].trim();
+            reasonDesc = parts[1].trim();
+        }
+
+        item.setWriteoffQty(writeoffQty);
+        item.setReasonCode(reasonCode);
+        item.setReasonDescription(reasonDesc);
+        item.setRemarks(remarks);
+
+        tableModel.setValueAt(item.getMaterialCode(), row, 0);
+        tableModel.setValueAt(String.format("%.2f", writeoffQty), row, 1);
+        tableModel.setValueAt(reasonCode, row, 2);
+        tableModel.setValueAt(LocalDate.now().toString(), row, 3);
+
+        StatusMessageHandler.showSuccess(txtStatus, "Updated " + item.getMaterialCode() + " in write-off list.");
+    }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (pendingWriteoffs.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "No pending write-off items to clear.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the write-off summary?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        pendingWriteoffs.clear();
+        tableModel.setRowCount(0);
+        editingWriteoffIndex = -1;
+        clearItemFields();
+        loadWriteoffHistory();
+
+        StatusMessageHandler.showSuccess(txtStatus, "Pending write-off list cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1005,10 +1213,13 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     private javax.swing.JPanel JpanelMaterialSearch;
     private javax.swing.JButton btbAdd;
     private javax.swing.JButton btbCancel;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
+    private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox<String> cmbScrapReason;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

@@ -509,10 +509,11 @@
                               <Group type="102" attributes="0">
                                   <Component id="btnAddToReceipt" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="btnUpdateRecieptItem" min="-2" pref="34" max="-2" attributes="0"/>
+                                  <Component id="btnUpdateSummaryItem" min="-2" pref="34" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="btnRemoveRecieptItem" min="-2" pref="35" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                  <Component id="btnRemoveSummaryItem" min="-2" pref="35" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Component id="btnClearSummaryTbl" min="-2" pref="31" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -541,8 +542,8 @@
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="btnRemoveRecieptItem" alignment="0" max="32767" attributes="0"/>
-                              <Component id="btnUpdateRecieptItem" alignment="0" max="32767" attributes="0"/>
+                              <Component id="btnRemoveSummaryItem" alignment="0" max="32767" attributes="0"/>
+                              <Component id="btnUpdateSummaryItem" alignment="0" max="32767" attributes="0"/>
                               <Component id="btnAddToReceipt" alignment="0" max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="lblRemarks" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -554,6 +555,7 @@
                                   <Component id="lblQuality" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="cmbQuality" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="btnClearSummaryTbl" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -661,7 +663,7 @@
                 </Component>
                 <Component class="javax.swing.JTextField" name="txtRemarks">
                 </Component>
-                <Component class="javax.swing.JButton" name="btnRemoveRecieptItem">
+                <Component class="javax.swing.JButton" name="btnRemoveSummaryItem">
                   <Properties>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                       <Color blue="6b" green="6b" red="ff" type="rgb"/>
@@ -672,10 +674,10 @@
                     <Property name="toolTipText" type="java.lang.String" value="Remove Selelcted Items from Receipt"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRemoveRecieptItemActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRemoveSummaryItemActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JButton" name="btnUpdateRecieptItem">
+                <Component class="javax.swing.JButton" name="btnUpdateSummaryItem">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                       <Image iconType="3" name="/btnicn/edit-14.png"/>
@@ -683,7 +685,17 @@
                     <Property name="toolTipText" type="java.lang.String" value="Save Changes"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUpdateRecieptItemActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUpdateSummaryItemActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JButton" name="btnClearSummaryTbl">
+                  <Properties>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/btnicn/clear_menu-14.png"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnClearSummaryTblActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

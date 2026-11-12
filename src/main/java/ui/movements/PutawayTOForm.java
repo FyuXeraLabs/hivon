@@ -421,6 +421,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
         btnAddTo = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnRemove = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jScrollPanePutawaySummary = new javax.swing.JScrollPane();
         tblPutawaySummary = new javax.swing.JTable();
 
@@ -598,6 +599,13 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelPutawayPlanningLayout = new javax.swing.GroupLayout(jPanelPutawayPlanning);
         jPanelPutawayPlanning.setLayout(jPanelPutawayPlanningLayout);
         jPanelPutawayPlanningLayout.setHorizontalGroup(
@@ -622,7 +630,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(72, 72, 72)
-                .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
                         .addComponent(lblPutawayQty, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -636,8 +644,10 @@ public class PutawayTOForm extends javax.swing.JFrame {
                         .addGap(47, 47, 47)
                         .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
         jPanelPutawayPlanningLayout.setVerticalGroup(
             jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -661,7 +671,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
                         .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnAddTo))
                     .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1101,6 +1112,33 @@ public class PutawayTOForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (putawaySummaryList.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Putaway summary table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the Putaway Summary?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        putawaySummaryList.clear();
+        refreshPutawaySummaryTable();
+        refreshInputsForSelectedMaterial();
+        tblPutawaySummary.clearSelection();
+        editingPutawaySummaryIndex = -1;
+        btnUpdate.setEnabled(false);
+        btnRemove.setEnabled(false);
+
+        StatusMessageHandler.showSuccess(txtStatus, "Putaway summary cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1140,6 +1178,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAddTo;
     private javax.swing.JButton btnAutoSuggest;
     private javax.swing.JButton btnCancle;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemove;

@@ -40,7 +40,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
      */
     public GRPurchaseOrderForm() {
         initComponents();
-        btnUpdateRecieptItem.setEnabled(false); // Disable update button initially
+        btnUpdateSummaryItem.setEnabled(false); // Disable update button initially
         tblReceiptSummary.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
@@ -332,7 +332,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 // Clear selection of receipt summary when user manually selects PO items to add new items
                 tblReceiptSummary.clearSelection();
                 editingReceiptSummaryIndex = -1;
-                btnUpdateRecieptItem.setEnabled(false);
+                btnUpdateSummaryItem.setEnabled(false);
                 
                 refreshInputsForSelectedPOItem();
             }
@@ -417,14 +417,14 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                                 }
                             }
                             
-                            btnUpdateRecieptItem.setEnabled(true);
+                            btnUpdateSummaryItem.setEnabled(true);
                             btnAddToReceipt.setEnabled(false);
                         }
                     }
                 } else {
                     // Either multiple rows or no rows selected
                     editingReceiptSummaryIndex = -1;
-                    btnUpdateRecieptItem.setEnabled(false);
+                    btnUpdateSummaryItem.setEnabled(false);
                     
                     refreshInputsForSelectedPOItem();
                     
@@ -618,8 +618,9 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         lblRemarks = new javax.swing.JLabel();
         btnAddToReceipt = new javax.swing.JButton();
         txtRemarks = new javax.swing.JTextField();
-        btnRemoveRecieptItem = new javax.swing.JButton();
-        btnUpdateRecieptItem = new javax.swing.JButton();
+        btnRemoveSummaryItem = new javax.swing.JButton();
+        btnUpdateSummaryItem = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jScrollPaneReceiptSummary = new javax.swing.JScrollPane();
         tblReceiptSummary = new javax.swing.JTable();
 
@@ -883,20 +884,27 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
-        btnRemoveRecieptItem.setBackground(new java.awt.Color(255, 107, 107));
-        btnRemoveRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
-        btnRemoveRecieptItem.setToolTipText("Remove Selelcted Items from Receipt");
-        btnRemoveRecieptItem.addActionListener(new java.awt.event.ActionListener() {
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnRemoveRecieptItemActionPerformed(evt);
+                btnRemoveSummaryItemActionPerformed(evt);
             }
         });
 
-        btnUpdateRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
-        btnUpdateRecieptItem.setToolTipText("Save Changes");
-        btnUpdateRecieptItem.addActionListener(new java.awt.event.ActionListener() {
+        btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateSummaryItem.setToolTipText("Save Changes");
+        btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUpdateRecieptItemActionPerformed(evt);
+                btnUpdateSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
             }
         });
 
@@ -945,10 +953,11 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                     .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
                         .addComponent(btnAddToReceipt)
                         .addGap(18, 18, 18)
-                        .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanelReceiptDetailsLayout.setVerticalGroup(
@@ -970,8 +979,8 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                         .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnAddToReceipt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblRemarks)
@@ -980,7 +989,8 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                         .addComponent(lblReceivingBin)
                         .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblQuality)
-                        .addComponent(cmbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cmbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1255,7 +1265,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
-    private void btnUpdateRecieptItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateRecieptItemActionPerformed
+    private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
         if (editingReceiptSummaryIndex < 0 || editingReceiptSummaryIndex >= receiptSummaryList.size()) {
             StatusMessageHandler.showWarning(txtStatus, "Please select an item from the Receipt Summary to update.");
             return;
@@ -1349,9 +1359,9 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         tblPOItems.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
         
         StatusMessageHandler.showSuccess(txtStatus, "Item updated in receipt summary.");
-    }//GEN-LAST:event_btnUpdateRecieptItemActionPerformed
+    }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
 
-    private void btnRemoveRecieptItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveRecieptItemActionPerformed
+    private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
         int[] selectedRows = tblReceiptSummary.getSelectedRows();
         if (selectedRows.length == 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select item(s) from the Receipt Summary to remove.");
@@ -1378,7 +1388,37 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
         
         StatusMessageHandler.showSuccess(txtStatus, "Selected item(s) removed from receipt summary.");
-    }//GEN-LAST:event_btnRemoveRecieptItemActionPerformed
+    }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (receiptSummaryList.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Receipt summary table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the receipt summary?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        receiptSummaryList.clear();
+        refreshReceiptSummaryTable();
+        tblReceiptSummary.clearSelection();
+        editingReceiptSummaryIndex = -1;
+        btnUpdateSummaryItem.setEnabled(false);
+
+        int currentSelection = tblPOItems.getSelectedRow();
+        if (currentSelection >= 0) {
+            tblPOItems.getSelectionModel().setSelectionInterval(currentSelection, currentSelection);
+        }
+
+        StatusMessageHandler.showSuccess(txtStatus, "Receipt summary cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1540,11 +1580,12 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToReceipt;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrintGR;
-    private javax.swing.JButton btnRemoveRecieptItem;
+    private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSearch;
-    private javax.swing.JButton btnUpdateRecieptItem;
+    private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox cmbBatch;
     private javax.swing.JComboBox cmbQuality;
     private javax.swing.JComboBox cmbReceivingBin;

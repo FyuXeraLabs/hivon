@@ -745,6 +745,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         btnRemoveRecieptItem = new javax.swing.JButton();
         txtRemarks = new javax.swing.JTextField();
         cmbQualityStatus = new javax.swing.JComboBox<>();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jScrollPaneReturnSummary = new javax.swing.JScrollPane();
         tblReturnSummary = new javax.swing.JTable();
 
@@ -1003,6 +1004,13 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         cmbQualityStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "OK", "Damaged", "Partial Damage", "Defective" }));
 
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelReturnDetailsLayout = new javax.swing.GroupLayout(jPanelReturnDetails);
         jPanelReturnDetails.setLayout(jPanelReturnDetailsLayout);
         jPanelReturnDetailsLayout.setHorizontalGroup(
@@ -1041,7 +1049,9 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(50, 50, 50)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(301, Short.MAX_VALUE))
         );
         jPanelReturnDetailsLayout.setVerticalGroup(
@@ -1066,7 +1076,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                         .addComponent(lblReceivingBin)
                         .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnAddToReturn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cmbQualityStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cmbQualityStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1449,6 +1460,35 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (returnSummaryList.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Return summary table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the return summary?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        returnSummaryList.clear();
+        refreshReturnSummaryTable();
+        tblReturnSummary.clearSelection();
+        btnUpdateRecieptItem.setEnabled(false);
+
+        int currentSelection = tblSOItems.getSelectedRow();
+        if (currentSelection >= 0) {
+            tblSOItems.getSelectionModel().setSelectionInterval(currentSelection, currentSelection);
+        }
+
+        StatusMessageHandler.showSuccess(txtStatus, "Return summary cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1609,6 +1649,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToReturn;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemoveRecieptItem;

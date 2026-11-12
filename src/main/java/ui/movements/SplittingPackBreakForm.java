@@ -40,6 +40,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     private boolean isProgrammaticChange = false;
     private boolean isCalculating = false;
     private String lastMovementNumber;
+    private int editingBreakingIndex = -1;
 
     /**
      * Creates new form SplittingPackBreakForm
@@ -87,6 +88,9 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         cmbDestinationBin = new javax.swing.JComboBox<>();
         btnAdd = new javax.swing.JButton();
+        btnRemoveSummaryItem = new javax.swing.JButton();
+        btnUpdateSummaryItem = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
         btnPost = new javax.swing.JButton();
@@ -228,6 +232,30 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateSummaryItem.setToolTipText("Save Changes");
+        btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -245,23 +273,35 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(75, 75, 75)
                 .addComponent(btnAdd)
-                .addGap(99, 99, 99))
+                .addGap(68, 68, 68)
+                .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(spinnerPacksToBreak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
-                    .addComponent(spinnerBaseUnitsCreated, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel9)
-                    .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAdd))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(spinnerPacksToBreak, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8)
+                            .addComponent(spinnerBaseUnitsCreated, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9)
+                            .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnAdd))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -343,7 +383,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -432,6 +472,133 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
+        removeSelectedBreakingItem();
+    }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
+
+    private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
+        int row = tblSummary.getSelectedRow();
+        if (row < 0 || row >= breakingItems.size()) {
+            if (editingBreakingIndex >= 0 && editingBreakingIndex < breakingItems.size()) {
+                row = editingBreakingIndex;
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Please select an item from the table to update.");
+                return;
+            }
+        }
+
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            txtMaterialCode.requestFocus();
+            return;
+        }
+
+        SplittingSourceBinDTO srcBin = getSelectedSourceBin();
+        if (srcBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a source bin.");
+            return;
+        }
+
+        BinToBinDestinationBinDTO destBin = getSelectedDestinationBin();
+        if (destBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination bin.");
+            return;
+        }
+
+        double packs = 0.0;
+        double baseUnits = 0.0;
+        try {
+            packs = Double.parseDouble(spinnerPacksToBreak.getValue().toString());
+            baseUnits = Double.parseDouble(spinnerBaseUnitsCreated.getValue().toString());
+        } catch (Exception ex) {
+            StatusMessageHandler.showError(txtStatus, "Invalid quantity entered.");
+            return;
+        }
+
+        if (packs <= 0 || baseUnits <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Packs to break must be greater than 0.");
+            return;
+        }
+
+        double remAvail = calculateRemainingSourceQty(srcBin, row);
+        double maxPacks = selectedMaterial.getUnitsPerPack() > 0 ? Math.floor(remAvail / selectedMaterial.getUnitsPerPack()) : 0;
+        if (packs > maxPacks) {
+            StatusMessageHandler.showError(txtStatus, "Cannot break more packs than available in source bin. Available: " + String.format("%.0f", maxPacks) + " packs.");
+            JOptionPane.showMessageDialog(
+                this,
+                "Cannot break more packs than available in source bin " + srcBin.getBinCode() + ".\nAvailable: " + String.format("%.0f", maxPacks) + " packs (" + String.format("%.2f", remAvail) + " " + selectedMaterial.getBaseUom() + ")\nRequested: " + String.format("%.0f", packs) + " packs (" + String.format("%.2f", baseUnits) + " " + selectedMaterial.getBaseUom() + ")",
+                "Insufficient Stock",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        if (destBin.getBinId() != srcBin.getBinId()) {
+            double remDestCap = calculateRemainingDestCapacity(destBin, row);
+            if (baseUnits > remDestCap) {
+                StatusMessageHandler.showError(txtStatus, "Destination bin does not have enough capacity. Remaining: " + String.format("%.2f", remDestCap));
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Destination bin " + destBin.getBinCode() + " capacity exceeded.\nRemaining Capacity: " + String.format("%.2f", remDestCap) + "\nRequested: " + String.format("%.2f", baseUnits),
+                    "Capacity Exceeded",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+        }
+
+        SplittingItemDTO item = breakingItems.get(row);
+        item.setMaterialId(selectedMaterial.getMaterialId());
+        item.setMaterialCode(selectedMaterial.getMaterialCode());
+        item.setMaterialDescription(selectedMaterial.getMaterialDescription());
+        item.setSourceBinId(srcBin.getBinId());
+        item.setSourceBinCode(srcBin.getBinCode());
+        item.setDestBinId(destBin.getBinId());
+        item.setDestBinCode(destBin.getBinCode());
+        item.setPacks(packs);
+        item.setUnitsPerPack(selectedMaterial.getUnitsPerPack());
+        item.setBaseUnits(baseUnits);
+        item.setPackUom(selectedMaterial.getPackUom());
+        item.setBaseUom(selectedMaterial.getBaseUom());
+        item.setBatchId(srcBin.getBatchId());
+        item.setBatchNumber(srcBin.getBatchNumber());
+
+        tableModel.setValueAt(item.getMaterialCode(), row, 0);
+        tableModel.setValueAt(item.getSourceBinCode() + (item.getBatchNumber() != null ? " (" + item.getBatchNumber() + ")" : ""), row, 1);
+        tableModel.setValueAt(String.format("%.0f", item.getPacks()) + " " + item.getPackUom(), row, 2);
+        tableModel.setValueAt(String.format("%.2f", item.getBaseUnits()) + " " + item.getBaseUom(), row, 3);
+        tableModel.setValueAt(item.getDestBinCode(), row, 4);
+
+        onSourceBinSelected();
+        refreshDestBinComboLabels();
+
+        StatusMessageHandler.showSuccess(txtStatus, "Updated " + item.getMaterialCode() + " in breaking list.");
+    }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (breakingItems.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Breaking summary table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the breaking list?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        breakingItems.clear();
+        tableModel.setRowCount(0);
+        editingBreakingIndex = -1;
+        onSourceBinSelected();
+        refreshDestBinComboLabels();
+        StatusMessageHandler.showSuccess(txtStatus, "Package breaking list cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     private void initCustomComponents() {
         txtMaterialName.setEditable(false);
         txtCurrentPackUOM.setEditable(false);
@@ -474,6 +641,17 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE) {
                     removeSelectedBreakingItem();
+                }
+            }
+        });
+
+        tblSummary.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && !isProgrammaticChange) {
+                int selectedRow = tblSummary.getSelectedRow();
+                if (selectedRow >= 0 && selectedRow < breakingItems.size()) {
+                    loadSummaryItemToForm(selectedRow);
+                } else {
+                    editingBreakingIndex = -1;
                 }
             }
         });
@@ -738,9 +916,15 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     }
 
     private double calculateRemainingSourceQty(SplittingSourceBinDTO srcBin) {
+        return calculateRemainingSourceQty(srcBin, -1);
+    }
+
+    private double calculateRemainingSourceQty(SplittingSourceBinDTO srcBin, int excludeIndex) {
         if (srcBin == null) return 0.0;
         double avail = srcBin.getAvailableQty();
-        for (SplittingItemDTO item : breakingItems) {
+        for (int i = 0; i < breakingItems.size(); i++) {
+            if (i == excludeIndex) continue;
+            SplittingItemDTO item = breakingItems.get(i);
             if (item.getSourceBinId() == srcBin.getBinId()) {
                 if ((srcBin.getBatchId() == null && item.getBatchId() == null) ||
                     (srcBin.getBatchId() != null && srcBin.getBatchId().equals(item.getBatchId()))) {
@@ -752,14 +936,57 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     }
 
     private double calculateRemainingDestCapacity(BinToBinDestinationBinDTO destBin) {
+        return calculateRemainingDestCapacity(destBin, -1);
+    }
+
+    private double calculateRemainingDestCapacity(BinToBinDestinationBinDTO destBin, int excludeIndex) {
         if (destBin == null) return 0.0;
         double rem = destBin.getRemainingCapacity();
-        for (SplittingItemDTO item : breakingItems) {
+        for (int i = 0; i < breakingItems.size(); i++) {
+            if (i == excludeIndex) continue;
+            SplittingItemDTO item = breakingItems.get(i);
             if (item.getDestBinId() == destBin.getBinId()) {
                 rem -= item.getBaseUnits();
             }
         }
         return Math.max(0.0, rem);
+    }
+
+    private void loadSummaryItemToForm(int row) {
+        if (row < 0 || row >= breakingItems.size()) return;
+        editingBreakingIndex = row;
+        SplittingItemDTO item = breakingItems.get(row);
+
+        if (selectedMaterial == null || selectedMaterial.getMaterialId() != item.getMaterialId()) {
+            SplittingMaterialDTO m = new SplittingMaterialDTO();
+            m.setMaterialId(item.getMaterialId());
+            m.setMaterialCode(item.getMaterialCode());
+            m.setMaterialDescription(item.getMaterialDescription());
+            m.setUnitsPerPack(item.getUnitsPerPack());
+            m.setPackUom(item.getPackUom());
+            m.setBaseUom(item.getBaseUom());
+            displayMaterialDetails(m);
+            loadSourceBinsForMaterial(m.getMaterialId());
+        }
+
+        for (int i = 0; i < loadedSourceBins.size(); i++) {
+            if (loadedSourceBins.get(i).getBinId() == item.getSourceBinId()) {
+                cmbSourceBin.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < loadedDestBins.size(); i++) {
+            if (loadedDestBins.get(i).getBinId() == item.getDestBinId()) {
+                cmbDestinationBin.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        isCalculating = true;
+        spinnerPacksToBreak.setValue(item.getPacks());
+        spinnerBaseUnitsCreated.setValue(item.getBaseUnits());
+        isCalculating = false;
     }
 
     private void onSourceBinSelected() {
@@ -1145,9 +1372,12 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
+    private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox<String> cmbDestinationBin;
     private javax.swing.JComboBox<String> cmbSourceBin;
     private javax.swing.JLabel jLabel1;

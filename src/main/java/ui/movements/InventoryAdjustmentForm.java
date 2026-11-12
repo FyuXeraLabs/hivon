@@ -40,6 +40,8 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     private MaterialStockDTO currentSelectedMaterial = null;
     private final List<AdjustmentItemDTO> pendingAdjustments = new ArrayList<>();
     private String lastMovementNumber;
+    private int editingAdjustmentIndex = -1;
+    private boolean isProgrammaticChange = false;
 
     /**
      * Creates new form InventoryAdjustmentForm
@@ -62,6 +64,17 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
             }
         };
         jTable1.setModel(tableModel);
+
+        jTable1.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && !isProgrammaticChange) {
+                int row = jTable1.getSelectedRow();
+                if (row >= 0 && row < pendingAdjustments.size()) {
+                    loadSummaryItemToForm(row);
+                } else {
+                    editingAdjustmentIndex = -1;
+                }
+            }
+        });
 
         // Make calculated/search fields read-only
         txtPONumber2.setEditable(false);   // Material Code display
@@ -333,6 +346,9 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         jComboVarianceReason = new javax.swing.JComboBox<>();
         txtSourceBin = new javax.swing.JTextField();
         btnadd = new javax.swing.JButton();
+        btnRemoveSummaryItem = new javax.swing.JButton();
+        btnUpdateSummaryItem = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         btnPost = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
@@ -554,6 +570,30 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateSummaryItem.setToolTipText("Save Changes");
+        btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout JpanelButtonsLayout = new javax.swing.GroupLayout(JpanelButtons);
         JpanelButtons.setLayout(JpanelButtonsLayout);
         JpanelButtonsLayout.setHorizontalGroup(
@@ -566,7 +606,13 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(26, 26, 26)
-                        .addComponent(btnadd))
+                        .addComponent(btnadd)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(JpanelButtonsLayout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -575,7 +621,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(168, Short.MAX_VALUE))
+                .addContainerGap())
         );
         JpanelButtonsLayout.setVerticalGroup(
             JpanelButtonsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -588,11 +634,17 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
                     .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(JpanelButtonsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(JpanelButtonsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel10))
-                    .addComponent(btnadd))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(JpanelButtonsLayout.createSequentialGroup()
+                        .addGroup(JpanelButtonsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(JpanelButtonsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel10))
+                            .addComponent(btnadd))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -920,6 +972,162 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void loadSummaryItemToForm(int row) {
+        if (row < 0 || row >= pendingAdjustments.size()) return;
+        editingAdjustmentIndex = row;
+        AdjustmentItemDTO item = pendingAdjustments.get(row);
+
+        MaterialStockDTO m = new MaterialStockDTO();
+        m.setMaterialId(item.getMaterialId());
+        m.setMaterialCode(item.getMaterialCode());
+        m.setMaterialDescription(item.getMaterialName());
+        m.setBaseUom(item.getBaseUom());
+        m.setPrimaryBinId(item.getBinId());
+        m.setPrimaryBinCode(item.getBinCode());
+        m.setSystemQuantity(item.getSystemQty());
+        this.currentSelectedMaterial = m;
+
+        isProgrammaticChange = true;
+        txtMaterialCode.setText(item.getMaterialCode());
+        txtPONumber2.setText(item.getMaterialCode());
+        txtMaterialName.setText(item.getMaterialName());
+        txtPONumber3.setText(String.format("%.2f", item.getSystemQty()));
+        txtSourceBin.setText(item.getBinCode() != null ? item.getBinCode() : "");
+        txtCountedQty.setText(String.format("%.2f", item.getCountedQty()));
+        txtVariance.setText(String.format("%+.2f", item.getVarianceQty()));
+        txtPONumber6.setText(String.format("%+.2f%%", item.getVariancePercent()));
+        txtRemarks.setText(item.getRemarks() != null ? item.getRemarks() : "");
+
+        for (int i = 0; i < jComboVarianceReason.getItemCount(); i++) {
+            String reasonItem = jComboVarianceReason.getItemAt(i);
+            if (reasonItem.startsWith(item.getReasonCode())) {
+                jComboVarianceReason.setSelectedIndex(i);
+                break;
+            }
+        }
+        isProgrammaticChange = false;
+    }
+
+    private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
+        int row = jTable1.getSelectedRow();
+        if (row < 0 || row >= pendingAdjustments.size()) {
+            if (editingAdjustmentIndex >= 0 && editingAdjustmentIndex < pendingAdjustments.size()) {
+                row = editingAdjustmentIndex;
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Please select an item from the adjustment summary to remove.");
+                return;
+            }
+        }
+
+        AdjustmentItemDTO removed = pendingAdjustments.remove(row);
+        tableModel.removeRow(row);
+        if (editingAdjustmentIndex == row) {
+            editingAdjustmentIndex = -1;
+            clearItemFields();
+        } else if (editingAdjustmentIndex > row) {
+            editingAdjustmentIndex--;
+        }
+        jTable1.clearSelection();
+        StatusMessageHandler.showSuccess(txtStatus, "Removed " + removed.getMaterialCode() + " from adjustment summary.");
+    }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
+
+    private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
+        int row = jTable1.getSelectedRow();
+        if (row < 0 || row >= pendingAdjustments.size()) {
+            if (editingAdjustmentIndex >= 0 && editingAdjustmentIndex < pendingAdjustments.size()) {
+                row = editingAdjustmentIndex;
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Please select an item from the adjustment summary to update.");
+                return;
+            }
+        }
+
+        AdjustmentItemDTO item = pendingAdjustments.get(row);
+        String countedText = txtCountedQty.getText().trim();
+        if (countedText.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter counted quantity.");
+            txtCountedQty.requestFocus();
+            return;
+        }
+
+        double sysQty = item.getSystemQty();
+        double countedQty;
+        try {
+            countedQty = Double.parseDouble(countedText);
+            if (countedQty < 0) {
+                StatusMessageHandler.showError(txtStatus, "Counted quantity cannot be negative.");
+                txtCountedQty.requestFocus();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            StatusMessageHandler.showError(txtStatus, "Invalid numeric counted quantity.");
+            txtCountedQty.requestFocus();
+            return;
+        }
+
+        double variance = countedQty - sysQty;
+        String remarks = txtRemarks.getText().trim();
+        if (variance < 0 && remarks.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Remarks required for quantity shortages.");
+            txtRemarks.requestFocus();
+            return;
+        }
+
+        String selectedReasonStr = (String) jComboVarianceReason.getSelectedItem();
+        String reasonCode = "COUNT";
+        String reasonDesc = "Cycle Count Variance";
+        if (selectedReasonStr != null && selectedReasonStr.contains("-")) {
+            String[] parts = selectedReasonStr.split("-", 2);
+            reasonCode = parts[0].trim();
+            reasonDesc = parts[1].trim();
+        }
+
+        String binCode = txtSourceBin.getText().trim();
+        if (binCode.isEmpty() && item.getBinCode() != null) {
+            binCode = item.getBinCode();
+        }
+
+        item.setBinCode(binCode);
+        item.setCountedQty(countedQty);
+        item.setVarianceQty(variance);
+        item.setVariancePercent(sysQty != 0 ? (variance / sysQty) * 100.0 : 0.0);
+        item.setReasonCode(reasonCode);
+        item.setReasonDescription(reasonDesc);
+        item.setRemarks(remarks);
+
+        tableModel.setValueAt(item.getMaterialCode(), row, 0);
+        tableModel.setValueAt(String.format("%.2f", sysQty), row, 1);
+        tableModel.setValueAt(String.format("%.2f", countedQty), row, 2);
+        tableModel.setValueAt(String.format("%+.2f", variance), row, 3);
+        tableModel.setValueAt(reasonCode, row, 4);
+
+        StatusMessageHandler.showSuccess(txtStatus, "Updated " + item.getMaterialCode() + " in adjustment summary.");
+    }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (pendingAdjustments.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Adjustment summary table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the adjustment summary?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        pendingAdjustments.clear();
+        tableModel.setRowCount(0);
+        editingAdjustmentIndex = -1;
+        jTable1.clearSelection();
+        clearItemFields();
+        StatusMessageHandler.showSuccess(txtStatus, "Adjustment summary cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -961,9 +1169,12 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     private javax.swing.JPanel JpanelMaterialDetails;
     private javax.swing.JPanel JpanelSearch;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
+    private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JButton btnadd;
     private javax.swing.JComboBox<String> jComboVarianceReason;
     private javax.swing.JLabel jLabel1;

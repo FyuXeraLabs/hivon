@@ -119,6 +119,9 @@ public class CycleCountForm extends javax.swing.JFrame {
         btnSkip = new javax.swing.JButton();
         btnRecount = new javax.swing.JButton();
         spinCountedQty = new javax.swing.JSpinner();
+        btnRemoveSummaryItem = new javax.swing.JButton();
+        btnUpdateSummaryItem = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         tblCountSummary = new javax.swing.JTable();
@@ -497,6 +500,30 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateSummaryItem.setToolTipText("Save Changes");
+        btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -506,16 +533,18 @@ public class CycleCountForm extends javax.swing.JFrame {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addComponent(chkRecountRequired)
-                        .addGap(80, 80, 80)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel19)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(64, 64, 64)
+                        .addGap(18, 18, 18)
                         .addComponent(btnAddToSummary)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSkip)
                         .addGap(18, 18, 18)
-                        .addComponent(btnRecount))
+                        .addComponent(btnRecount)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(jPanel6Layout.createSequentialGroup()
@@ -551,8 +580,13 @@ public class CycleCountForm extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel15)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblSystemQty, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(61, Short.MAX_VALUE))
+                                .addComponent(lblSystemQty, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 5, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(15, 15, 15))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -567,25 +601,37 @@ public class CycleCountForm extends javax.swing.JFrame {
                     .addComponent(lblBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel15)
                     .addComponent(lblSystemQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel16)
-                    .addComponent(jLabel17)
-                    .addComponent(lblVariance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel18)
-                    .addComponent(lblVariancePercentage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(spinCountedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnSkip)
-                        .addComponent(btnRecount))
-                    .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel19)
-                        .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnAddToSummary))
-                    .addComponent(chkRecountRequired))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel16)
+                            .addComponent(jLabel17)
+                            .addComponent(lblVariance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel18)
+                            .addComponent(lblVariancePercentage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(spinCountedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(14, 14, 14)))
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(btnSkip)
+                                .addComponent(btnRecount))
+                            .addComponent(btnAddToSummary)
+                            .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(chkRecountRequired)
+                                .addComponent(jLabel19)
+                                .addComponent(txtaRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(30, 30, 30))))
         );
 
         jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Count Summary"));
@@ -1600,6 +1646,125 @@ public class CycleCountForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
+        int row = tblCountSummary.getSelectedRow();
+        if (row < 0 || row >= countItems.size()) {
+            int listIdx = listMaterials.getSelectedIndex();
+            if (listIdx >= 0 && listIdx < countItems.size()) {
+                row = listIdx;
+            }
+        }
+        if (row < 0 || row >= countItems.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select an item from the Count Summary to remove/reset.");
+            return;
+        }
+
+        CycleCountItemDTO item = countItems.get(row);
+        item.setCountedQuantity(null);
+        item.setVarianceReason(null);
+        item.setRecountRequired(false);
+
+        if (row < materialListModel.size()) {
+            materialListModel.set(row, formatListItem(item));
+        }
+        refreshSummaryTable();
+
+        if (listMaterials.getSelectedIndex() == row) {
+            spinCountedQty.setValue(0.0);
+            lblVariance.setText("");
+            lblVariancePercentage.setText("");
+            txtaRemarks.setText("");
+            chkRecountRequired.setSelected(false);
+        }
+
+        saveItemCountToApi(item);
+        StatusMessageHandler.showSuccess(txtStatus, "Count reset for " + item.getMaterialCode() + ".");
+    }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
+
+    private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
+        int row = tblCountSummary.getSelectedRow();
+        if (row < 0 || row >= countItems.size()) {
+            int listIdx = listMaterials.getSelectedIndex();
+            if (listIdx >= 0 && listIdx < countItems.size()) {
+                row = listIdx;
+            }
+        }
+        if (row < 0 || row >= countItems.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select an item from the Count Summary to update.");
+            return;
+        }
+
+        CycleCountItemDTO item = countItems.get(row);
+        double countedQty;
+        try {
+            spinCountedQty.commitEdit();
+            countedQty = ((Number) spinCountedQty.getValue()).doubleValue();
+        } catch (Exception e) {
+            StatusMessageHandler.showError(txtStatus, "Please enter a valid counted quantity.");
+            return;
+        }
+
+        if (countedQty < 0) {
+            StatusMessageHandler.showError(txtStatus, "Counted quantity cannot be negative.");
+            return;
+        }
+
+        item.setCountedQuantity(countedQty);
+        String remarks = txtaRemarks.getText().trim();
+        item.setVarianceReason(remarks.isEmpty() ? null : remarks);
+        item.setRecountRequired(chkRecountRequired.isSelected());
+
+        if (row < materialListModel.size()) {
+            materialListModel.set(row, formatListItem(item));
+        }
+
+        refreshSummaryTable();
+        highlightSummaryRow(row);
+        saveItemCountToApi(item);
+
+        StatusMessageHandler.showSuccess(txtStatus, "Updated count for " + item.getMaterialCode() + " (" + countedQty + ").");
+    }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        boolean hasCounted = false;
+        for (CycleCountItemDTO item : countItems) {
+            if (item.isCounted()) {
+                hasCounted = true;
+                break;
+            }
+        }
+
+        if (!hasCounted) {
+            StatusMessageHandler.showInfo(txtStatus, "No recorded counts to clear.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all recorded counts in this session?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        for (int i = 0; i < countItems.size(); i++) {
+            CycleCountItemDTO item = countItems.get(i);
+            item.setCountedQuantity(null);
+            item.setVarianceReason(null);
+            item.setRecountRequired(false);
+            if (i < materialListModel.size()) {
+                materialListModel.set(i, formatListItem(item));
+            }
+            saveItemCountToApi(item);
+        }
+
+        refreshSummaryTable();
+        clearCountEntryFields();
+        StatusMessageHandler.showSuccess(txtStatus, "All recorded counts cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1637,15 +1802,18 @@ public class CycleCountForm extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToSummary;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnFreeze;
     private javax.swing.JButton btnNextMaterial;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrevMaterial;
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRecount;
+    private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSkip;
     private javax.swing.JButton btnStartCount;
     private javax.swing.JButton btnUnfreeze;
+    private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JCheckBox chkRecountRequired;
     private javax.swing.JComboBox<String> cmbBin;
     private javax.swing.JComboBox<String> cmbCountReason;

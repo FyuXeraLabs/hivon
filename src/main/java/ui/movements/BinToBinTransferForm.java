@@ -44,6 +44,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     private String lastTransferNumber = null;
     private boolean detailsConfirmed = false;
     private boolean isProgrammaticChange = false;
+    private int editingSummaryIndex = -1;
 
     /**
      * Creates new form BinToBinTransferForm
@@ -113,6 +114,9 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         lblCurrentQty = new javax.swing.JTextField();
         btnAddToTransfer = new javax.swing.JButton();
         spinTransferQty = new javax.swing.JSpinner();
+        btnUpdateSummaryItem = new javax.swing.JButton();
+        btnRemoveSummaryItem = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -447,6 +451,30 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
+        btnUpdateSummaryItem.setToolTipText("Save Changes");
+        btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
+        btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
+        btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveSummaryItemActionPerformed(evt);
+            }
+        });
+
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
@@ -466,23 +494,35 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
                 .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(80, 80, 80)
                 .addComponent(btnAddToTransfer)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel10)
-                        .addComponent(lblCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel8)
-                        .addComponent(jLabel9)
-                        .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnAddToTransfer)
-                        .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel10)
+                                .addComponent(lblCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel8)
+                                .addComponent(jLabel9)
+                                .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnAddToTransfer)
+                                .addComponent(spinTransferQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
@@ -605,6 +645,140 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         cancelForm();
     }//GEN-LAST:event_btnCancelActionPerformed
 
+    private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
+        int row = jTable1.getSelectedRow();
+        if (row < 0 || row >= transferItems.size()) {
+            if (editingSummaryIndex >= 0 && editingSummaryIndex < transferItems.size()) {
+                row = editingSummaryIndex;
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Please select an item from the table to update.");
+                return;
+            }
+        }
+
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            return;
+        }
+
+        BinToBinSourceBinDTO srcBin = getSelectedSourceBin();
+        if (srcBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a source bin.");
+            return;
+        }
+
+        BinToBinDestinationBinDTO destBin = getSelectedDestinationBin();
+        if (destBin == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a destination bin.");
+            return;
+        }
+
+        if (srcBin.getBinId() == destBin.getBinId()) {
+            StatusMessageHandler.showError(txtStatus, "Source and destination bins must be different.");
+            JOptionPane.showMessageDialog(this, "Source and destination bins must be different.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (srcBin.isFrozen()) {
+            StatusMessageHandler.showError(txtStatus, "Source bin " + srcBin.getBinCode() + " is frozen. Transfer not allowed.");
+            return;
+        }
+        if (destBin.isFrozen()) {
+            StatusMessageHandler.showError(txtStatus, "Destination bin " + destBin.getBinCode() + " is frozen. Transfer not allowed.");
+            return;
+        }
+
+        if ("RECEIVING".equalsIgnoreCase(srcBin.getBinType()) && "STORAGE".equalsIgnoreCase(destBin.getBinType())) {
+            StatusMessageHandler.showError(txtStatus, "Cannot transfer from RECEIVING to STORAGE using bin-to-bin. Use Putaway instead.");
+            JOptionPane.showMessageDialog(this, "Cannot transfer from RECEIVING to STORAGE using bin-to-bin. Use Putaway instead.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double qty;
+        try {
+            qty = Double.parseDouble(spinTransferQty.getValue().toString());
+        } catch (Exception ex) {
+            StatusMessageHandler.showError(txtStatus, "Invalid transfer quantity.");
+            return;
+        }
+
+        if (qty <= 0.0) {
+            StatusMessageHandler.showWarning(txtStatus, "Transfer quantity must be greater than 0.");
+            return;
+        }
+
+        double remSourceAvail = calculateRemainingAvailableSourceQty(srcBin, row);
+        if (qty > remSourceAvail) {
+            StatusMessageHandler.showError(txtStatus, "Insufficient stock in source bin. Available: " + String.format("%.2f", remSourceAvail));
+            JOptionPane.showMessageDialog(this, "Insufficient stock in source bin " + srcBin.getBinCode() + ".\nAvailable: " + String.format("%.2f", remSourceAvail) + "\nRequested: " + qty, "Insufficient Stock", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double remDestCap = calculateRemainingDestCapacity(destBin, row);
+        if (qty > remDestCap) {
+            StatusMessageHandler.showError(txtStatus, "Destination bin does not have enough capacity. Remaining: " + String.format("%.2f", remDestCap));
+            JOptionPane.showMessageDialog(this, "Destination bin " + destBin.getBinCode() + " does not have enough capacity.\nRemaining Capacity: " + String.format("%.2f", remDestCap) + "\nRequested: " + qty, "Capacity Exceeded", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        BinToBinTransferItemDTO item = transferItems.get(row);
+        String uom = selectedMaterial.getBaseUom() != null ? selectedMaterial.getBaseUom() : "EA";
+        item.setMaterialId(selectedMaterial.getMaterialId());
+        item.setMaterialCode(selectedMaterial.getMaterialCode());
+        item.setMaterialName(selectedMaterial.getMaterialDescription());
+        item.setFromBinId(srcBin.getBinId());
+        item.setFromBinCode(srcBin.getBinCode());
+        item.setToBinId(destBin.getBinId());
+        item.setToBinCode(destBin.getBinCode());
+        item.setToZoneCode(destBin.getZoneCode());
+        item.setQuantity(qty);
+        item.setUom(uom);
+        item.setBatchId(srcBin.getBatchId());
+        item.setBatchNumber(srcBin.getBatchNumber());
+
+        tableModel.setValueAt(item.getMaterialCode(), row, 0);
+        tableModel.setValueAt(item.getFromBinCode(), row, 1);
+        tableModel.setValueAt(item.getToBinCode(), row, 2);
+        tableModel.setValueAt(String.format("%.2f", item.getQuantity()), row, 3);
+        tableModel.setValueAt(item.getBatchNumber() != null ? item.getBatchNumber() : "N/A", row, 4);
+        tableModel.setValueAt(item.getStatus(), row, 5);
+
+        onSourceBinSelected();
+        onDestinationBinSelected();
+        refreshDestBinComboLabels();
+
+        StatusMessageHandler.showSuccess(txtStatus, "Updated " + item.getMaterialCode() + " in transfer list.");
+    }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
+
+    private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
+        removeSelectedTransferItem();
+    }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (transferItems.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Transfer table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the transfer list?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        transferItems.clear();
+        tableModel.setRowCount(0);
+        editingSummaryIndex = -1;
+        onSourceBinSelected();
+        onDestinationBinSelected();
+        refreshDestBinComboLabels();
+        StatusMessageHandler.showSuccess(txtStatus, "Transfer list cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     // ==========================================
     // Custom Bin-to-Bin Initialization & Logic
     // ==========================================
@@ -653,6 +827,18 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE) {
                     removeSelectedTransferItem();
+                }
+            }
+        });
+
+        // Selection listener to load selected item into inputs for editing
+        jTable1.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && !isProgrammaticChange) {
+                int selectedRow = jTable1.getSelectedRow();
+                if (selectedRow >= 0 && selectedRow < transferItems.size()) {
+                    loadSummaryItemToForm(selectedRow);
+                } else {
+                    editingSummaryIndex = -1;
                 }
             }
         });
@@ -1014,9 +1200,15 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     }
 
     private double calculateRemainingAvailableSourceQty(BinToBinSourceBinDTO bin) {
+        return calculateRemainingAvailableSourceQty(bin, -1);
+    }
+
+    private double calculateRemainingAvailableSourceQty(BinToBinSourceBinDTO bin, int excludeIndex) {
         if (bin == null) return 0.0;
         double available = bin.getAvailableQty();
-        for (BinToBinTransferItemDTO item : transferItems) {
+        for (int i = 0; i < transferItems.size(); i++) {
+            if (i == excludeIndex) continue;
+            BinToBinTransferItemDTO item = transferItems.get(i);
             if (item.getFromBinId() == bin.getBinId()) {
                 if ((bin.getBatchId() == null && item.getBatchId() == null) ||
                     (bin.getBatchId() != null && bin.getBatchId().equals(item.getBatchId()))) {
@@ -1028,14 +1220,89 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     }
 
     private double calculateRemainingDestCapacity(BinToBinDestinationBinDTO bin) {
+        return calculateRemainingDestCapacity(bin, -1);
+    }
+
+    private double calculateRemainingDestCapacity(BinToBinDestinationBinDTO bin, int excludeIndex) {
         if (bin == null) return 0.0;
         double remaining = bin.getRemainingCapacity();
-        for (BinToBinTransferItemDTO item : transferItems) {
+        for (int i = 0; i < transferItems.size(); i++) {
+            if (i == excludeIndex) continue;
+            BinToBinTransferItemDTO item = transferItems.get(i);
             if (item.getToBinId() == bin.getBinId()) {
                 remaining -= item.getQuantity();
             }
         }
         return Math.max(0.0, remaining);
+    }
+
+    private void loadSummaryItemToForm(int row) {
+        if (row < 0 || row >= transferItems.size()) return;
+        editingSummaryIndex = row;
+        BinToBinTransferItemDTO item = transferItems.get(row);
+
+        MaterialDTO m = new MaterialDTO();
+        m.setMaterialId(item.getMaterialId());
+        m.setMaterialCode(item.getMaterialCode());
+        m.setMaterialDescription(item.getMaterialName());
+        m.setBaseUom(item.getUom());
+        this.selectedMaterial = m;
+        txtMaterialSearch.setText(item.getMaterialCode() + " - " + item.getMaterialName());
+
+        int whId = getSelectedWarehouseId();
+        if (whId > 0) {
+            BackgroundTask task = new BackgroundTask(this, "Loading Source Bins") {
+                private List<BinToBinSourceBinDTO> sourceBins;
+
+                @Override
+                protected Boolean performTask() throws Exception {
+                    sourceBins = controller.getSourceBins(whId, item.getMaterialId());
+                    return sourceBins != null;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    isProgrammaticChange = true;
+                    cmbSourceBin.removeAllItems();
+                    loadedSourceBins = sourceBins != null ? sourceBins : new ArrayList<>();
+
+                    int selectIdx = -1;
+                    for (int i = 0; i < loadedSourceBins.size(); i++) {
+                        BinToBinSourceBinDTO b = loadedSourceBins.get(i);
+                        String label = b.getBinCode();
+                        if (b.getBatchNumber() != null && !b.getBatchNumber().isEmpty()) {
+                            label += " (" + b.getBatchNumber() + ")";
+                        }
+                        cmbSourceBin.addItem(label);
+                        if (b.getBinId() == item.getFromBinId()) {
+                            selectIdx = i;
+                        }
+                    }
+                    if (selectIdx >= 0) {
+                        cmbSourceBin.setSelectedIndex(selectIdx);
+                    }
+                    isProgrammaticChange = false;
+                    onSourceBinSelected();
+
+                    // Select destination bin
+                    for (int i = 0; i < loadedDestBins.size(); i++) {
+                        if (loadedDestBins.get(i).getBinId() == item.getToBinId()) {
+                            cmbDestinationWarehouse.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                    onDestinationBinSelected();
+
+                    spinTransferQty.setValue(item.getQuantity());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to load source bins for selected item", e);
+                }
+            };
+            task.executeWithDialog();
+        }
     }
 
     private void onSourceBinSelected() {
@@ -1415,9 +1682,12 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddToTransfer;
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
+    private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSearchMaterial;
+    private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox<String> cmbDestinationWarehouse;
     private javax.swing.JTextField cmbDestinationZone;
     private javax.swing.JComboBox<String> cmbSourceBin;

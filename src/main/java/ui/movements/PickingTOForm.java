@@ -375,6 +375,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         btnAddTo = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnRemove = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jScrollPanePickingSummary = new javax.swing.JScrollPane();
         tblPickingSummary = new javax.swing.JTable();
 
@@ -600,6 +601,13 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelPickingPlanningLayout = new javax.swing.GroupLayout(jPanelPickingPlanning);
         jPanelPickingPlanning.setLayout(jPanelPickingPlanningLayout);
         jPanelPickingPlanningLayout.setHorizontalGroup(
@@ -624,7 +632,9 @@ public class PickingTOForm extends javax.swing.JFrame {
                         .addGap(71, 71, 71)
                         .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 89, Short.MAX_VALUE)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelPickingPlanningLayout.createSequentialGroup()
                         .addComponent(lblMaterials)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -640,8 +650,9 @@ public class PickingTOForm extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(lblSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(115, Short.MAX_VALUE))
+                        .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanelPickingPlanningLayout.setVerticalGroup(
             jPanelPickingPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -669,7 +680,8 @@ public class PickingTOForm extends javax.swing.JFrame {
                             .addComponent(btnAddTo))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -722,7 +734,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1001, Short.MAX_VALUE)
+            .addComponent(jScrollPaneMain)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1078,6 +1090,32 @@ public class PickingTOForm extends javax.swing.JFrame {
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
 
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (pickingSummaryList.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Picking summary table is already empty.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the Picking Summary?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        pickingSummaryList.clear();
+        refreshPickingSummaryTable();
+        tblPickingSummary.clearSelection();
+        editingPickingSummaryIndex = -1;
+        btnUpdate.setEnabled(false);
+        btnRemove.setEnabled(false);
+
+        StatusMessageHandler.showSuccess(txtStatus, "Picking summary cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1117,6 +1155,7 @@ public class PickingTOForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAddTo;
     private javax.swing.JButton btnAutoSequence;
     private javax.swing.JButton btnCancle;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemove;

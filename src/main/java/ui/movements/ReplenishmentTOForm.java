@@ -142,7 +142,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         btnAddtoTO = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        btnClear = new javax.swing.JButton();
+        btnClearSummaryTbl = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblReplenishmentSummary = new javax.swing.JTable();
 
@@ -323,10 +323,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             }
         });
 
-        btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
-        btnClear.addActionListener(new java.awt.event.ActionListener() {
+        btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
+        btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnClearActionPerformed(evt);
+                btnClearSummaryTblActionPerformed(evt);
             }
         });
 
@@ -374,7 +374,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -410,7 +410,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                                 .addComponent(txtReplenishQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(btnAddtoTO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnDelete, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -508,6 +508,31 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
 
         builder.showExportDialog(this);
     }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
+        if (summaryList.isEmpty()) {
+            ui.components.StatusMessageHandler.showInfo(txtStatus, "Replenishment summary table is already empty.");
+            return;
+        }
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all items from the Replenishment Summary?",
+            "Confirm Clear",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != javax.swing.JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        summaryList.clear();
+        refreshSummaryTable();
+        tblReplenishmentSummary.clearSelection();
+        editingSummaryIndex = -1;
+        clearPlanningInputs();
+
+        ui.components.StatusMessageHandler.showSuccess(txtStatus, "Replenishment summary cleared.");
+    }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
     private void loadFilters() {
         core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Filters") {
@@ -1099,7 +1124,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAddtoTO;
     private javax.swing.JButton btnAutoPlan;
     private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnPost;
