@@ -162,6 +162,10 @@ public class AutoSuggestTextField {
                     textField.setText(selected);
                     textField.getDocument().addDocumentListener(docListener);
                     popup.setVisible(false);
+                    // Trigger action listeners on text field (like search / selection)
+                    for (ActionListener al : textField.getActionListeners()) {
+                        al.actionPerformed(new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, ""));
+                    }
                 }
             }
         });
