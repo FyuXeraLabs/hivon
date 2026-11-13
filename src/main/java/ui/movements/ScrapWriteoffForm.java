@@ -93,9 +93,6 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
 
         // Load Scrap Reasons
         loadScrapReasons();
-
-        // Load Recent Write-off History
-        loadWriteoffHistory();
     }
 
     private void loadScrapReasons() {
@@ -286,8 +283,9 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         clearItemFields();
         pendingWriteoffs.clear();
         tableModel.setRowCount(0);
+        editingWriteoffIndex = -1;
+        jTable1.clearSelection();
         StatusMessageHandler.showInfo(txtStatus, "Form cleared.");
-        loadWriteoffHistory();
     }
 
 
@@ -1055,8 +1053,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
 
     private void btnRemoveSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveSummaryItemActionPerformed
         int row = jTable1.getSelectedRow();
-        if (row < 0 || row >= pendingWriteoffs.size()) {
-            if (editingWriteoffIndex >= 0 && editingWriteoffIndex < pendingWriteoffs.size()) {
+        if (row < 0) {
+            if (editingWriteoffIndex >= 0 && editingWriteoffIndex < tableModel.getRowCount()) {
                 row = editingWriteoffIndex;
             } else {
                 StatusMessageHandler.showWarning(txtStatus, "Please select an item from the write-off summary to remove.");
@@ -1064,8 +1062,16 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         }
 
-        ScrapItemDTO removed = pendingWriteoffs.remove(row);
+        String matCode = "";
+        if (row < pendingWriteoffs.size()) {
+            ScrapItemDTO removed = pendingWriteoffs.remove(row);
+            matCode = removed.getMaterialCode();
+        } else if (row < tableModel.getRowCount()) {
+            Object val = tableModel.getValueAt(row, 0);
+            matCode = val != null ? val.toString() : "item";
+        }
         tableModel.removeRow(row);
+
         if (editingWriteoffIndex == row) {
             editingWriteoffIndex = -1;
             clearItemFields();
@@ -1073,10 +1079,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             editingWriteoffIndex--;
         }
         jTable1.clearSelection();
-        if (pendingWriteoffs.isEmpty()) {
-            loadWriteoffHistory();
-        }
-        StatusMessageHandler.showSuccess(txtStatus, "Removed " + removed.getMaterialCode() + " from write-off list.");
+        StatusMessageHandler.showSuccess(txtStatus, "Removed " + matCode + " from write-off list.");
     }//GEN-LAST:event_btnRemoveSummaryItemActionPerformed
 
     private void btnUpdateSummaryItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSummaryItemActionPerformed
@@ -1149,8 +1152,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateSummaryItemActionPerformed
 
     private void btnClearSummaryTblActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSummaryTblActionPerformed
-        if (pendingWriteoffs.isEmpty()) {
-            StatusMessageHandler.showInfo(txtStatus, "No pending write-off items to clear.");
+        if (tableModel.getRowCount() == 0 && pendingWriteoffs.isEmpty()) {
+            StatusMessageHandler.showInfo(txtStatus, "Write-off summary table is already empty.");
             return;
         }
 
@@ -1167,10 +1170,10 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         pendingWriteoffs.clear();
         tableModel.setRowCount(0);
         editingWriteoffIndex = -1;
+        jTable1.clearSelection();
         clearItemFields();
-        loadWriteoffHistory();
 
-        StatusMessageHandler.showSuccess(txtStatus, "Pending write-off list cleared.");
+        StatusMessageHandler.showSuccess(txtStatus, "Write-off summary cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
     /**
