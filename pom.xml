@@ -145,6 +145,26 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>make-test-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>hivon-tests</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <archive>
+                                <manifest>
+                                    <mainClass>test.framework.TestCli</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs combine.self="override"/>
+                            <descriptors>
+                                <descriptor>src/assembly/test-jar.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

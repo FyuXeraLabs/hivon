@@ -23,6 +23,12 @@ public class RetryHelper {
      */
     public static <T> T executeWithRetry(java.awt.Component parent, String taskName,
             Callable<T> operation, String errorMessage) throws Exception {
+        // A headless JVM cannot construct the modal ProgressDialog (JDialog throws
+        // HeadlessException), so run the operation directly instead of failing.
+        if (java.awt.GraphicsEnvironment.isHeadless()) {
+            return operation.call();
+        }
+
         final Object[] result = new Object[1];
         final Exception[] error = new Exception[1];
         final boolean[] succeeded = new boolean[1];

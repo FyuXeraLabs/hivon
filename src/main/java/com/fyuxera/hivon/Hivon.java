@@ -54,10 +54,12 @@ public class Hivon {
         // Initialize system tray
         core.workers.SystemTray.init();
 
+        /*
         // Check internet connection with retry support
         while (!internetCheckPassed) {
             createInternetCheckTask().executeWithRetry();
         }
+        */
 
         // Check API health with retry support
         while (!healthCheckPassed) {
