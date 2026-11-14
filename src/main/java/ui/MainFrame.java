@@ -249,6 +249,8 @@ public class MainFrame extends javax.swing.JFrame {
         treeNode2.add(treeNode3);
         treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP66 - Financial Report");
         treeNode2.add(treeNode3);
+        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("REP67 - Material Monitoring");
+        treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
         treeMovement.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         treeMovement.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -733,7 +735,8 @@ public class MainFrame extends javax.swing.JFrame {
                 Map.entry("rep63", "VIEW_STOCK_AGING_REPORT"),
                 Map.entry("rep64", "VIEW_PERFORMANCE_REPORT"),
                 Map.entry("rep65", "VIEW_UTILIZATION_REPORT"),
-                Map.entry("rep66", "VIEW_FINANCIAL_REPORT")
+                Map.entry("rep66", "VIEW_FINANCIAL_REPORT"),
+                Map.entry("rep67", "VIEW_MATERIALS")
         );
 
         // movement form mapping
@@ -774,7 +777,8 @@ public class MainFrame extends javax.swing.JFrame {
                 Map.entry("rep63", () -> new StockAgingForm().setVisible(true)),
                 Map.entry("rep64", () -> new PerformanceReportForm().setVisible(true)),
                 Map.entry("rep65", () -> new UtilizationReportForm().setVisible(true)),
-                Map.entry("rep66", () -> new FinancialReportForm().setVisible(true))
+                Map.entry("rep66", () -> new FinancialReportForm().setVisible(true)),
+                Map.entry("rep67", () -> new MaterialMonitoringForm().setVisible(true))
         );
 
         String code = value == null ? "" : value.trim().toLowerCase();
