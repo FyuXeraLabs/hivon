@@ -4,17 +4,62 @@
  */
 package ui.movements;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+import core.api.dao.GIInternalConsumptionDAO.MaterialWithStock;
+import core.api.dao.GIInternalConsumptionDAO.BinWithStock;
+import core.api.dao.GIInternalConsumptionDAO.GIConsumptionIssueItem;
+import movements.controllers.GIInternalConsumptionController;
+import core.workers.BackgroundTask;
+import ui.components.StatusMessageHandler;
+import ui.components.AutoSuggestTextField;
+import core.logging.Logger;
+import core.security.UserSession;
+
 /**
+ * Form for recording Goods Issue for Internal Consumption (OUT16)
  *
  * @author Piyumi
  */
 public class GIInternalConsumptionForm extends javax.swing.JFrame {
+
+    private GIInternalConsumptionController controller;
+    private MaterialWithStock selectedMaterial;
+    private List<GIConsumptionIssueItem> issueItemList = new ArrayList<>();
+    private String lastMovementNumber;
+    private boolean isProgrammaticSelection = false;
 
     /**
      * Creates new form GIInternalConsumptionForm
      */
     public GIInternalConsumptionForm() {
         initComponents();
+        this.setTitle("Goods Issue - Internal Consumption (OUT16)");
+        try {
+            this.setIconImage(new javax.swing.ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
+        } catch (Exception ignored) {}
+        this.setExtendedState(this.MAXIMIZED_BOTH);
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        this.controller = new GIInternalConsumptionController();
+
+        // Make input fields editable
+        spinIssueQty.setEditable(true);
+        txtRemarks.setEditable(true);
+
+        loadConsumptionTypes();
+        loadInitialBins();
+        attachMaterialAutoSuggest();
+        attachDepartmentAutoSuggest();
+        initTableActions();
+
+        // Enter key shortcuts
+        txtMaterialSearch.addActionListener(evt -> btnSearchActionPerformed(evt));
+        spinIssueQty.addActionListener(evt -> btnAddToIssueActionPerformed(evt));
+
+        StatusMessageHandler.showInfo(txtStatus, "Ready. Select Consumption Type and search material to issue.");
     }
 
     /**
@@ -26,21 +71,813 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jPanel10 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        cmbConsumptionType = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        txtDepartment = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtProjectReference = new javax.swing.JTextField();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        txtMaterialSearch = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        lblCurrentStock = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        lblMaterialCode = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        lblBaseUOM = new javax.swing.JTextField();
+        jPanel8 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        spinIssueQty = new javax.swing.JTextField();
+        txtRemarks = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        cmbSourceBin = new javax.swing.JComboBox<>();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblIssueSummary = new javax.swing.JTable();
+        jPanel11 = new javax.swing.JPanel();
+        btnAddToIssue = new javax.swing.JButton();
+        btnCompleteIssue = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Goods Issue - Internal Consumption (OUT16)");
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Consumption Type"));
+
+        cmbConsumptionType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel1.setText("Consumption Type");
+
+        jLabel2.setText("Department");
+
+        jLabel3.setText("Project");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(cmbConsumptionType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtProjectReference, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbConsumptionType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtProjectReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Selection panel"));
+
+        jLabel4.setText("Material Code");
+
+        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(btnSearch)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtMaterialSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch))
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Details"));
+
+        jLabel5.setText("Material Code");
+
+        lblCurrentStock.setEditable(false);
+
+        jLabel6.setText("Current Stock");
+
+        lblMaterialCode.setEditable(false);
+
+        jLabel7.setText("Base UOM");
+
+        lblBaseUOM.setEditable(false);
+        lblBaseUOM.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lblBaseUOMActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblCurrentStock, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(lblMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(lblCurrentStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(lblBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
+        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("Issue Details"));
+
+        jLabel8.setText("Issue Qty");
+
+        jLabel9.setText("Remarks");
+
+        spinIssueQty.setEditable(false);
+
+        txtRemarks.setEditable(false);
+
+        jLabel10.setText("Source Bin");
+
+        cmbSourceBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(spinIssueQty, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(25, 25, 25)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(527, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(spinIssueQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9)
+                    .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        tblIssueSummary.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Material", "Qty", "Bin", "Department"
+            }
+        ));
+        jScrollPane2.setViewportView(tblIssueSummary);
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jScrollPane3.setViewportView(jPanel10);
+
+        btnAddToIssue.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAddToIssue.setText("Add");
+        btnAddToIssue.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddToIssueActionPerformed(evt);
+            }
+        });
+
+        btnCompleteIssue.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnCompleteIssue.setText("Complete Issue");
+        btnCompleteIssue.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompleteIssueActionPerformed(evt);
+            }
+        });
+
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(btnAddToIssue)
+                .addGap(10, 10, 10)
+                .addComponent(btnCompleteIssue)
+                .addGap(20, 20, 20)
+                .addComponent(btnCancel)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAddToIssue)
+                    .addComponent(btnCompleteIssue)
+                    .addComponent(btnCancel))
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 918, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 672, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        String rawQuery = txtMaterialSearch.getText().trim();
+        if (rawQuery.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a material code or name to search.");
+            txtMaterialSearch.requestFocus();
+            return;
+        }
+
+        // If user picked from AutoSuggest like "MNT-001 - Lubricating Oil", isolate the code
+        String query = rawQuery.contains(" - ") ? rawQuery.split(" - ")[0].trim() : rawQuery;
+
+        BackgroundTask task = new BackgroundTask(this, "Searching Material") {
+            private List<MaterialWithStock> results;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Searching materials with available stock...");
+                results = controller.searchMaterial(query);
+                return results != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (results == null || results.isEmpty()) {
+                    StatusMessageHandler.showWarning(txtStatus, "No materials with stock found for: " + query);
+                    JOptionPane.showMessageDialog(GIInternalConsumptionForm.this,
+                            "No materials with available stock found for: " + query,
+                            "No Results", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                MaterialWithStock chosen;
+                if (results.size() == 1) {
+                    chosen = results.get(0);
+                } else {
+                    // Build display list for picker
+                    String[] options = new String[results.size()];
+                    for (int i = 0; i < results.size(); i++) {
+                        MaterialWithStock m = results.get(i);
+                        options[i] = m.getMaterialCode() + " - " + m.getMaterialDescription()
+                                + " (Stock: " + m.getTotalStock() + " " + (m.getBaseUom() != null ? m.getBaseUom() : "") + ")";
+                    }
+                    int idx = JOptionPane.showOptionDialog(GIInternalConsumptionForm.this,
+                            "Multiple materials found. Select one:",
+                            "Select Material",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.PLAIN_MESSAGE,
+                            null, options, options[0]);
+                    if (idx < 0) return;
+                    chosen = results.get(idx);
+                }
+
+                selectedMaterial = chosen;
+                lblMaterialCode.setText(chosen.getMaterialCode());
+                lblBaseUOM.setText(chosen.getBaseUom() != null ? chosen.getBaseUom() : "");
+                lblCurrentStock.setText(String.valueOf(chosen.getTotalStock()));
+                txtMaterialSearch.setText(chosen.getMaterialCode() + " - " + chosen.getMaterialDescription());
+
+                StatusMessageHandler.showSuccess(txtStatus, "Loaded material: " + chosen.getMaterialCode());
+                loadBinsForMaterial(chosen.getMaterialId());
+                spinIssueQty.requestFocus();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Error searching material: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void lblBaseUOMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lblBaseUOMActionPerformed
+        // intentionally empty
+    }//GEN-LAST:event_lblBaseUOMActionPerformed
+
+    private void btnAddToIssueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToIssueActionPerformed
+        // --- validations ---
+        if (cmbConsumptionType.getSelectedIndex() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a Consumption Type.");
+            cmbConsumptionType.requestFocus();
+            return;
+        }
+        String department = txtDepartment.getText().trim();
+        if (department.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a Department.");
+            txtDepartment.requestFocus();
+            return;
+        }
+        if (selectedMaterial == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please search and select a material first.");
+            txtMaterialSearch.requestFocus();
+            return;
+        }
+        if (cmbSourceBin.getSelectedIndex() <= 0 || !(cmbSourceBin.getSelectedItem() instanceof BinWithStock)) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a Source Bin with available stock.");
+            cmbSourceBin.requestFocus();
+            return;
+        }
+
+        String qtyText = spinIssueQty.getText().trim();
+        if (qtyText.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter issue quantity.");
+            spinIssueQty.requestFocus();
+            return;
+        }
+
+        double qty;
+        try {
+            qty = Double.parseDouble(qtyText);
+        } catch (NumberFormatException ex) {
+            StatusMessageHandler.showError(txtStatus, "Issue Quantity must be a valid number.");
+            spinIssueQty.requestFocus();
+            return;
+        }
+        if (qty <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Issue Quantity must be greater than zero.");
+            spinIssueQty.requestFocus();
+            return;
+        }
+
+        BinWithStock selectedBin = (BinWithStock) cmbSourceBin.getSelectedItem();
+
+        // Calculate cumulative quantity already staged for this material and bin
+        double alreadyAdded = 0.0;
+        for (GIConsumptionIssueItem existing : issueItemList) {
+            if (existing.getMaterialId() == selectedMaterial.getMaterialId()
+                    && existing.getBinId() == selectedBin.getBinId()) {
+                alreadyAdded += existing.getQuantity();
+            }
+        }
+
+        if (qty + alreadyAdded > selectedBin.getAvailableQty()) {
+            StatusMessageHandler.showWarning(txtStatus,
+                    "Quantity (" + qty + ") + existing (" + alreadyAdded + ") exceeds available in "
+                            + selectedBin.getBinCode() + " (" + selectedBin.getAvailableQty() + ").");
+            spinIssueQty.requestFocus();
+            return;
+        }
+
+        // --- build issue item ---
+        GIConsumptionIssueItem item = new GIConsumptionIssueItem();
+        item.setMaterialId(selectedMaterial.getMaterialId());
+        item.setMaterialCode(selectedMaterial.getMaterialCode());
+        item.setMaterialDescription(selectedMaterial.getMaterialDescription());
+        item.setQuantity(qty);
+        item.setUom(selectedMaterial.getBaseUom() != null ? selectedMaterial.getBaseUom() : "PCS");
+        item.setRemarks(txtRemarks.getText().trim());
+        item.setBinId(selectedBin.getBinId());
+        item.setBinCode(selectedBin.getBinCode());
+        if (selectedBin.getBatchId() != null) {
+            item.setBatchId(selectedBin.getBatchId());
+        }
+        if (selectedBin.getBatchNumber() != null) {
+            item.setBatchNumber(selectedBin.getBatchNumber());
+        }
+
+        issueItemList.add(item);
+        refreshIssueSummaryTable();
+
+        // reset line fields for next item
+        spinIssueQty.setText("");
+        txtRemarks.setText("");
+        StatusMessageHandler.showSuccess(txtStatus, "Added " + item.getMaterialCode() + " (" + qty + " " + item.getUom() + ") to issue list.");
+        spinIssueQty.requestFocus();
+    }//GEN-LAST:event_btnAddToIssueActionPerformed
+
+    private void btnCompleteIssueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompleteIssueActionPerformed
+        if (issueItemList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No items in the issue list. Please add materials first.");
+            return;
+        }
+        if (cmbConsumptionType.getSelectedIndex() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a Consumption Type.");
+            cmbConsumptionType.requestFocus();
+            return;
+        }
+        String department = txtDepartment.getText().trim();
+        if (department.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a Department.");
+            txtDepartment.requestFocus();
+            return;
+        }
+
+        String consumptionType = cmbConsumptionType.getSelectedItem() != null ? cmbConsumptionType.getSelectedItem().toString() : "";
+        String projectRef = txtProjectReference.getText().trim();
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Post Goods Issue for Internal Consumption?\n\n"
+                + "Type: " + consumptionType + "\n"
+                + "Department: " + department + "\n"
+                + "Reference: " + (projectRef.isEmpty() ? "N/A" : projectRef) + "\n"
+                + "Total Line Items: " + issueItemList.size(),
+                "Confirm Goods Issue (OUT16)",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        final List<GIConsumptionIssueItem> itemsToPost = new ArrayList<>(issueItemList);
+
+        BackgroundTask task = new BackgroundTask(this, "Posting Goods Issue") {
+            private String movementNumber;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Posting internal consumption movement OUT16...");
+                movementNumber = controller.completeConsumption(
+                        consumptionType, department, projectRef, itemsToPost);
+                return movementNumber != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                lastMovementNumber = movementNumber;
+                StatusMessageHandler.showSuccess(txtStatus, "Goods Issue posted: " + movementNumber);
+                JOptionPane.showMessageDialog(GIInternalConsumptionForm.this,
+                        "Goods Issue posted successfully!\nMovement Number: " + movementNumber,
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                // Prompt user for PDF summary export or print
+                printSummaryReport();
+                clearForm();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Posting failed: " + e.getMessage());
+                JOptionPane.showMessageDialog(GIInternalConsumptionForm.this,
+                        "Failed to post Goods Issue:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+        task.executeWithDialog();
+    }//GEN-LAST:event_btnCompleteIssueActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    // --- Helper / initialisation methods ---
+
+    private void initTableActions() {
+        // Table row selection listener
+        tblIssueSummary.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && !isProgrammaticSelection) {
+                int row = tblIssueSummary.getSelectedRow();
+                if (row >= 0 && row < issueItemList.size()) {
+                    GIConsumptionIssueItem item = issueItemList.get(row);
+                    StatusMessageHandler.showInfo(txtStatus, "Selected: " + item.getMaterialCode() + " - " + item.getQuantity() + " " + item.getUom() + " (Bin: " + item.getBinCode() + ")");
+                }
+            }
+        });
+
+        // Right click context menu
+        javax.swing.JPopupMenu popup = new javax.swing.JPopupMenu();
+        javax.swing.JMenuItem removeItem = new javax.swing.JMenuItem("Remove Item");
+        try {
+            removeItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png")));
+        } catch (Exception ignored) {}
+        removeItem.addActionListener(e -> removeSelectedIssueItem());
+        popup.add(removeItem);
+
+        javax.swing.JMenuItem clearAll = new javax.swing.JMenuItem("Clear All Items");
+        try {
+            clearAll.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png")));
+        } catch (Exception ignored) {}
+        clearAll.addActionListener(e -> clearIssueItems());
+        popup.add(clearAll);
+
+        tblIssueSummary.setComponentPopupMenu(popup);
+
+        // Delete key listener
+        tblIssueSummary.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_DELETE) {
+                    removeSelectedIssueItem();
+                }
+            }
+        });
+    }
+
+    private void removeSelectedIssueItem() {
+        int row = tblIssueSummary.getSelectedRow();
+        if (row < 0 || row >= issueItemList.size()) {
+            StatusMessageHandler.showWarning(txtStatus, "Select an item from the issue summary table to remove.");
+            return;
+        }
+        GIConsumptionIssueItem removed = issueItemList.remove(row);
+        refreshIssueSummaryTable();
+        StatusMessageHandler.showSuccess(txtStatus, "Removed " + removed.getMaterialCode() + " from issue list.");
+    }
+
+    private void clearIssueItems() {
+        if (issueItemList.isEmpty()) {
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Clear all items from the issue summary?",
+                "Confirm Clear",
+                JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            issueItemList.clear();
+            refreshIssueSummaryTable();
+            StatusMessageHandler.showInfo(txtStatus, "Issue list cleared.");
+        }
+    }
+
+    private void printSummaryReport() {
+        StatusMessageHandler.showInfo(txtStatus, "Document processed successfully.");
+    }
+
+    // Populates cmbConsumptionType with standard consumption categories
+    private void loadConsumptionTypes() {
+        cmbConsumptionType.removeAllItems();
+        cmbConsumptionType.addItem("-- Select Type --");
+        cmbConsumptionType.addItem("Maintenance");
+        cmbConsumptionType.addItem("Testing");
+        cmbConsumptionType.addItem("Samples");
+        cmbConsumptionType.addItem("Training");
+        cmbConsumptionType.addItem("Office Use");
+        cmbConsumptionType.addItem("R&D");
+        cmbConsumptionType.addItem("Scrap");
+        cmbConsumptionType.addItem("Other");
+    }
+
+    // Loads placeholder into cmbSourceBin before material is chosen
+    private void loadInitialBins() {
+        cmbSourceBin.removeAllItems();
+        cmbSourceBin.addItem("-- Select Bin --");
+    }
+
+    // Attaches auto-suggest to txtMaterialSearch so users get live suggestions
+    private void attachMaterialAutoSuggest() {
+        AutoSuggestTextField.attach(txtMaterialSearch, query -> {
+            try {
+                List<MaterialWithStock> results = controller.searchMaterial(query);
+                List<String> suggestions = new ArrayList<>();
+                if (results != null) {
+                    for (MaterialWithStock m : results) {
+                        suggestions.add(m.getMaterialCode() + " - " + m.getMaterialDescription());
+                    }
+                }
+                return suggestions;
+            } catch (Exception e) {
+                Logger.errlog("Failed to load material suggestions", e);
+                return new ArrayList<>();
+            }
+        });
+    }
+
+    // Attaches auto-suggest to txtDepartment for rapid department selection
+    private void attachDepartmentAutoSuggest() {
+        AutoSuggestTextField.attach(txtDepartment, query -> {
+            List<String> depts = List.of(
+                "Plant Maintenance",
+                "Quality Assurance",
+                "Warehouse Operations",
+                "Plant Administration",
+                "R&D Laboratory",
+                "Safety & Training",
+                "Production Assembly",
+                "Packaging & Shipping"
+            );
+            List<String> matches = new ArrayList<>();
+            String q = query != null ? query.trim().toLowerCase() : "";
+            for (String d : depts) {
+                if (d.toLowerCase().contains(q)) {
+                    matches.add(d);
+                }
+            }
+            return matches;
+        });
+    }
+
+    // Loads bins that have available stock for the selected material
+    private void loadBinsForMaterial(int materialId) {
+        Integer warehouseId = null;
+        try {
+            if (UserSession.getInstance().getCurrentUser() != null) {
+                warehouseId = UserSession.getInstance().getCurrentUser().getWarehouseId();
+            }
+        } catch (Exception e) {
+            Logger.errlog("Could not read warehouse ID from session", e);
+        }
+
+        final Integer whId = warehouseId;
+        BackgroundTask task = new BackgroundTask(this, "Loading Bins") {
+            private List<BinWithStock> bins;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Fetching bins with available stock...");
+                bins = controller.getBinsWithStock(materialId, whId);
+                return bins != null;
+            }
+
+            @Override
+            protected void onSuccess() {
+                cmbSourceBin.removeAllItems();
+                cmbSourceBin.addItem("-- Select Bin --");
+                if (bins != null) {
+                    for (BinWithStock bin : bins) {
+                        cmbSourceBin.addItem(bin);
+                    }
+                }
+                if (bins == null || bins.isEmpty()) {
+                    StatusMessageHandler.showWarning(txtStatus, "No bins with available stock found for selected material.");
+                } else {
+                    cmbSourceBin.setSelectedIndex(1); // Auto-select first available bin
+                    StatusMessageHandler.showInfo(txtStatus, "Loaded " + bins.size() + " storage bin(s) with stock.");
+                }
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to load bins: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
+    }
+
+    // Rebuilds the issue summary table from the current issueItemList
+    private void refreshIssueSummaryTable() {
+        isProgrammaticSelection = true;
+        DefaultTableModel model = new DefaultTableModel(
+                new String[]{"Material", "Qty", "Bin", "Department"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        String dept = txtDepartment.getText().trim();
+        for (GIConsumptionIssueItem item : issueItemList) {
+            model.addRow(new Object[]{
+                item.getMaterialCode() + " - " + item.getMaterialDescription(),
+                item.getQuantity(),
+                item.getBinCode() != null ? item.getBinCode() : "N/A",
+                dept
+            });
+        }
+        tblIssueSummary.setModel(model);
+        isProgrammaticSelection = false;
+    }
+
+    // Resets all form inputs to their initial state
+    private void clearForm() {
+        cmbConsumptionType.setSelectedIndex(0);
+        txtDepartment.setText("");
+        txtProjectReference.setText("");
+        txtMaterialSearch.setText("");
+        lblMaterialCode.setText("");
+        lblCurrentStock.setText("");
+        lblBaseUOM.setText("");
+        spinIssueQty.setText("");
+        txtRemarks.setText("");
+        selectedMaterial = null;
+        issueItemList.clear();
+        lastMovementNumber = null;
+        loadInitialBins();
+        refreshIssueSummaryTable();
+        StatusMessageHandler.showInfo(txtStatus, "Form reset. Ready for next transaction.");
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +915,39 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddToIssue;
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnCompleteIssue;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox<Object> cmbConsumptionType;
+    private javax.swing.JComboBox<Object> cmbSourceBin;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextField lblBaseUOM;
+    private javax.swing.JTextField lblCurrentStock;
+    private javax.swing.JTextField lblMaterialCode;
+    private javax.swing.JTextField spinIssueQty;
+    private javax.swing.JTable tblIssueSummary;
+    private javax.swing.JTextField txtDepartment;
+    private javax.swing.JTextField txtMaterialSearch;
+    private javax.swing.JTextField txtProjectReference;
+    private javax.swing.JTextField txtRemarks;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
