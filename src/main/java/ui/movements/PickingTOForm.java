@@ -383,6 +383,8 @@ public class PickingTOForm extends javax.swing.JFrame {
         setTitle("Picking Transfer Order (TR23)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
+        btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setText("Create TO");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -390,6 +392,8 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnAutoSequence.setBackground(new java.awt.Color(153, 153, 153));
+        btnAutoSequence.setForeground(new java.awt.Color(255, 255, 255));
         btnAutoSequence.setText("Auto-Sequence");
         btnAutoSequence.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -397,6 +401,8 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
         btnPrint.addActionListener(new java.awt.event.ActionListener() {
@@ -405,6 +411,8 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnCancle.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancle.setForeground(new java.awt.Color(255, 255, 255));
         btnCancle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancle.setText(" Cancel");
         btnCancle.addActionListener(new java.awt.event.ActionListener() {
@@ -423,11 +431,11 @@ public class PickingTOForm extends javax.swing.JFrame {
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnPost)
-                .addGap(42, 42, 42)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnAutoSequence)
-                .addGap(79, 79, 79)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnPrint)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCancle)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -452,18 +460,23 @@ public class PickingTOForm extends javax.swing.JFrame {
         lblSearch.setText("Sales Order");
 
         cmbSalesOrder.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select Sales Order--", " " }));
+        cmbSalesOrder.setNextFocusableComponent(cmbGiDocument);
 
         lblGiDocument.setText("GI Document");
 
         cmbGiDocument.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select  GI Document--" }));
+        cmbGiDocument.setNextFocusableComponent(chkbxShowCompletedTos);
 
         chkbxShowCompletedTos.setText("Show Completed TOs");
+        chkbxShowCompletedTos.setNextFocusableComponent(txtMaterials);
         chkbxShowCompletedTos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkbxShowCompletedTosActionPerformed(evt);
             }
         });
 
+        btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText(" Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -485,9 +498,9 @@ public class PickingTOForm extends javax.swing.JFrame {
                 .addComponent(lblGiDocument)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbGiDocument, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(74, 74, 74)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkbxShowCompletedTos)
-                .addGap(70, 70, 70)
+                .addGap(18, 18, 18)
                 .addComponent(btnSearch)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -525,6 +538,8 @@ public class PickingTOForm extends javax.swing.JFrame {
         lblMaterials.setText("Material");
 
         txtMaterials.setEditable(false);
+        txtMaterials.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterials.setNextFocusableComponent(lblRequiredQty);
         txtMaterials.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtMaterialsActionPerformed(evt);
@@ -534,6 +549,8 @@ public class PickingTOForm extends javax.swing.JFrame {
         lblRequiredQty.setText("Required Qty");
 
         txtRequiredQty.setEditable(false);
+        txtRequiredQty.setBackground(new java.awt.Color(255, 255, 255));
+        txtRequiredQty.setNextFocusableComponent(lblAvailableQty);
         txtRequiredQty.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtRequiredQtyActionPerformed(evt);
@@ -543,6 +560,8 @@ public class PickingTOForm extends javax.swing.JFrame {
         lblAvailableQty.setText("Available Qty");
 
         txtAvailableQty.setEditable(false);
+        txtAvailableQty.setBackground(new java.awt.Color(255, 255, 255));
+        txtAvailableQty.setNextFocusableComponent(lblSuggestedBins);
         txtAvailableQty.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtAvailableQtyActionPerformed(evt);
@@ -552,6 +571,8 @@ public class PickingTOForm extends javax.swing.JFrame {
         lblSuggestedBins.setText("Suggested Bins");
 
         txtSuggestedBins.setEditable(false);
+        txtSuggestedBins.setBackground(new java.awt.Color(255, 255, 255));
+        txtSuggestedBins.setNextFocusableComponent(cmbSelectedBin);
         txtSuggestedBins.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtSuggestedBinsActionPerformed(evt);
@@ -563,20 +584,26 @@ public class PickingTOForm extends javax.swing.JFrame {
         lblPickQty.setText("Pick Qty");
 
         cmbSelectedBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select Bin--" }));
+        cmbSelectedBin.setNextFocusableComponent(lblPickQty);
         cmbSelectedBin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbSelectedBinActionPerformed(evt);
             }
         });
 
+        spinPickQty.setNextFocusableComponent(lblSequence);
+
         lblSequence.setText("Sequence");
 
+        txtSequence.setNextFocusableComponent(cmbSalesOrder);
         txtSequence.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtSequenceActionPerformed(evt);
             }
         });
 
+        btnAddTo.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddTo.setForeground(new java.awt.Color(255, 255, 255));
         btnAddTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddTo.setText("Add to TO");
         btnAddTo.addActionListener(new java.awt.event.ActionListener() {
@@ -585,6 +612,7 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdate.setBackground(new java.awt.Color(204, 204, 204));
         btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdate.setToolTipText("Save Changes");
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
@@ -593,6 +621,7 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemove.setBackground(new java.awt.Color(204, 204, 204));
         btnRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemove.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
@@ -601,6 +630,7 @@ public class PickingTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setBackground(new java.awt.Color(204, 204, 204));
         btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -616,26 +646,6 @@ public class PickingTOForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelPickingPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelPickingPlanningLayout.createSequentialGroup()
-                        .addComponent(lblSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(lblPickQty)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(spinPickQty, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(56, 56, 56)
-                        .addComponent(lblSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(53, 53, 53)
-                        .addComponent(btnAddTo)
-                        .addGap(71, 71, 71)
-                        .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 89, Short.MAX_VALUE)
-                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelPickingPlanningLayout.createSequentialGroup()
                         .addComponent(lblMaterials)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtMaterials, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -647,11 +657,31 @@ public class PickingTOForm extends javax.swing.JFrame {
                         .addComponent(lblAvailableQty)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addGap(12, 12, 12)
                         .addComponent(lblSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 171, Short.MAX_VALUE))
+                    .addGroup(jPanelPickingPlanningLayout.createSequentialGroup()
+                        .addComponent(lblSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(lblPickQty)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(spinPickQty, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnAddTo)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanelPickingPlanningLayout.setVerticalGroup(
@@ -734,7 +764,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPaneMain)
+            .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1160, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

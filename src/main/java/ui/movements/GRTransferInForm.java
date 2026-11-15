@@ -99,6 +99,10 @@ public class GRTransferInForm extends javax.swing.JFrame {
 
         lblTONumber.setText("Transfer Order Number");
 
+        txtTONumber.setNextFocusableComponent(lblFromWarehouse);
+
+        btnLoadTO.setBackground(new java.awt.Color(41, 128, 232));
+        btnLoadTO.setForeground(new java.awt.Color(255, 255, 255));
         btnLoadTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnLoadTO.setText(" Search");
         btnLoadTO.addActionListener(new java.awt.event.ActionListener() {
@@ -136,20 +140,30 @@ public class GRTransferInForm extends javax.swing.JFrame {
         lblFromWarehouse.setText("From Warehouse");
 
         txtFromWarehouse.setEditable(false);
+        txtFromWarehouse.setBackground(new java.awt.Color(255, 255, 255));
+        txtFromWarehouse.setNextFocusableComponent(lblToWarehouse);
 
         lblToWarehouse.setText("To Warehouse");
 
         txtToWarehouse.setEditable(false);
+        txtToWarehouse.setBackground(new java.awt.Color(255, 255, 255));
+        txtToWarehouse.setNextFocusableComponent(lblExpectedQty);
 
         lblExpectedQty.setText("Expected Quantity");
 
         txtExpectedQuantity.setEditable(false);
+        txtExpectedQuantity.setBackground(new java.awt.Color(255, 255, 255));
+        txtExpectedQuantity.setNextFocusableComponent(lblExpectedDate);
 
         lblExpectedDate.setText("Expected Receipt Date");
 
         txtExpectedReceiptDate.setEditable(false);
+        txtExpectedReceiptDate.setBackground(new java.awt.Color(255, 255, 255));
+        txtExpectedReceiptDate.setNextFocusableComponent(txtActualReceiptDate);
 
         lblActualDate.setText("Actual Receipt Date");
+
+        txtActualReceiptDate.setNextFocusableComponent(txtTONumber);
 
         javax.swing.GroupLayout jPanelDetailsLayout = new javax.swing.GroupLayout(jPanelDetails);
         jPanelDetails.setLayout(jPanelDetailsLayout);
@@ -221,6 +235,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        btnCompleteReceipt.setBackground(new java.awt.Color(0, 184, 148));
+        btnCompleteReceipt.setForeground(new java.awt.Color(255, 255, 255));
         btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnCompleteReceipt.setText(" Receive All");
         btnCompleteReceipt.addActionListener(new java.awt.event.ActionListener() {
@@ -229,6 +245,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
             }
         });
 
+        btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText(" Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -242,6 +260,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnReceiveGoods.setBackground(new java.awt.Color(0, 184, 148));
+        btnReceiveGoods.setForeground(new java.awt.Color(255, 255, 255));
         btnReceiveGoods.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnReceiveGoods.setText("Receive Goods");
         btnReceiveGoods.addActionListener(new java.awt.event.ActionListener() {
@@ -250,6 +270,8 @@ public class GRTransferInForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
         btnPrint.setToolTipText("Print Return Authorization");

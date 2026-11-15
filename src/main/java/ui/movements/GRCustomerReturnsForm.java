@@ -755,6 +755,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnPost.setText("Post");
         btnPost.setToolTipText("Complete Return");
@@ -764,6 +766,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
         btnPrint.setToolTipText("Print Return Authorization");
@@ -773,6 +777,8 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             }
         });
 
+        btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText(" Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -793,7 +799,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                 .addComponent(btnPost)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrint)
-                .addGap(33, 33, 33)
+                .addGap(18, 18, 18)
                 .addComponent(btnCancel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -818,8 +824,14 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         lblSONumber.setText("SO Number");
 
+        txtSONumber.setNextFocusableComponent(lblCustomerName);
+
         lblCustomerName.setText("Customer Name");
 
+        txtCustomerName.setNextFocusableComponent(lblSONumber);
+
+        btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText(" Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -863,24 +875,35 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         lblSONumberDisplay.setText("SO Number");
 
         txtSONumberDisplay.setEditable(false);
+        txtSONumberDisplay.setBackground(new java.awt.Color(255, 255, 255));
+        txtSONumberDisplay.setNextFocusableComponent(lblCustomerName);
 
         lblCustomerNameDisplay.setText("Customer Name");
 
         txtCustomerNameDisplay.setEditable(false);
+        txtCustomerNameDisplay.setBackground(new java.awt.Color(255, 255, 255));
+        txtCustomerNameDisplay.setNextFocusableComponent(lblSODate);
 
         lblSODate.setText("SO Date");
 
         txtSODate.setEditable(false);
+        txtSODate.setBackground(new java.awt.Color(255, 255, 255));
+        txtSODate.setNextFocusableComponent(lblReturnReason);
 
         lblReturnReason.setText("Return Reason");
 
         cmbReturnReason.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "defective", "unwanted", "damage", "overshipped", "other" }));
+        cmbReturnReason.setNextFocusableComponent(txtReturnAuthNumber);
 
         lblReturnAuthNumber.setText("Return Auth No");
 
         txtReturnAuthNumber.setEditable(false);
+        txtReturnAuthNumber.setBackground(new java.awt.Color(255, 255, 255));
+        txtReturnAuthNumber.setNextFocusableComponent(lblReturnDate);
 
         lblReturnDate.setText("Return Date");
+
+        txtReturnDate.setNextFocusableComponent(txtMaterial);
 
         javax.swing.GroupLayout jPanelAuthorizationLayout = new javax.swing.GroupLayout(jPanelAuthorization);
         jPanelAuthorization.setLayout(jPanelAuthorizationLayout);
@@ -962,17 +985,24 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         lblMaterial.setText("Material");
 
         txtMaterial.setEditable(false);
+        txtMaterial.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial.setNextFocusableComponent(txtUOM);
 
         lblReturnQty.setText("Return Qty");
+
+        spinReturnQty.setNextFocusableComponent(lblRemarks);
 
         lblQualityStatus.setText("Quality Status");
 
         lblReceivingBin.setText("Receiving Bin");
 
         cmbReceivingBin.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Bin --" }));
+        cmbReceivingBin.setNextFocusableComponent(lblSONumber);
 
         lblRemarks.setText("Remarks");
 
+        btnAddToReturn.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddToReturn.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToReturn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToReturn.setText("Add");
         btnAddToReturn.setToolTipText("Add to Return");
@@ -985,7 +1015,10 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
         jLabel1.setText("UOM");
 
         txtUOM.setEditable(false);
+        txtUOM.setBackground(new java.awt.Color(255, 255, 255));
+        txtUOM.setNextFocusableComponent(lblReturnQty);
 
+        btnUpdateRecieptItem.setBackground(new java.awt.Color(204, 204, 204));
         btnUpdateRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdateRecieptItem.setToolTipText("Save Changes");
         btnUpdateRecieptItem.addActionListener(new java.awt.event.ActionListener() {
@@ -994,6 +1027,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemoveRecieptItem.setBackground(new java.awt.Color(204, 204, 204));
         btnRemoveRecieptItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemoveRecieptItem.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemoveRecieptItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1002,8 +1036,11 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
             }
         });
 
+        txtRemarks.setNextFocusableComponent(cmbQualityStatus);
+
         cmbQualityStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "OK", "Damaged", "Partial Damage", "Defective" }));
 
+        btnClearSummaryTbl.setBackground(new java.awt.Color(204, 204, 204));
         btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1036,23 +1073,24 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                         .addComponent(lblReturnQty)
                         .addGap(12, 12, 12)
                         .addComponent(spinReturnQty, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(121, 121, 121)
-                        .addComponent(lblRemarks)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanelReturnDetailsLayout.createSequentialGroup()
                         .addComponent(lblReceivingBin)
                         .addGap(12, 12, 12)
                         .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(28, 28, 28)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblRemarks)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 258, Short.MAX_VALUE)
                         .addComponent(btnAddToReturn)
                         .addGap(18, 18, 18)
                         .addComponent(btnUpdateRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(50, 50, 50)
-                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(301, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(20, 20, 20))))
         );
         jPanelReturnDetailsLayout.setVerticalGroup(
             jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1064,9 +1102,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                     .addComponent(lblReturnQty)
                     .addComponent(spinReturnQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
-                    .addComponent(txtUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblRemarks)
-                    .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtUOM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanelReturnDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnRemoveRecieptItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1076,7 +1112,9 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
                         .addComponent(lblReceivingBin)
                         .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnAddToReturn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cmbQualityStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(cmbQualityStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblRemarks)
+                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );

@@ -68,7 +68,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         txtMaterialCode = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         cmbSourceBin = new javax.swing.JComboBox<>();
-        btnSearch = new javax.swing.JButton();
+        btnSearchMaterial = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         txtMaterialName = new javax.swing.JTextField();
@@ -87,10 +87,10 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         spinnerBaseUnitsCreated = new javax.swing.JSpinner();
         jLabel9 = new javax.swing.JLabel();
         cmbDestinationBin = new javax.swing.JComboBox<>();
-        btnAdd = new javax.swing.JButton();
         btnRemoveSummaryItem = new javax.swing.JButton();
         btnUpdateSummaryItem = new javax.swing.JButton();
         btnClearSummaryTbl = new javax.swing.JButton();
+        btnAddToTransfer = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
         btnPost = new javax.swing.JButton();
@@ -109,12 +109,19 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
 
         jLabel1.setText("Material Code");
 
+        txtMaterialCode.setNextFocusableComponent(cmbSourceBin);
+
         jLabel2.setText("Source Bin");
 
-        btnSearch.setText("Search");
-        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+        cmbSourceBin.setNextFocusableComponent(txtMaterialName);
+
+        btnSearchMaterial.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearchMaterial.setForeground(new java.awt.Color(255, 255, 255));
+        btnSearchMaterial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearchMaterial.setText("Search");
+        btnSearchMaterial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
+                btnSearchMaterialActionPerformed(evt);
             }
         });
 
@@ -131,8 +138,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSearch)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnSearchMaterial)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
@@ -144,8 +151,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                     .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
                     .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSearch))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnSearchMaterial))
+                .addContainerGap(7, Short.MAX_VALUE))
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Details"));
@@ -153,51 +160,68 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         jLabel3.setText("Material");
 
         txtMaterialName.setEditable(false);
+        txtMaterialName.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterialName.setNextFocusableComponent(txtCurrentPackUOM);
 
         txtCurrentPackUOM.setEditable(false);
+        txtCurrentPackUOM.setBackground(new java.awt.Color(255, 255, 255));
         txtCurrentPackUOM.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtCurrentPackUOM.setNextFocusableComponent(txtQtyPerPack);
 
         jLabel5.setText("Qty per Pack");
 
         txtQtyPerPack.setEditable(false);
+        txtQtyPerPack.setBackground(new java.awt.Color(255, 255, 255));
+        txtQtyPerPack.setNextFocusableComponent(txtBaseUOM);
 
         jLabel4.setText("Available Qty");
 
         txtBaseUOM.setEditable(false);
+        txtBaseUOM.setBackground(new java.awt.Color(255, 255, 255));
         txtBaseUOM.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBaseUOM.setNextFocusableComponent(txtAvailableQty);
 
         txtAvailableQty.setEditable(false);
+        txtAvailableQty.setBackground(new java.awt.Color(255, 255, 255));
+        txtAvailableQty.setNextFocusableComponent(txtCurrentPacks);
+        txtAvailableQty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAvailableQtyActionPerformed(evt);
+            }
+        });
 
         jLabel6.setText("Current Packs");
 
         txtCurrentPacks.setEditable(false);
+        txtCurrentPacks.setBackground(new java.awt.Color(255, 255, 255));
+        txtCurrentPacks.setNextFocusableComponent(spinnerPacksToBreak);
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(19, 19, 19)
+                .addContainerGap()
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtCurrentPackUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtQtyPerPack, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(37, 37, 37)
+                .addGap(24, 24, 24)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtBaseUOM, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(46, 46, 46)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtCurrentPacks, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addContainerGap(143, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -221,18 +245,17 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
 
         jLabel7.setText("Packs to Break");
 
+        spinnerPacksToBreak.setNextFocusableComponent(spinnerBaseUnitsCreated);
+
         jLabel8.setText("Base Units Created");
+
+        spinnerBaseUnitsCreated.setNextFocusableComponent(cmbDestinationBin);
 
         jLabel9.setText("Destination Bin");
 
-        btnAdd.setText("Add");
-        btnAdd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddActionPerformed(evt);
-            }
-        });
+        cmbDestinationBin.setNextFocusableComponent(txtMaterialCode);
 
-        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(204, 204, 204));
         btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
@@ -241,6 +264,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdateSummaryItem.setBackground(new java.awt.Color(204, 204, 204));
         btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdateSummaryItem.setToolTipText("Save Changes");
         btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
@@ -249,10 +273,21 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setBackground(new java.awt.Color(204, 204, 204));
         btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnClearSummaryTblActionPerformed(evt);
+            }
+        });
+
+        btnAddToTransfer.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddToTransfer.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddToTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
+        btnAddToTransfer.setText("Add");
+        btnAddToTransfer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddToTransferActionPerformed(evt);
             }
         });
 
@@ -261,26 +296,26 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(17, 17, 17)
+                .addContainerGap()
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(spinnerPacksToBreak, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(spinnerBaseUnitsCreated, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(39, 39, 39)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(75, 75, 75)
-                .addComponent(btnAdd)
-                .addGap(68, 68, 68)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnAddToTransfer)
+                .addGap(18, 18, 18)
                 .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -298,8 +333,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                             .addComponent(spinnerBaseUnitsCreated, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel9)
                             .addComponent(cmbDestinationBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnAdd))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(btnAddToTransfer))
+                        .addGap(0, 1, Short.MAX_VALUE))
                     .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -307,6 +342,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setText("POST");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -314,6 +351,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             }
         });
 
+        btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -321,6 +360,8 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
         btnPrint.setToolTipText("Print Return Authorization");
@@ -335,13 +376,13 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(17, 17, 17)
                 .addComponent(btnPost)
-                .addGap(28, 28, 28)
+                .addGap(18, 18, 18)
                 .addComponent(btnCancel)
                 .addGap(18, 18, 18)
                 .addComponent(btnPrint)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 403, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -383,7 +424,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -417,14 +458,6 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        performMaterialSearch();
-    }//GEN-LAST:event_btnSearchActionPerformed
-
-    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        addToBreakingList();
-    }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
         completePackageBreaking();
@@ -598,6 +631,18 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         refreshDestBinComboLabels();
         StatusMessageHandler.showSuccess(txtStatus, "Package breaking list cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
+    private void btnSearchMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchMaterialActionPerformed
+        performMaterialSearch();
+    }//GEN-LAST:event_btnSearchMaterialActionPerformed
+
+    private void btnAddToTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToTransferActionPerformed
+        addToTransfer();
+    }//GEN-LAST:event_btnAddToTransferActionPerformed
+
+    private void txtAvailableQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAvailableQtyActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAvailableQtyActionPerformed
 
     private void initCustomComponents() {
         txtMaterialName.setEditable(false);
@@ -1370,13 +1415,13 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnAddToTransfer;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnClearSummaryTbl;
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemoveSummaryItem;
-    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSearchMaterial;
     private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox<String> cmbDestinationBin;
     private javax.swing.JComboBox<String> cmbSourceBin;
