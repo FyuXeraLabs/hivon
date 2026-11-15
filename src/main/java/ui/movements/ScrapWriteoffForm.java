@@ -311,7 +311,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         JpanelMaterialSearch = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txtMaterialcode = new javax.swing.JTextField();
-        btnSearch = new javax.swing.JButton();
+        btnSearchMaterial = new javax.swing.JButton();
         JpanelMaterialDetails = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -344,6 +344,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         setTitle("Scrap Write-off (ADJ21)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
+        btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnPost.setText("Post");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
@@ -352,6 +354,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
+        btnSave.setBackground(new java.awt.Color(120, 111, 166));
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
         btnSave.setText("Save Draft ");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
@@ -360,6 +363,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
+        btbCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btbCancel.setForeground(new java.awt.Color(255, 255, 255));
         btbCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btbCancel.setText(" Cancel");
         btbCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -371,6 +376,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
         btnPrint.setToolTipText("Print Return Authorization");
@@ -387,11 +394,11 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addComponent(btnPost)
-                .addGap(44, 44, 44)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnSave)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btbCancel)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnPrint)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -415,16 +422,20 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
 
         jLabel1.setText("Material Code");
 
+        txtMaterialcode.setNextFocusableComponent(txtMaterialCode);
         txtMaterialcode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtMaterialcodeActionPerformed(evt);
             }
         });
 
-        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
-        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+        btnSearchMaterial.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearchMaterial.setForeground(new java.awt.Color(255, 255, 255));
+        btnSearchMaterial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
+        btnSearchMaterial.setText("Search");
+        btnSearchMaterial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
+                btnSearchMaterialActionPerformed(evt);
             }
         });
 
@@ -433,13 +444,13 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         JpanelMaterialSearchLayout.setHorizontalGroup(
             JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(JpanelMaterialSearchLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
+                .addGap(8, 8, 8)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtMaterialcode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(39, 39, 39)
+                .addComponent(btnSearchMaterial)
+                .addContainerGap(547, Short.MAX_VALUE))
         );
         JpanelMaterialSearchLayout.setVerticalGroup(
             JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -447,8 +458,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtMaterialcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSearch)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(btnSearchMaterial))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -464,30 +475,35 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
 
         jLabel4.setText(" Material Name");
 
+        txtPMaterialName.setNextFocusableComponent(txtPONumber4);
         txtPMaterialName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtPMaterialNameActionPerformed(evt);
             }
         });
 
+        txtCurrentQty.setNextFocusableComponent(txtWriteoffQty);
         txtCurrentQty.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtCurrentQtyActionPerformed(evt);
             }
         });
 
+        txtBatchNumber.setNextFocusableComponent(txtPMaterialName);
         txtBatchNumber.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtBatchNumberActionPerformed(evt);
             }
         });
 
+        txtPONumber4.setNextFocusableComponent(txtCurrentQty);
         txtPONumber4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtPONumber4ActionPerformed(evt);
             }
         });
 
+        txtMaterialCode.setNextFocusableComponent(txtBatchNumber);
         txtMaterialCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtMaterialCodeActionPerformed(evt);
@@ -499,30 +515,29 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         JpanelMaterialDetailsLayout.setHorizontalGroup(
             JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
-                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addContainerGap()
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtPONumber4, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
-                        .addGap(23, 23, 23)
                         .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(46, 46, 46)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtPMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(JpanelMaterialDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(24, 24, 24)
+                        .addComponent(jLabel7)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtPONumber4, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtPMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(29, 29, 29)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(64, Short.MAX_VALUE))
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         JpanelMaterialDetailsLayout.setVerticalGroup(
             JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -534,15 +549,13 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                     .addComponent(txtMaterialCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtPMaterialName, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel6)
-                        .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtPONumber4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(JpanelMaterialDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtBatchNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPONumber4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCurrentQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -556,12 +569,14 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
 
         jLabel10.setText("Remarks");
 
+        txtPONumber6.setNextFocusableComponent(JpanelMaterialSearch);
         txtPONumber6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtPONumber6ActionPerformed(evt);
             }
         });
 
+        txtWriteoffQty.setNextFocusableComponent(txtBatchnumber);
         txtWriteoffQty.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtWriteoffQtyActionPerformed(evt);
@@ -574,6 +589,9 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
+        cmbScrapReason.setNextFocusableComponent(txtPONumber6);
+
+        btbAdd.setBackground(new java.awt.Color(0, 184, 148));
         btbAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btbAdd.setText("Add");
         btbAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -582,7 +600,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
-        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(204, 204, 204));
         btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
@@ -591,6 +609,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdateSummaryItem.setBackground(new java.awt.Color(204, 204, 204));
         btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdateSummaryItem.setToolTipText("Save Changes");
         btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
@@ -599,6 +618,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setBackground(new java.awt.Color(204, 204, 204));
         btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -611,31 +631,31 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         jPanelWriteoffDetailsLayout.setHorizontalGroup(
             jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
-                .addGap(24, 24, 24)
-                .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtWriteoffQty, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(27, 27, 27)
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbScrapReason, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addContainerGap()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(33, 33, 33)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel10)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtPONumber6)))
-                .addGap(80, 80, 80)
+                        .addGap(33, 33, 33)
+                        .addComponent(txtPONumber6, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE))
+                    .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtWriteoffQty, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbScrapReason, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(118, 118, 118)
                 .addComponent(btbAdd)
                 .addGap(18, 18, 18)
                 .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -655,12 +675,12 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                     .addGroup(jPanelWriteoffDetailsLayout.createSequentialGroup()
                         .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel10)
                                 .addComponent(txtPONumber6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(btbAdd))
                             .addGroup(jPanelWriteoffDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel9)
-                                .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(txtBatchnumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel10)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -949,10 +969,6 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         performSearch();
     }//GEN-LAST:event_txtMaterialcodeActionPerformed
 
-    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        performSearch();
-    }//GEN-LAST:event_btnSearchActionPerformed
-
     private void txtPMaterialNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPMaterialNameActionPerformed
     }//GEN-LAST:event_txtPMaterialNameActionPerformed
 
@@ -1173,6 +1189,10 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         StatusMessageHandler.showSuccess(txtStatus, "Pending write-off list cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
+    private void btnSearchMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchMaterialActionPerformed
+        performMaterialSearch();
+    }//GEN-LAST:event_btnSearchMaterialActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1218,7 +1238,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemoveSummaryItem;
     private javax.swing.JButton btnSave;
-    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSearchMaterial;
     private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox<String> cmbScrapReason;
     private javax.swing.JLabel jLabel1;

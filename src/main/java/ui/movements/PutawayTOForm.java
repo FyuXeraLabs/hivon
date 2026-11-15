@@ -429,6 +429,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
         setTitle("Putaway Transfer Order (TR22)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
+        btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setText("Create TO");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -436,6 +438,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnAutoSuggest.setBackground(new java.awt.Color(153, 153, 153));
+        btnAutoSuggest.setForeground(new java.awt.Color(255, 255, 255));
         btnAutoSuggest.setText("Auto-Suggest");
         btnAutoSuggest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -443,6 +447,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
         btnPrint.addActionListener(new java.awt.event.ActionListener() {
@@ -451,6 +457,8 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnCancle.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancle.setForeground(new java.awt.Color(255, 255, 255));
         btnCancle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancle.setText(" Cancel");
         btnCancle.addActionListener(new java.awt.event.ActionListener() {
@@ -469,13 +477,13 @@ public class PutawayTOForm extends javax.swing.JFrame {
             .addGroup(jPanelActionsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnPost)
-                .addGap(42, 42, 42)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnAutoSuggest)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrint)
-                .addGap(174, 174, 174)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnCancle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -500,9 +508,13 @@ public class PutawayTOForm extends javax.swing.JFrame {
         lblReceivingBin.setText("Receiving Bin");
 
         cmbRecevingBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select Bin--" }));
+        cmbRecevingBin.setNextFocusableComponent(chkbxShowCompletedTos);
 
         chkbxShowCompletedTos.setText("Show Completed TOs");
+        chkbxShowCompletedTos.setNextFocusableComponent(lblMaterials);
 
+        btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -520,11 +532,11 @@ public class PutawayTOForm extends javax.swing.JFrame {
                 .addComponent(lblReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbRecevingBin, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(55, 55, 55)
-                .addComponent(chkbxShowCompletedTos, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkbxShowCompletedTos, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55, 55, 55)
                 .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(487, Short.MAX_VALUE))
         );
         jPanelSearchLayout.setVerticalGroup(
             jPanelSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -558,23 +570,36 @@ public class PutawayTOForm extends javax.swing.JFrame {
         lblMaterials.setText("Material");
 
         txtMaterials.setEditable(false);
+        txtMaterials.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterials.setNextFocusableComponent(txtAvailableQty);
 
         lblAvailableQty.setText("Available Qty");
 
         txtAvailableQty.setEditable(false);
+        txtAvailableQty.setBackground(new java.awt.Color(255, 255, 255));
+        txtAvailableQty.setNextFocusableComponent(lblPutawayQty);
 
         lblPutawayQty.setText("Putaway Qty");
+
+        spinPutawayQty.setNextFocusableComponent(lblSuggestedBins);
 
         lblSuggestedBins.setText("Suggested Bins");
 
         txtSuggestedBins.setEditable(false);
+        txtSuggestedBins.setBackground(new java.awt.Color(255, 255, 255));
+        txtSuggestedBins.setNextFocusableComponent(cmbSelectedBin);
 
         lblSelectedBin.setText("Selected Bin");
 
         cmbSelectedBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select Bin--" }));
+        cmbSelectedBin.setNextFocusableComponent(lblSequence);
 
         lblSequence.setText("Sequence");
 
+        txtSequence.setNextFocusableComponent(cmbRecevingBin);
+
+        btnAddTo.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddTo.setForeground(new java.awt.Color(255, 255, 255));
         btnAddTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddTo.setText("Add to TO ");
         btnAddTo.addActionListener(new java.awt.event.ActionListener() {
@@ -583,6 +608,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdate.setBackground(new java.awt.Color(204, 204, 204));
         btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdate.setToolTipText("Save Changes");
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
@@ -591,6 +617,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnRemove.setBackground(new java.awt.Color(204, 204, 204));
         btnRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemove.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
@@ -599,6 +626,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setBackground(new java.awt.Color(204, 204, 204));
         btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -614,40 +642,43 @@ public class PutawayTOForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
+                        .addComponent(lblSelectedBin)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblSequence)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
                         .addComponent(lblMaterials)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtMaterials, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
-                        .addComponent(lblSelectedBin)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblSequence)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(72, 72, 72)
-                .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
-                        .addComponent(lblPutawayQty, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtAvailableQty, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(spinPutawayQty, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lblPutawayQty, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(2, 2, 2)
+                .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(spinPutawayQty, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(92, Short.MAX_VALUE))
+                    .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnAddTo)
-                        .addGap(47, 47, 47)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(16, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(17, 17, 17))))
         );
         jPanelPutawayPlanningLayout.setVerticalGroup(
             jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -664,16 +695,21 @@ public class PutawayTOForm extends javax.swing.JFrame {
                     .addComponent(txtSuggestedBins, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblSelectedBin)
-                        .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblSequence)
-                        .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnAddTo))
-                    .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanelPutawayPlanningLayout.createSequentialGroup()
+                        .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnAddTo)
+                            .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
+                            .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 2, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelPutawayPlanningLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanelPutawayPlanningLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblSelectedBin)
+                            .addComponent(cmbSelectedBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblSequence)
+                            .addComponent(txtSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap())
         );
 
         jScrollPanePutawaySummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Putaway Summary"));
@@ -722,7 +758,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1065, Short.MAX_VALUE)
+            .addComponent(jScrollPaneMain, javax.swing.GroupLayout.DEFAULT_SIZE, 1066, Short.MAX_VALUE)
             .addComponent(jPanelActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(

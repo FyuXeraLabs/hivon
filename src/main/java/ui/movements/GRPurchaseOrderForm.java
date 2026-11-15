@@ -587,17 +587,17 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         txtVendor = new javax.swing.JTextField();
         jPanelPODetails = new javax.swing.JPanel();
         lblPONumberDisplay = new javax.swing.JLabel();
-        txtPONumberDisplay = new javax.swing.JTextField();
         lblPODate = new javax.swing.JLabel();
-        txtPODate = new javax.swing.JTextField();
         lblVendorName = new javax.swing.JLabel();
-        txtVendorName = new javax.swing.JTextField();
         lblVendorCode = new javax.swing.JLabel();
-        txtVendorCode = new javax.swing.JTextField();
         lblAddress = new javax.swing.JLabel();
-        txtAddress = new javax.swing.JTextField();
         lblContactPerson = new javax.swing.JLabel();
-        txtContactPerson = new javax.swing.JTextField();
+        txtMaterial1 = new javax.swing.JTextField();
+        txtMaterial2 = new javax.swing.JTextField();
+        txtMaterial3 = new javax.swing.JTextField();
+        txtMaterial4 = new javax.swing.JTextField();
+        txtMaterial5 = new javax.swing.JTextField();
+        txtMaterial6 = new javax.swing.JTextField();
         jScrollPanePOItems = new javax.swing.JScrollPane();
         tblPOItems = new javax.swing.JTable();
         jPanelReceiptDetails = new javax.swing.JPanel();
@@ -630,7 +630,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        btnPost.setBackground(new java.awt.Color(46, 204, 113));
+        btnPost.setBackground(new java.awt.Color(0, 184, 148));
         btnPost.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
@@ -642,7 +642,9 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrintGR.setBackground(new java.awt.Color(60, 99, 130));
         btnPrintGR.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnPrintGR.setForeground(new java.awt.Color(255, 255, 255));
         btnPrintGR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrintGR.setText(" Print");
         btnPrintGR.setToolTipText("Print GR");
@@ -652,7 +654,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
-        btnCancel.setBackground(new java.awt.Color(255, 107, 107));
+        btnCancel.setBackground(new java.awt.Color(214, 48, 49));
         btnCancel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
@@ -694,22 +696,27 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addContainerGap(10, Short.MAX_VALUE))
         );
 
-        jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Search Purchase Order", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
+        jPanelSearch.setBackground(new java.awt.Color(204, 204, 204));
+        jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblPONumber.setText("PO Number");
 
+        txtPONumber.setNextFocusableComponent(txtVendor);
+
         lblVendorFilter.setText("Vendor");
 
-        btnSearch.setBackground(new java.awt.Color(46, 204, 113));
+        btnSearch.setBackground(new java.awt.Color(41, 128, 232));
         btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
-        btnSearch.setText(" Search");
+        btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchActionPerformed(evt);
             }
         });
+
+        txtVendor.setNextFocusableComponent(txtPONumber);
 
         javax.swing.GroupLayout jPanelSearchLayout = new javax.swing.GroupLayout(jPanelSearch);
         jPanelSearch.setLayout(jPanelSearchLayout);
@@ -741,31 +748,43 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addContainerGap(12, Short.MAX_VALUE))
         );
 
-        jPanelPODetails.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "PO Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
+        jPanelPODetails.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
         lblPONumberDisplay.setText("PO Number");
 
-        txtPONumberDisplay.setEditable(false);
-
         lblPODate.setText("PO Date");
-
-        txtPODate.setEditable(false);
 
         lblVendorName.setText("Vendor Name");
 
-        txtVendorName.setEditable(false);
-
         lblVendorCode.setText("Vendor Code");
-
-        txtVendorCode.setEditable(false);
 
         lblAddress.setText("Address");
 
-        txtAddress.setEditable(false);
-
         lblContactPerson.setText("Contact Person");
 
-        txtContactPerson.setEditable(false);
+        txtMaterial1.setEditable(false);
+        txtMaterial1.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial1.setNextFocusableComponent(lblOrderedQty);
+
+        txtMaterial2.setEditable(false);
+        txtMaterial2.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial2.setNextFocusableComponent(lblOrderedQty);
+
+        txtMaterial3.setEditable(false);
+        txtMaterial3.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial3.setNextFocusableComponent(lblOrderedQty);
+
+        txtMaterial4.setEditable(false);
+        txtMaterial4.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial4.setNextFocusableComponent(lblOrderedQty);
+
+        txtMaterial5.setEditable(false);
+        txtMaterial5.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial5.setNextFocusableComponent(lblOrderedQty);
+
+        txtMaterial6.setEditable(false);
+        txtMaterial6.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial6.setNextFocusableComponent(lblOrderedQty);
 
         javax.swing.GroupLayout jPanelPODetailsLayout = new javax.swing.GroupLayout(jPanelPODetails);
         jPanelPODetails.setLayout(jPanelPODetailsLayout);
@@ -773,58 +792,61 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelPODetailsLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanelPODetailsLayout.createSequentialGroup()
                         .addComponent(lblVendorName)
-                        .addGap(15, 15, 15)
-                        .addComponent(txtVendorName, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblVendorCode)
-                        .addGap(15, 15, 15)
-                        .addComponent(txtVendorCode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblAddress)
-                        .addGap(25, 25, 25)
-                        .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblContactPerson)
-                        .addGap(15, 15, 15)
-                        .addComponent(txtContactPerson, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtMaterial5, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelPODetailsLayout.createSequentialGroup()
                         .addComponent(lblPONumberDisplay)
-                        .addGap(25, 25, 25)
-                        .addComponent(txtPONumberDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtMaterial1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelPODetailsLayout.createSequentialGroup()
+                        .addGap(29, 29, 29)
+                        .addComponent(lblVendorCode))
+                    .addGroup(jPanelPODetailsLayout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addComponent(lblPODate)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelPODetailsLayout.createSequentialGroup()
+                        .addComponent(txtMaterial3, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(21, 21, 21)
+                        .addComponent(lblAddress)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMaterial4, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(lblPODate)
-                        .addGap(15, 15, 15)
-                        .addComponent(txtPODate, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(lblContactPerson)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMaterial6, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMaterial2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelPODetailsLayout.setVerticalGroup(
             jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelPODetailsLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
+                .addGap(8, 8, 8)
                 .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblPONumberDisplay)
-                    .addComponent(txtPONumberDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblPODate)
-                    .addComponent(txtPODate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblAddress)
-                        .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblContactPerson)
-                        .addComponent(txtContactPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblVendorName)
-                        .addComponent(txtVendorName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblVendorCode)
-                        .addComponent(txtVendorCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtMaterial1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMaterial2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtMaterial5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblVendorCode)
+                    .addComponent(lblVendorName)
+                    .addComponent(txtMaterial3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddress)
+                    .addComponent(txtMaterial4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblContactPerson)
+                    .addComponent(txtMaterial6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
-        jScrollPanePOItems.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "PO Items", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI Semibold", 0, 12))); // NOI18N
+        jScrollPanePOItems.setBackground(new java.awt.Color(255, 255, 255));
+        jScrollPanePOItems.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
         tblPOItems.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -851,28 +873,40 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         lblMaterial.setText("Material");
 
         txtMaterial.setEditable(false);
+        txtMaterial.setBackground(new java.awt.Color(255, 255, 255));
+        txtMaterial.setNextFocusableComponent(lblOrderedQty);
 
         lblOrderedQty.setText("Ordered Qty");
 
         txtOrderedQty.setEditable(false);
+        txtOrderedQty.setBackground(new java.awt.Color(255, 255, 255));
+        txtOrderedQty.setNextFocusableComponent(lblReceivedQty);
 
         lblReceivedQty.setText("Received Qty");
+
+        spinReceivedQty.setNextFocusableComponent(lblBatchNumber);
 
         lblBatchNumber.setText("Batch Number");
 
         cmbBatch.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Batch --" }));
+        cmbBatch.setNextFocusableComponent(txtExpiryDate);
 
         lblExpiryDate.setText("Expiry Date");
 
+        txtExpiryDate.setNextFocusableComponent(cmbReceivingBin);
+
         lblReceivingBin.setText("Receiving Bin");
+
+        cmbReceivingBin.setNextFocusableComponent(cmbQuality);
 
         lblQuality.setText("Quality");
 
         cmbQuality.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Quality --", "Accepted", "Partial Damage", "Rejected" }));
+        cmbQuality.setNextFocusableComponent(lblRemarks);
 
         lblRemarks.setText("Remarks");
 
-        btnAddToReceipt.setBackground(new java.awt.Color(46, 204, 113));
+        btnAddToReceipt.setBackground(new java.awt.Color(0, 184, 148));
         btnAddToReceipt.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btnAddToReceipt.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
@@ -884,7 +918,9 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
-        btnRemoveSummaryItem.setBackground(new java.awt.Color(255, 107, 107));
+        txtRemarks.setNextFocusableComponent(lblPONumber);
+
+        btnRemoveSummaryItem.setBackground(new java.awt.Color(204, 204, 204));
         btnRemoveSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnRemoveSummaryItem.setToolTipText("Remove Selelcted Items from Receipt");
         btnRemoveSummaryItem.addActionListener(new java.awt.event.ActionListener() {
@@ -893,6 +929,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdateSummaryItem.setBackground(new java.awt.Color(204, 204, 204));
         btnUpdateSummaryItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdateSummaryItem.setToolTipText("Save Changes");
         btnUpdateSummaryItem.addActionListener(new java.awt.event.ActionListener() {
@@ -901,6 +938,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             }
         });
 
+        btnClearSummaryTbl.setBackground(new java.awt.Color(204, 204, 204));
         btnClearSummaryTbl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClearSummaryTbl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -946,17 +984,19 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
                         .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 77, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(lblExpiryDate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 67, Short.MAX_VALUE))
                     .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnAddToReceipt)
                         .addGap(18, 18, 18)
                         .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnClearSummaryTbl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -964,27 +1004,25 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelReceiptDetailsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblExpiryDate)
-                        .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblMaterial)
-                        .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblOrderedQty)
-                        .addComponent(txtOrderedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblReceivedQty)
-                        .addComponent(spinReceivedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblBatchNumber)
-                        .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblMaterial)
+                    .addComponent(txtMaterial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblOrderedQty)
+                    .addComponent(txtOrderedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblReceivedQty)
+                    .addComponent(spinReceivedQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblBatchNumber)
+                    .addComponent(cmbBatch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtExpiryDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblExpiryDate))
                 .addGap(18, 18, 18)
                 .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnRemoveSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnUpdateSummaryItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnAddToReceipt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblRemarks)
-                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAddToReceipt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanelReceiptDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblReceivingBin)
                         .addComponent(cmbReceivingBin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1616,18 +1654,18 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     private javax.swing.JSpinner spinReceivedQty;
     private javax.swing.JTable tblPOItems;
     private javax.swing.JTable tblReceiptSummary;
-    private javax.swing.JTextField txtAddress;
-    private javax.swing.JTextField txtContactPerson;
     private javax.swing.JTextField txtExpiryDate;
     private javax.swing.JTextField txtMaterial;
+    private javax.swing.JTextField txtMaterial1;
+    private javax.swing.JTextField txtMaterial2;
+    private javax.swing.JTextField txtMaterial3;
+    private javax.swing.JTextField txtMaterial4;
+    private javax.swing.JTextField txtMaterial5;
+    private javax.swing.JTextField txtMaterial6;
     private javax.swing.JTextField txtOrderedQty;
-    private javax.swing.JTextField txtPODate;
     private javax.swing.JTextField txtPONumber;
-    private javax.swing.JTextField txtPONumberDisplay;
     private javax.swing.JTextField txtRemarks;
     private javax.swing.JLabel txtStatus;
     private javax.swing.JTextField txtVendor;
-    private javax.swing.JTextField txtVendorCode;
-    private javax.swing.JTextField txtVendorName;
     // End of variables declaration//GEN-END:variables
 }
