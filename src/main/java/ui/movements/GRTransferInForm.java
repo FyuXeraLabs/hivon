@@ -270,7 +270,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
             }
         });
 
-        btnPrint.setBackground(new java.awt.Color(60, 99, 130));
+        btnPrint.setBackground(new java.awt.Color(41, 128, 232));
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
