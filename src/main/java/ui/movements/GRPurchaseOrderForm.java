@@ -592,12 +592,12 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         lblVendorCode = new javax.swing.JLabel();
         lblAddress = new javax.swing.JLabel();
         lblContactPerson = new javax.swing.JLabel();
-        txtMaterial1 = new javax.swing.JTextField();
-        txtMaterial2 = new javax.swing.JTextField();
-        txtMaterial3 = new javax.swing.JTextField();
-        txtMaterial4 = new javax.swing.JTextField();
-        txtMaterial5 = new javax.swing.JTextField();
-        txtMaterial6 = new javax.swing.JTextField();
+        txtPONumberDisplay = new javax.swing.JTextField();
+        txtPODate = new javax.swing.JTextField();
+        txtVendorCode = new javax.swing.JTextField();
+        txtAddress = new javax.swing.JTextField();
+        txtVendorName = new javax.swing.JTextField();
+        txtContactPerson = new javax.swing.JTextField();
         jScrollPanePOItems = new javax.swing.JScrollPane();
         tblPOItems = new javax.swing.JTable();
         jPanelReceiptDetails = new javax.swing.JPanel();
@@ -762,29 +762,29 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         lblContactPerson.setText("Contact Person");
 
-        txtMaterial1.setEditable(false);
-        txtMaterial1.setBackground(new java.awt.Color(255, 255, 255));
-        txtMaterial1.setNextFocusableComponent(lblOrderedQty);
+        txtPONumberDisplay.setEditable(false);
+        txtPONumberDisplay.setBackground(new java.awt.Color(255, 255, 255));
+        txtPONumberDisplay.setNextFocusableComponent(lblOrderedQty);
 
-        txtMaterial2.setEditable(false);
-        txtMaterial2.setBackground(new java.awt.Color(255, 255, 255));
-        txtMaterial2.setNextFocusableComponent(lblOrderedQty);
+        txtPODate.setEditable(false);
+        txtPODate.setBackground(new java.awt.Color(255, 255, 255));
+        txtPODate.setNextFocusableComponent(lblOrderedQty);
 
-        txtMaterial3.setEditable(false);
-        txtMaterial3.setBackground(new java.awt.Color(255, 255, 255));
-        txtMaterial3.setNextFocusableComponent(lblOrderedQty);
+        txtVendorCode.setEditable(false);
+        txtVendorCode.setBackground(new java.awt.Color(255, 255, 255));
+        txtVendorCode.setNextFocusableComponent(lblOrderedQty);
 
-        txtMaterial4.setEditable(false);
-        txtMaterial4.setBackground(new java.awt.Color(255, 255, 255));
-        txtMaterial4.setNextFocusableComponent(lblOrderedQty);
+        txtAddress.setEditable(false);
+        txtAddress.setBackground(new java.awt.Color(255, 255, 255));
+        txtAddress.setNextFocusableComponent(lblOrderedQty);
 
-        txtMaterial5.setEditable(false);
-        txtMaterial5.setBackground(new java.awt.Color(255, 255, 255));
-        txtMaterial5.setNextFocusableComponent(lblOrderedQty);
+        txtVendorName.setEditable(false);
+        txtVendorName.setBackground(new java.awt.Color(255, 255, 255));
+        txtVendorName.setNextFocusableComponent(lblOrderedQty);
 
-        txtMaterial6.setEditable(false);
-        txtMaterial6.setBackground(new java.awt.Color(255, 255, 255));
-        txtMaterial6.setNextFocusableComponent(lblOrderedQty);
+        txtContactPerson.setEditable(false);
+        txtContactPerson.setBackground(new java.awt.Color(255, 255, 255));
+        txtContactPerson.setNextFocusableComponent(lblOrderedQty);
 
         javax.swing.GroupLayout jPanelPODetailsLayout = new javax.swing.GroupLayout(jPanelPODetails);
         jPanelPODetails.setLayout(jPanelPODetailsLayout);
@@ -796,11 +796,11 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                     .addGroup(jPanelPODetailsLayout.createSequentialGroup()
                         .addComponent(lblVendorName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtMaterial5, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtVendorName, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelPODetailsLayout.createSequentialGroup()
                         .addComponent(lblPONumberDisplay)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtMaterial1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtPONumberDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelPODetailsLayout.createSequentialGroup()
                         .addGap(29, 29, 29)
@@ -811,16 +811,16 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelPODetailsLayout.createSequentialGroup()
-                        .addComponent(txtMaterial3, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtVendorCode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(21, 21, 21)
                         .addComponent(lblAddress)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtMaterial4, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(lblContactPerson)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtMaterial6, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtMaterial2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtContactPerson, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPODate, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelPODetailsLayout.setVerticalGroup(
@@ -830,18 +830,18 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblPONumberDisplay)
                     .addComponent(lblPODate)
-                    .addComponent(txtMaterial1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtMaterial2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPONumberDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPODate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelPODetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtMaterial5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtVendorName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblVendorCode)
                     .addComponent(lblVendorName)
-                    .addComponent(txtMaterial3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtVendorCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblAddress)
-                    .addComponent(txtMaterial4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblContactPerson)
-                    .addComponent(txtMaterial6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtContactPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
@@ -1659,18 +1659,18 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     private javax.swing.JSpinner spinReceivedQty;
     private javax.swing.JTable tblPOItems;
     private javax.swing.JTable tblReceiptSummary;
+    private javax.swing.JTextField txtAddress;
+    private javax.swing.JTextField txtContactPerson;
     private javax.swing.JTextField txtExpiryDate;
     private javax.swing.JTextField txtMaterial;
-    private javax.swing.JTextField txtMaterial1;
-    private javax.swing.JTextField txtMaterial2;
-    private javax.swing.JTextField txtMaterial3;
-    private javax.swing.JTextField txtMaterial4;
-    private javax.swing.JTextField txtMaterial5;
-    private javax.swing.JTextField txtMaterial6;
     private javax.swing.JTextField txtOrderedQty;
+    private javax.swing.JTextField txtPODate;
     private javax.swing.JTextField txtPONumber;
+    private javax.swing.JTextField txtPONumberDisplay;
     private javax.swing.JTextField txtRemarks;
     private javax.swing.JLabel txtStatus;
     private javax.swing.JTextField txtVendor;
+    private javax.swing.JTextField txtVendorCode;
+    private javax.swing.JTextField txtVendorName;
     // End of variables declaration//GEN-END:variables
 }

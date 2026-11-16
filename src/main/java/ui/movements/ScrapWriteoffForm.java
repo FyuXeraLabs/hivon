@@ -446,9 +446,9 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtMaterialcode, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(39, 39, 39)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnSearchMaterial)
-                .addContainerGap(703, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         JpanelMaterialSearchLayout.setVerticalGroup(
             JpanelMaterialSearchLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1197,7 +1197,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
     private void btnSearchMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchMaterialActionPerformed
-        performMaterialSearch();
+        performSearch();
     }//GEN-LAST:event_btnSearchMaterialActionPerformed
 
     /**

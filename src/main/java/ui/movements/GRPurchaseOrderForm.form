@@ -313,12 +313,12 @@
                               <Group type="102" attributes="0">
                                   <Component id="lblVendorName" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="txtMaterial5" min="-2" pref="180" max="-2" attributes="0"/>
+                                  <Component id="txtVendorName" min="-2" pref="180" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" attributes="0">
                                   <Component id="lblPONumberDisplay" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="txtMaterial1" min="-2" pref="180" max="-2" attributes="0"/>
+                                  <Component id="txtPONumberDisplay" min="-2" pref="180" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -334,17 +334,17 @@
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
-                                  <Component id="txtMaterial3" min="-2" pref="180" max="-2" attributes="0"/>
+                                  <Component id="txtVendorCode" min="-2" pref="180" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
                                   <Component id="lblAddress" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="txtMaterial4" min="-2" pref="180" max="-2" attributes="0"/>
+                                  <Component id="txtAddress" min="-2" pref="180" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Component id="lblContactPerson" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="txtMaterial6" min="-2" pref="180" max="-2" attributes="0"/>
+                                  <Component id="txtContactPerson" min="-2" pref="180" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="txtMaterial2" min="-2" pref="180" max="-2" attributes="0"/>
+                              <Component id="txtPODate" min="-2" pref="180" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
@@ -357,19 +357,19 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="lblPONumberDisplay" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblPODate" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtMaterial1" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtMaterial2" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtPONumberDisplay" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtPODate" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="txtMaterial5" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtVendorName" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblVendorCode" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblVendorName" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtMaterial3" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtVendorCode" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblAddress" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtMaterial4" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtAddress" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblContactPerson" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtMaterial6" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtContactPerson" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace pref="24" max="32767" attributes="0"/>
                       </Group>
@@ -407,7 +407,7 @@
                     <Property name="text" type="java.lang.String" value="Contact Person"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtMaterial1">
+                <Component class="javax.swing.JTextField" name="txtPONumberDisplay">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -418,7 +418,7 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtMaterial2">
+                <Component class="javax.swing.JTextField" name="txtPODate">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -429,7 +429,7 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtMaterial3">
+                <Component class="javax.swing.JTextField" name="txtVendorCode">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -440,7 +440,7 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtMaterial4">
+                <Component class="javax.swing.JTextField" name="txtAddress">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -451,7 +451,7 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtMaterial5">
+                <Component class="javax.swing.JTextField" name="txtVendorName">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -462,7 +462,7 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtMaterial6">
+                <Component class="javax.swing.JTextField" name="txtContactPerson">
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">

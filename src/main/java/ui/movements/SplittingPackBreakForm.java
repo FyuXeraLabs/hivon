@@ -637,7 +637,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSearchMaterialActionPerformed
 
     private void btnAddToTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToTransferActionPerformed
-        addToTransfer();
+        addToBreakingList();
     }//GEN-LAST:event_btnAddToTransferActionPerformed
 
     private void txtAvailableQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAvailableQtyActionPerformed

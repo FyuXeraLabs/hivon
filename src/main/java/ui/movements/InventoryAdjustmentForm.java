@@ -1146,15 +1146,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        String criteria = txtSONumber.getText().trim();
-        if (criteria.isEmpty()) {
-            criteria = txtCustomerName.getText().trim();
-        }
-        if (criteria.isEmpty()) {
-            searchOpenSalesOrders();
-        } else {
-            searchSalesOrders();
-        }
+        performSearch();
     }//GEN-LAST:event_btnSearchActionPerformed
 
     /**
