@@ -27,7 +27,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jScrollPaneMain" pref="1255" max="32767" attributes="0"/>
+          <Component id="jScrollPaneMain" pref="1540" max="32767" attributes="0"/>
           <Component id="jPanelActions" alignment="0" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
@@ -109,7 +109,7 @@
         <Component class="javax.swing.JButton" name="btnPrintGR">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="82" green="63" red="3c" type="rgb"/>
+              <Color blue="e8" green="80" red="29" type="rgb"/>
             </Property>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI Semibold" size="12" style="0"/>
@@ -529,82 +529,96 @@
                           <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="1" attributes="0">
-                                  <Component id="lblMaterial" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="txtMaterial" min="-2" pref="180" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
-                                  <Component id="lblOrderedQty" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="txtOrderedQty" min="-2" pref="100" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="36" max="-2" attributes="0"/>
-                                  <Component id="lblReceivedQty" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="spinReceivedQty" min="-2" pref="100" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
-                                  <Component id="lblBatchNumber" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="1" attributes="0">
                                   <Component id="lblReceivingBin" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="cmbReceivingBin" min="-2" pref="180" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
-                                  <Component id="lblQuality" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
-                                  <Component id="cmbQuality" min="-2" pref="180" max="-2" attributes="0"/>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="lblRemarks" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="txtRemarks" min="-2" pref="131" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="lblMaterial" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Component id="cmbBatch" min="-2" pref="180" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="cmbReceivingBin" min="-2" pref="180" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="lblExpiryDate" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="txtExpiryDate" min="-2" pref="130" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="67" max="32767" attributes="0"/>
+                                  <Component id="lblQuality" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+                                  <Component id="cmbQuality" min="-2" pref="180" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                  <Component id="btnAddToReceipt" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtMaterial" min="-2" pref="180" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="lblOrderedQty" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="txtOrderedQty" min="-2" pref="100" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="lblReceivedQty" min="-2" max="-2" attributes="0"/>
+                              <Component id="lblRemarks" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace pref="36" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <Component id="spinReceivedQty" min="-2" pref="100" max="-2" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="lblBatchNumber" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                                  <Component id="cmbBatch" min="-2" pref="180" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="txtRemarks" min="-2" pref="361" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                          <Component id="lblExpiryDate" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="txtExpiryDate" min="-2" pref="130" max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
+                                  <Component id="btnAddToReceipt" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                                   <Component id="btnUpdateSummaryItem" min="-2" pref="34" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                                   <Component id="btnRemoveSummaryItem" min="-2" pref="35" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                                   <Component id="btnClearSummaryTbl" min="-2" pref="31" max="-2" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace pref="172" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="lblMaterial" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtMaterial" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblOrderedQty" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtOrderedQty" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblReceivedQty" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spinReceivedQty" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblBatchNumber" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="cmbBatch" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtExpiryDate" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblExpiryDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="lblMaterial" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtMaterial" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="lblOrderedQty" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="txtOrderedQty" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                                      <Component id="lblReceivedQty" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spinReceivedQty" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                                  <Component id="lblBatchNumber" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="cmbBatch" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblExpiryDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtExpiryDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="btnRemoveSummaryItem" alignment="0" max="32767" attributes="0"/>
                               <Component id="btnUpdateSummaryItem" alignment="0" max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="lblRemarks" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="txtRemarks" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="btnAddToReceipt" alignment="3" max="32767" attributes="0"/>
                               </Group>
@@ -613,6 +627,7 @@
                                   <Component id="cmbReceivingBin" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="lblQuality" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="cmbQuality" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblRemarks" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Component id="btnClearSummaryTbl" alignment="0" max="32767" attributes="0"/>
                           </Group>
