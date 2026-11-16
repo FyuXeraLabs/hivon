@@ -24,6 +24,8 @@ import models.dto.UOMDTO;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MasterDataExportUtils;
 
 /**
  *
@@ -36,6 +38,9 @@ public class UOMForm extends javax.swing.JFrame {
     private UOMDTO selectedUOM;
     private List<UOMDTO> allUOMs = new ArrayList<>();
     private boolean isAddMode = false;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form UOMForm
@@ -47,6 +52,7 @@ public class UOMForm extends javax.swing.JFrame {
         this.controller = new UOMController();
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         loadUOMList();
         updateButtonStates();
         isInitializing = false;
@@ -81,6 +87,8 @@ public class UOMForm extends javax.swing.JFrame {
         btnSave = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Unit of Measure");
@@ -140,11 +148,11 @@ public class UOMForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "UOM Code", "UOM Name"
+                "UOM Code", "UOM Name", "Active"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -250,12 +258,28 @@ public class UOMForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -272,7 +296,11 @@ public class UOMForm extends javax.swing.JFrame {
                 .addComponent(btnUpdate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnDelete)
-                .addGap(273, 273, 273)
+                .addGap(46, 46, 46)
+                .addComponent(btnExport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addGap(67, 67, 67)
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -286,7 +314,10 @@ public class UOMForm extends javax.swing.JFrame {
                         .addComponent(btnUpdate)
                         .addComponent(btnDelete)
                         .addComponent(btnClear)
-                        .addComponent(btnSave))
+                        .addComponent(btnSave)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnExport)
+                            .addComponent(btnPrint)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -489,6 +520,189 @@ public class UOMForm extends javax.swing.JFrame {
         loadUOMList();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allUOMs == null || allUOMs.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No UOM data available to print.");
+            return;
+        }
+
+        if (selectedUOM != null) {
+            Object[] options = {"Selected UOM (" + selectedUOM.getParamKey() + ")", "All Displayed UOMs (" + allUOMs.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedUOM(selectedUOM);
+            } else if (choice == 1) {
+                printAllUOMs();
+            }
+        } else {
+            printAllUOMs();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(e -> exportUOMs("PDF"));
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(e -> exportUOMs("XLSX"));
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportUOMs(String format) {
+        if (allUOMs == null || allUOMs.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No UOM data available to export.");
+            return;
+        }
+
+        List<UOMDTO> dataToExport = allUOMs;
+        if (selectedUOM != null) {
+            Object[] options = {"Selected UOM (" + selectedUOM.getParamKey() + ")", "All Displayed UOMs (" + allUOMs.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedUOM);
+            } else if (choice == 1) {
+                dataToExport = allUOMs;
+            } else {
+                return;
+            }
+        }
+
+        final List<UOMDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export UOMs as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("UOM_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("UOM_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting UOMs as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MasterDataExportUtils.exportUOMsToXLSX(finalExportList, targetFile);
+                    } else {
+                        MasterDataExportUtils.exportUOMsToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export UOMs as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedUOM(UOMDTO u) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Unit of Measure Record (MAS05)")
+                .subtitle("UOM: " + u.getParamKey() + " - " + safeString(u.getParamValue()))
+                .addDetail("UOM Code", u.getParamKey())
+                .addDetail("UOM Name", safeString(u.getParamValue()))
+                .addDetail("Description", safeString(u.getDescription()))
+                .addDetail("Category", safeString(u.getCategory()))
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"UOM Code", u.getParamKey()})
+                .addTableRow(new String[]{"UOM Name", safeString(u.getParamValue())})
+                .addTableRow(new String[]{"Description", safeString(u.getDescription())})
+                .addTableRow(new String[]{"Category", safeString(u.getCategory())});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllUOMs() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Unit of Measure Master (MAS05)")
+                .subtitle("Total Units of Measure: " + allUOMs.size())
+                .addDetail("Report Type", "UOM Master Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allUOMs.size()))
+                .tableColumns(new String[]{"UOM Code", "UOM Name", "Description", "Category"});
+
+        for (UOMDTO u : allUOMs) {
+            builder.addTableRow(new String[]{
+                safeString(u.getParamKey()),
+                safeString(u.getParamValue()),
+                safeString(u.getDescription()),
+                safeString(u.getCategory())
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
+
     // loads and populates UOM data into the table
 
     private void loadUOMList() {
@@ -654,6 +868,20 @@ public class UOMForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
         actionMap.put("add", addAction);
@@ -684,12 +912,20 @@ public class UOMForm extends javax.swing.JFrame {
 
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.ALT_DOWN_MASK), "search");
         actionMap.put("search", searchAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;

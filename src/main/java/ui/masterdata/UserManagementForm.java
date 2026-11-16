@@ -31,6 +31,8 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import ui.components.StatusMessageHandler;
 import ui.dialogs.PasswordEntryForm;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MasterDataExportUtils;
 
 /**
  *
@@ -45,6 +47,9 @@ public class UserManagementForm extends javax.swing.JFrame {
     private boolean isInitializing = true;
     private List<UserDTO> allUsers = new ArrayList<>();
     private boolean isAddMode = false;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form UserManagementForm
@@ -60,6 +65,7 @@ public class UserManagementForm extends javax.swing.JFrame {
         
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         loadUserList();
         updateButtonStates();
         isInitializing = false;
@@ -545,6 +551,20 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         // btnActDeact
         KeyStroke altA = KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_DOWN_MASK);
         KeyStroke f11 = KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0);
@@ -628,6 +648,12 @@ public class UserManagementForm extends javax.swing.JFrame {
         actionMap.put("update", updateAction);
         inputMap.put(f9, "updateF9");
         actionMap.put("updateF9", updateAction);
+
+        // btnPrint & btnExport
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     /**
@@ -656,6 +682,8 @@ public class UserManagementForm extends javax.swing.JFrame {
         btnSave = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -856,12 +884,28 @@ public class UserManagementForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -882,8 +926,12 @@ public class UserManagementForm extends javax.swing.JFrame {
                 .addComponent(btnActDeact)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPwdReset)
-                .addGap(140, 140, 140)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                .addGap(26, 26, 26)
+                .addComponent(btnExport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -898,7 +946,10 @@ public class UserManagementForm extends javax.swing.JFrame {
                         .addComponent(btnActDeact)
                         .addComponent(btnPwdReset)
                         .addComponent(btnClear)
-                        .addComponent(btnSave))
+                        .addComponent(btnSave)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnExport)
+                            .addComponent(btnPrint)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -955,7 +1006,7 @@ public class UserManagementForm extends javax.swing.JFrame {
                                 .addComponent(chkIsActive))
                             .addComponent(txtFullName)
                             .addComponent(txtEmail))))
-                .addContainerGap(555, Short.MAX_VALUE))
+                .addContainerGap(771, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1027,11 +1078,11 @@ public class UserManagementForm extends javax.swing.JFrame {
                             .addComponent(btnAddPermission)
                             .addComponent(btnRemovePermission)
                             .addComponent(btnAssignDefault))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 168, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(276, Short.MAX_VALUE))
+                .addContainerGap(384, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1600,6 +1651,195 @@ public class UserManagementForm extends javax.swing.JFrame {
         txtSearch.requestFocusInWindow();
     }//GEN-LAST:event_formWindowOpened
 
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allUsers == null || allUsers.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No user data available to print.");
+            return;
+        }
+
+        if (selectedUser != null) {
+            Object[] options = {"Selected User (" + selectedUser.getUsername() + ")", "All Displayed Users (" + allUsers.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedUser(selectedUser);
+            } else if (choice == 1) {
+                printAllUsers();
+            }
+        } else {
+            printAllUsers();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(e -> exportUsers("PDF"));
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(e -> exportUsers("XLSX"));
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportUsers(String format) {
+        if (allUsers == null || allUsers.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No user data available to export.");
+            return;
+        }
+
+        List<UserDTO> dataToExport = allUsers;
+        if (selectedUser != null) {
+            Object[] options = {"Selected User (" + selectedUser.getUsername() + ")", "All Displayed Users (" + allUsers.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedUser);
+            } else if (choice == 1) {
+                dataToExport = allUsers;
+            } else {
+                return;
+            }
+        }
+
+        final List<UserDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export Users as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("User_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("User_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting Users as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MasterDataExportUtils.exportUsersToXLSX(finalExportList, targetFile);
+                    } else {
+                        MasterDataExportUtils.exportUsersToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export users as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedUser(UserDTO u) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("User Profile Record (MAS06)")
+                .subtitle("User: " + u.getUsername() + " - " + safeString(u.getFullName()))
+                .addDetail("Username", u.getUsername())
+                .addDetail("Full Name", safeString(u.getFullName()))
+                .addDetail("Email", safeString(u.getEmail()))
+                .addDetail("Role", safeString(u.getRole()))
+                .addDetail("Status", (u.getIsActive() != null && u.getIsActive()) ? "Active" : "Inactive")
+                .addDetail("Last Login", u.getLastLogin() != null ? u.getLastLogin().toString() : "-")
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"Username", u.getUsername()})
+                .addTableRow(new String[]{"Full Name", safeString(u.getFullName())})
+                .addTableRow(new String[]{"Email", safeString(u.getEmail())})
+                .addTableRow(new String[]{"Role", safeString(u.getRole())})
+                .addTableRow(new String[]{"Account Status", (u.getIsActive() != null && u.getIsActive()) ? "Active" : "Inactive"})
+                .addTableRow(new String[]{"Last Login", u.getLastLogin() != null ? u.getLastLogin().toString() : "-"});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllUsers() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("User Management Master (MAS06)")
+                .subtitle("Total Users: " + allUsers.size())
+                .addDetail("Report Type", "User Directory Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allUsers.size()))
+                .tableColumns(new String[]{"Username", "Full Name", "Email", "Role", "Status", "Last Login"});
+
+        for (UserDTO u : allUsers) {
+            builder.addTableRow(new String[]{
+                safeString(u.getUsername()),
+                safeString(u.getFullName()),
+                safeString(u.getEmail()),
+                safeString(u.getRole()),
+                (u.getIsActive() != null && u.getIsActive()) ? "Active" : "Inactive",
+                u.getLastLogin() != null ? u.getLastLogin().toString() : "-"
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
+
     private void loadPermissions(Integer userId) {
         // async load from API to avoid blocking EDT
         BackgroundTask task = new BackgroundTask(this, "Loading Permissions") {
@@ -1770,6 +2010,8 @@ public class UserManagementForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAssignDefault;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnPwdReset;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnRemovePermission;

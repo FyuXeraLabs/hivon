@@ -24,6 +24,8 @@ import models.dto.CustomerDTO;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MasterDataExportUtils;
 
 /**
  *
@@ -36,6 +38,9 @@ public class CustomerForm extends javax.swing.JFrame {
     private CustomerDTO selectedCustomer;
     private List<CustomerDTO> allCustomers = new ArrayList<>();
     private boolean isAddMode = false;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form CustomerForm
@@ -47,6 +52,7 @@ public class CustomerForm extends javax.swing.JFrame {
         this.controller = new CustomerController();
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         loadCustomerList();
         updateButtonStates();
         isInitializing = false;
@@ -89,11 +95,12 @@ public class CustomerForm extends javax.swing.JFrame {
         btnUpdate = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnViewSOs = new javax.swing.JButton();
-        btnViewShipments = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Customer Management");
@@ -158,11 +165,11 @@ public class CustomerForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Code", "Name", "Contact", "Phone"
+                "Code", "Name", "Contact", "Phone", "Active"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -303,13 +310,6 @@ public class CustomerForm extends javax.swing.JFrame {
             }
         });
 
-        btnViewShipments.setText("View Shipments");
-        btnViewShipments.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnViewShipmentsActionPerformed(evt);
-            }
-        });
-
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("  Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
@@ -339,12 +339,28 @@ public class CustomerForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 195, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -363,9 +379,11 @@ public class CustomerForm extends javax.swing.JFrame {
                 .addComponent(btnDelete)
                 .addGap(37, 37, 37)
                 .addComponent(btnViewSOs)
+                .addGap(37, 37, 37)
+                .addComponent(btnExport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnViewShipments)
-                .addGap(140, 140, 140)
+                .addComponent(btnPrint)
+                .addGap(63, 63, 63)
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 195, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -379,9 +397,11 @@ public class CustomerForm extends javax.swing.JFrame {
                         .addComponent(btnUpdate)
                         .addComponent(btnDelete)
                         .addComponent(btnViewSOs)
-                        .addComponent(btnViewShipments)
                         .addComponent(btnClear)
-                        .addComponent(btnSave))
+                        .addComponent(btnSave)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnExport)
+                            .addComponent(btnPrint)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -605,9 +625,196 @@ public class CustomerForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnViewSOsActionPerformed
 
-    private void btnViewShipmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewShipmentsActionPerformed
-        StatusMessageHandler.showInfo(txtStatus, "View Shipments feature coming soon");
-    }//GEN-LAST:event_btnViewShipmentsActionPerformed
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allCustomers == null || allCustomers.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No customer data available to print.");
+            return;
+        }
+
+        if (selectedCustomer != null) {
+            Object[] options = {"Selected Customer (" + selectedCustomer.getCustomerCode() + ")", "All Displayed Customers (" + allCustomers.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedCustomer(selectedCustomer);
+            } else if (choice == 1) {
+                printAllCustomers();
+            }
+        } else {
+            printAllCustomers();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(e -> exportCustomers("PDF"));
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(e -> exportCustomers("XLSX"));
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportCustomers(String format) {
+        if (allCustomers == null || allCustomers.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No customer data available to export.");
+            return;
+        }
+
+        List<CustomerDTO> dataToExport = allCustomers;
+        if (selectedCustomer != null) {
+            Object[] options = {"Selected Customer (" + selectedCustomer.getCustomerCode() + ")", "All Displayed Customers (" + allCustomers.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedCustomer);
+            } else if (choice == 1) {
+                dataToExport = allCustomers;
+            } else {
+                return;
+            }
+        }
+
+        final List<CustomerDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export Customers as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("Customer_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("Customer_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting Customers as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MasterDataExportUtils.exportCustomersToXLSX(finalExportList, targetFile);
+                    } else {
+                        MasterDataExportUtils.exportCustomersToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export customers as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedCustomer(CustomerDTO c) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Customer Record (MAS04)")
+                .subtitle("Customer: " + c.getCustomerCode() + " - " + safeString(c.getCustomerName()))
+                .addDetail("Customer Code", c.getCustomerCode())
+                .addDetail("Customer Name", safeString(c.getCustomerName()))
+                .addDetail("Contact Person", safeString(c.getContactPerson()))
+                .addDetail("Phone", safeString(c.getPhone()))
+                .addDetail("Email", safeString(c.getEmail()))
+                .addDetail("Address", safeString(c.getAddress()))
+                .addDetail("Shipping Address", safeString(c.getShippingAddress()))
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"Customer Code", c.getCustomerCode()})
+                .addTableRow(new String[]{"Customer Name", safeString(c.getCustomerName())})
+                .addTableRow(new String[]{"Contact Person", safeString(c.getContactPerson())})
+                .addTableRow(new String[]{"Phone", safeString(c.getPhone())})
+                .addTableRow(new String[]{"Email", safeString(c.getEmail())})
+                .addTableRow(new String[]{"Address", safeString(c.getAddress())})
+                .addTableRow(new String[]{"Shipping Address", safeString(c.getShippingAddress())});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllCustomers() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Customer Master (MAS04)")
+                .subtitle("Total Customers: " + allCustomers.size())
+                .addDetail("Report Type", "Customer Master Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allCustomers.size()))
+                .tableColumns(new String[]{"Code", "Customer Name", "Contact Person", "Phone", "Email", "Address"});
+
+        for (CustomerDTO c : allCustomers) {
+            builder.addTableRow(new String[]{
+                safeString(c.getCustomerCode()),
+                safeString(c.getCustomerName()),
+                safeString(c.getContactPerson()),
+                safeString(c.getPhone()),
+                safeString(c.getEmail()),
+                safeString(c.getAddress())
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
 
     // loads and populates customer data into the table
 
@@ -780,6 +987,20 @@ public class CustomerForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
         actionMap.put("add", addAction);
@@ -810,18 +1031,25 @@ public class CustomerForm extends javax.swing.JFrame {
 
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.ALT_DOWN_MASK), "search");
         actionMap.put("search", searchAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnViewSOs;
-    private javax.swing.JButton btnViewShipments;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

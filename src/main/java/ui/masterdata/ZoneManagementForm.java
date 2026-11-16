@@ -27,6 +27,8 @@ import core.security.UserSession;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MasterDataExportUtils;
 
 /**
  *
@@ -39,6 +41,9 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     private boolean isInitializing = true;
     private List<ZoneDTO> allZones = new ArrayList<>();
     private List<WarehouseDTO> allWarehouses = new ArrayList<>();
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form ZoneManagementForm
@@ -50,6 +55,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         this.controller = new ZoneManagementController();
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         cmbWarehouse.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 loadZones();
@@ -101,6 +107,8 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         btnSave = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Zone Management");
@@ -337,12 +345,28 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -361,7 +385,11 @@ public class ZoneManagementForm extends javax.swing.JFrame {
                 .addComponent(btnDelete)
                 .addGap(37, 37, 37)
                 .addComponent(btnViewBins)
-                .addGap(200, 200, 200)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnExport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addGap(28, 28, 28)
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -376,7 +404,10 @@ public class ZoneManagementForm extends javax.swing.JFrame {
                         .addComponent(btnDelete)
                         .addComponent(btnViewBins)
                         .addComponent(btnClear)
-                        .addComponent(btnSave))
+                        .addComponent(btnSave)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnExport)
+                            .addComponent(btnPrint)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -470,6 +501,200 @@ public class ZoneManagementForm extends javax.swing.JFrame {
             StatusMessageHandler.showWarning(txtStatus, "Please select a zone first!");
         }
     }//GEN-LAST:event_btnViewBinsActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allZones == null || allZones.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No zone data available to print.");
+            return;
+        }
+
+        if (selectedZone != null) {
+            Object[] options = {"Selected Zone (" + selectedZone.getZoneCode() + ")", "All Displayed Zones (" + allZones.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedZone(selectedZone);
+            } else if (choice == 1) {
+                printAllZones();
+            }
+        } else {
+            printAllZones();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(e -> exportZones("PDF"));
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(e -> exportZones("XLSX"));
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportZones(String format) {
+        if (allZones == null || allZones.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No zone data available to export.");
+            return;
+        }
+
+        List<ZoneDTO> dataToExport = allZones;
+        if (selectedZone != null) {
+            Object[] options = {"Selected Zone (" + selectedZone.getZoneCode() + ")", "All Displayed Zones (" + allZones.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedZone);
+            } else if (choice == 1) {
+                dataToExport = allZones;
+            } else {
+                return;
+            }
+        }
+
+        final List<ZoneDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export Zones as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("Zone_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("Zone_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting Zones as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MasterDataExportUtils.exportZonesToXLSX(finalExportList, targetFile);
+                    } else {
+                        MasterDataExportUtils.exportZonesToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export zones as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedZone(ZoneDTO z) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Zone Record (MAS08)")
+                .subtitle("Zone: " + z.getZoneCode() + " - " + safeString(z.getZoneName()))
+                .addDetail("Zone Code", z.getZoneCode())
+                .addDetail("Zone Name", safeString(z.getZoneName()))
+                .addDetail("Zone Type", safeString(z.getZoneType()))
+                .addDetail("Warehouse", safeString(z.getWarehouseName()))
+                .addDetail("Total Bins", String.valueOf(z.getTotalBins() != null ? z.getTotalBins() : 0))
+                .addDetail("Total Capacity", z.getTotalCapacity() != null ? String.valueOf(z.getTotalCapacity()) : "0.00")
+                .addDetail("Utilization", String.format("%.1f%%", z.getUtilizationPercent()))
+                .addDetail("Description", safeString(z.getDescription()))
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"Zone Code", z.getZoneCode()})
+                .addTableRow(new String[]{"Zone Name", safeString(z.getZoneName())})
+                .addTableRow(new String[]{"Zone Type", safeString(z.getZoneType())})
+                .addTableRow(new String[]{"Warehouse", safeString(z.getWarehouseName())})
+                .addTableRow(new String[]{"Total Bins", String.valueOf(z.getTotalBins() != null ? z.getTotalBins() : 0)})
+                .addTableRow(new String[]{"Total Capacity", z.getTotalCapacity() != null ? String.valueOf(z.getTotalCapacity()) : "0.00"})
+                .addTableRow(new String[]{"Current Utilization", String.format("%.1f%%", z.getUtilizationPercent())})
+                .addTableRow(new String[]{"Description", safeString(z.getDescription())});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllZones() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Zone Management Master (MAS08)")
+                .subtitle("Total Zones: " + allZones.size())
+                .addDetail("Report Type", "Zone Master Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allZones.size()))
+                .tableColumns(new String[]{"Zone Code", "Zone Name", "Zone Type", "Warehouse", "Total Bins", "Total Capacity", "Utilization"});
+
+        for (ZoneDTO z : allZones) {
+            builder.addTableRow(new String[]{
+                safeString(z.getZoneCode()),
+                safeString(z.getZoneName()),
+                safeString(z.getZoneType()),
+                safeString(z.getWarehouseName()),
+                String.valueOf(z.getTotalBins() != null ? z.getTotalBins() : 0),
+                z.getTotalCapacity() != null ? String.valueOf(z.getTotalCapacity()) : "0.00",
+                String.format("%.1f%%", z.getUtilizationPercent())
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
 
     // loads warehouses and populates zone data
 
@@ -698,6 +923,20 @@ public class ZoneManagementForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
         actionMap.put("add", addAction);
@@ -728,6 +967,12 @@ public class ZoneManagementForm extends javax.swing.JFrame {
 
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.ALT_DOWN_MASK), "search");
         actionMap.put("search", searchAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     private void populateZoneTable(List<ZoneDTO> zones) {
@@ -773,6 +1018,8 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;

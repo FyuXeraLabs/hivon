@@ -23,6 +23,8 @@ import models.dto.MaterialDTO;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MaterialMasterExportUtils;
 
 /**
  *
@@ -35,6 +37,9 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     private MaterialDTO selectedMaterial;
     private List<MaterialDTO> allMaterials = new ArrayList<>();
     private boolean isAddMode = false;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form MaterialMasterForm
@@ -46,6 +51,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         this.controller = new MaterialController();
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         loadMaterialList();
         updateButtonStates();
         isInitializing = false;
@@ -108,6 +114,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
         btnSave = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Material Master");
@@ -167,11 +174,11 @@ public class MaterialMasterForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Code", "Description", "UOM", "Batch Managed", "Last Modified"
+                "Code", "Description", "UOM", "Batch Managed", "Active", "Last Modified"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -402,6 +409,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
             }
         });
 
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -445,6 +453,14 @@ public class MaterialMasterForm extends javax.swing.JFrame {
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
 
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -462,8 +478,10 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                 .addComponent(btnDelete)
                 .addGap(37, 37, 37)
                 .addComponent(btnExport)
-                .addGap(200, 200, 200)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addGap(119, 119, 119)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -477,7 +495,8 @@ public class MaterialMasterForm extends javax.swing.JFrame {
                         .addComponent(btnDelete)
                         .addComponent(btnExport)
                         .addComponent(btnClear)
-                        .addComponent(btnSave))
+                        .addComponent(btnSave)
+                        .addComponent(btnPrint))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -755,8 +774,217 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
-        StatusMessageHandler.showInfo(txtStatus, "Export feature coming soon");
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
     }//GEN-LAST:event_btnExportActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allMaterials == null || allMaterials.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No material data available to print.");
+            return;
+        }
+
+        if (selectedMaterial != null) {
+            Object[] options = {"Selected Material (" + selectedMaterial.getMaterialCode() + ")", "All Displayed Materials (" + allMaterials.size() + ")", "Cancel"};
+            int choice = JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedMaterial(selectedMaterial);
+            } else if (choice == 1) {
+                printAllMaterials();
+            }
+        } else {
+            printAllMaterials();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportMaterials("PDF");
+            }
+        });
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportMaterials("XLSX");
+            }
+        });
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportMaterials(String format) {
+        if (allMaterials == null || allMaterials.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No material data available to export.");
+            return;
+        }
+
+        List<MaterialDTO> dataToExport = allMaterials;
+        if (selectedMaterial != null) {
+            Object[] options = {"Selected Material (" + selectedMaterial.getMaterialCode() + ")", "All Displayed Materials (" + allMaterials.size() + ")", "Cancel"};
+            int choice = JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedMaterial);
+            } else if (choice == 1) {
+                dataToExport = allMaterials;
+            } else {
+                return;
+            }
+        }
+
+        final List<MaterialDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export Materials as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("Material_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("Material_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting Materials as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MaterialMasterExportUtils.exportToXLSX(finalExportList, targetFile);
+                    } else {
+                        MaterialMasterExportUtils.exportToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export materials as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedMaterial(MaterialDTO m) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Material Master Record (MAS01)")
+                .subtitle("Material: " + m.getMaterialCode() + " - " + safeString(m.getMaterialDescription()))
+                .addDetail("Material Code", m.getMaterialCode())
+                .addDetail("Description", safeString(m.getMaterialDescription()))
+                .addDetail("Base UOM", safeString(m.getBaseUom()))
+                .addDetail("Material Group", safeString(m.getMaterialGroup()))
+                .addDetail("Storage Type", safeString(m.getStorageType()))
+                .addDetail("Storage Condition", safeString(m.getStorageCondition()))
+                .addDetail("Min Stock Level", m.getMinStockLevel() != null ? String.valueOf(m.getMinStockLevel()) : "N/A")
+                .addDetail("Max Stock Level", m.getMaxStockLevel() != null ? String.valueOf(m.getMaxStockLevel()) : "N/A")
+                .addDetail("Reorder Point", m.getReorderPoint() != null ? String.valueOf(m.getReorderPoint()) : "N/A")
+                .addDetail("Unit Cost", m.getUnitCost() != null ? String.format("%.2f", m.getUnitCost()) : "N/A")
+                .addDetail("Batch Managed", m.isBatchManaged() ? "Yes" : "No")
+                .addDetail("Unit Weight", m.getWeight() != null ? String.valueOf(m.getWeight()) : "N/A")
+                .addDetail("Volume", m.getVolume() != null ? String.valueOf(m.getVolume()) : "N/A")
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"Material Code", m.getMaterialCode()})
+                .addTableRow(new String[]{"Description", safeString(m.getMaterialDescription())})
+                .addTableRow(new String[]{"Base UOM", safeString(m.getBaseUom())})
+                .addTableRow(new String[]{"Category / Group", safeString(m.getMaterialGroup())})
+                .addTableRow(new String[]{"Storage Type", safeString(m.getStorageType())})
+                .addTableRow(new String[]{"Storage Condition", safeString(m.getStorageCondition())})
+                .addTableRow(new String[]{"Minimum Stock", m.getMinStockLevel() != null ? String.valueOf(m.getMinStockLevel()) : "N/A"})
+                .addTableRow(new String[]{"Maximum Stock", m.getMaxStockLevel() != null ? String.valueOf(m.getMaxStockLevel()) : "N/A"})
+                .addTableRow(new String[]{"Reorder Point", m.getReorderPoint() != null ? String.valueOf(m.getReorderPoint()) : "N/A"})
+                .addTableRow(new String[]{"Unit Cost", m.getUnitCost() != null ? String.format("%.2f", m.getUnitCost()) : "N/A"})
+                .addTableRow(new String[]{"Batch Managed", m.isBatchManaged() ? "Yes" : "No"})
+                .addTableRow(new String[]{"Unit Weight", m.getWeight() != null ? String.valueOf(m.getWeight()) : "N/A"})
+                .addTableRow(new String[]{"Volume", m.getVolume() != null ? String.valueOf(m.getVolume()) : "N/A"});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllMaterials() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Material Master Catalog (MAS01)")
+                .subtitle("Total Materials: " + allMaterials.size())
+                .addDetail("Report Type", "Material Master Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allMaterials.size()))
+                .addDetail("Active SKUs", String.valueOf(allMaterials.size()))
+                .tableColumns(new String[]{"Code", "Description", "Base UOM", "Group", "Storage Type", "Batch Managed", "Unit Cost"});
+
+        for (MaterialDTO m : allMaterials) {
+            builder.addTableRow(new String[]{
+                safeString(m.getMaterialCode()),
+                safeString(m.getMaterialDescription()),
+                safeString(m.getBaseUom()),
+                safeString(m.getMaterialGroup()),
+                safeString(m.getStorageType()),
+                m.isBatchManaged() ? "Yes" : "No",
+                m.getUnitCost() != null ? String.format("%.2f", m.getUnitCost()) : "-"
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
 
     private void setupTttFieldNavigation() {
         javax.swing.JTextField[] textFields = {
@@ -838,6 +1066,20 @@ public class MaterialMasterForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
         actionMap.put("add", addAction);
@@ -868,6 +1110,12 @@ public class MaterialMasterForm extends javax.swing.JFrame {
 
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK), "search");
         actionMap.put("search", searchAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     // loads and populates material data into the table
@@ -980,6 +1228,7 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;

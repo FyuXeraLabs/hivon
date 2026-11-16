@@ -33,6 +33,8 @@ import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import ui.dialogs.BatchStockViewForm;
 import core.logging.Logger;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MasterDataExportUtils;
 
 /**
  *
@@ -47,6 +49,9 @@ public class BatchManagementForm extends javax.swing.JFrame {
     private List<MaterialDTO> allMaterialsList = new ArrayList<>();
     private boolean isAddMode = false;
     private boolean isPopulating = false;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form BatchManagementForm
@@ -58,6 +63,7 @@ public class BatchManagementForm extends javax.swing.JFrame {
         this.controller = new BatchController();
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         setupMaterialFilter();
         loadMaterials();
         loadBatchList();
@@ -104,6 +110,8 @@ public class BatchManagementForm extends javax.swing.JFrame {
         btnSave = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnExport = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Batch Management");
@@ -319,12 +327,28 @@ public class BatchManagementForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -341,7 +365,11 @@ public class BatchManagementForm extends javax.swing.JFrame {
                 .addComponent(btnUpdate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnViewStock)
-                .addGap(273, 273, 273)
+                .addGap(61, 61, 61)
+                .addComponent(btnExport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addGap(52, 52, 52)
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -355,7 +383,10 @@ public class BatchManagementForm extends javax.swing.JFrame {
                         .addComponent(btnUpdate)
                         .addComponent(btnViewStock)
                         .addComponent(btnClear)
-                        .addComponent(btnSave))
+                        .addComponent(btnSave)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnExport)
+                            .addComponent(btnPrint)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -610,6 +641,197 @@ public class BatchManagementForm extends javax.swing.JFrame {
         task.executeWithDialog();
     }//GEN-LAST:event_btnViewStockActionPerformed
 
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allBatches == null || allBatches.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No batch data available to print.");
+            return;
+        }
+
+        if (selectedBatch != null) {
+            Object[] options = {"Selected Batch (" + selectedBatch.getBatchNumber() + ")", "All Displayed Batches (" + allBatches.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedBatch(selectedBatch);
+            } else if (choice == 1) {
+                printAllBatches();
+            }
+        } else {
+            printAllBatches();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(e -> exportBatches("PDF"));
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(e -> exportBatches("XLSX"));
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportBatches(String format) {
+        if (allBatches == null || allBatches.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No batch data available to export.");
+            return;
+        }
+
+        List<BatchDTO> dataToExport = allBatches;
+        if (selectedBatch != null) {
+            Object[] options = {"Selected Batch (" + selectedBatch.getBatchNumber() + ")", "All Displayed Batches (" + allBatches.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedBatch);
+            } else if (choice == 1) {
+                dataToExport = allBatches;
+            } else {
+                return;
+            }
+        }
+
+        final List<BatchDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export Batches as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("Batch_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("Batch_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting Batches as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MasterDataExportUtils.exportBatchesToXLSX(finalExportList, targetFile);
+                    } else {
+                        MasterDataExportUtils.exportBatchesToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export batches as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedBatch(BatchDTO b) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Batch Record (MAS02)")
+                .subtitle("Batch: " + b.getBatchNumber())
+                .addDetail("Batch Number", b.getBatchNumber())
+                .addDetail("Material Code", safeString(b.getMaterialCode()))
+                .addDetail("Description", safeString(b.getMaterialDescription()))
+                .addDetail("Supplier Batch", safeString(b.getSupplierBatch()))
+                .addDetail("Manufacture Date", b.getManufactureDate() != null ? b.getManufactureDate().toString() : "-")
+                .addDetail("Expiry Date", b.getExpiryDate() != null ? b.getExpiryDate().toString() : "-")
+                .addDetail("Quality Status", safeString(b.getQualityStatus()))
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"Batch Number", b.getBatchNumber()})
+                .addTableRow(new String[]{"Material Code", safeString(b.getMaterialCode())})
+                .addTableRow(new String[]{"Material Description", safeString(b.getMaterialDescription())})
+                .addTableRow(new String[]{"Supplier Batch", safeString(b.getSupplierBatch())})
+                .addTableRow(new String[]{"Manufacture Date", b.getManufactureDate() != null ? b.getManufactureDate().toString() : "-"})
+                .addTableRow(new String[]{"Expiry Date", b.getExpiryDate() != null ? b.getExpiryDate().toString() : "-"})
+                .addTableRow(new String[]{"Quality Status", safeString(b.getQualityStatus())});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllBatches() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Batch Management Master (MAS02)")
+                .subtitle("Total Batches: " + allBatches.size())
+                .addDetail("Report Type", "Batch Management Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allBatches.size()))
+                .tableColumns(new String[]{"Batch Number", "Material Code", "Supplier Batch", "Mfg Date", "Expiry Date", "Status"});
+
+        for (BatchDTO b : allBatches) {
+            builder.addTableRow(new String[]{
+                safeString(b.getBatchNumber()),
+                safeString(b.getMaterialCode()),
+                safeString(b.getSupplierBatch()),
+                b.getManufactureDate() != null ? b.getManufactureDate().toString() : "-",
+                b.getExpiryDate() != null ? b.getExpiryDate().toString() : "-",
+                safeString(b.getQualityStatus())
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
+
     // deletes the selected batch after confirmation
     private void btnDeleteActionPerformed() {
         if (selectedBatch == null || selectedBatch.getBatchId() == null) {
@@ -855,6 +1077,20 @@ public class BatchManagementForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
         actionMap.put("add", addAction);
@@ -885,6 +1121,12 @@ public class BatchManagementForm extends javax.swing.JFrame {
 
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK), "search");
         actionMap.put("search", searchAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     // loads and populates batch data into the table
@@ -1117,6 +1359,8 @@ public class BatchManagementForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearch;

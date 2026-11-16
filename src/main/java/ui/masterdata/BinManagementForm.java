@@ -23,6 +23,8 @@ import core.security.UserSession;
 import core.logging.Logger;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
+import core.utils.export.FormSummaryPdfExporter;
+import core.utils.export.MasterDataExportUtils;
 
 /**
  * Form for creating and managing storage locations (bins) within warehouses.
@@ -38,6 +40,9 @@ public class BinManagementForm extends javax.swing.JFrame {
     private List<WarehouseDTO> allWarehouses = new ArrayList<>();
     private java.util.Map<String, Object> generateParams;
     private boolean isAddMode = false;
+    private javax.swing.JPopupMenu popupExportBtn;
+    private javax.swing.JMenuItem menuitemPDF;
+    private javax.swing.JMenuItem menuitemXLSX;
 
     /**
      * Creates new form BinManagementForm
@@ -57,6 +62,7 @@ public class BinManagementForm extends javax.swing.JFrame {
 
         setupTttFieldNavigation();
         setupKeyBindings();
+        setupExportMenu();
         updateButtonStates();
 
         cmbWarehouse.addActionListener(new java.awt.event.ActionListener() {
@@ -155,16 +161,18 @@ public class BinManagementForm extends javax.swing.JFrame {
         spinBulkRacks = new javax.swing.JSpinner();
         spinBulkLevels = new javax.swing.JSpinner();
         lblBulkPreview = new javax.swing.JLabel();
+        btnGenerate = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        btnGenerate = new javax.swing.JButton();
         btnViewStock = new javax.swing.JButton();
         btnPrintLabel = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         txtStatus = new javax.swing.JLabel();
+        btnPrint = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Bin Management");
@@ -174,19 +182,15 @@ public class BinManagementForm extends javax.swing.JFrame {
 
         jLabelWarehouse.setText("Warehouse *");
 
-        cmbWarehouse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- Select Warehouse --" }));
-
         jLabelFilterZone.setText("Zone");
-
-        cmbFilterZone.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- All Zones --" }));
 
         jLabelFilterType.setText("Bin Type");
 
-        cmbFilterBinType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- All Types --", "RECEIVING", "STORAGE", "PICKING", "STAGING", "DAMAGE", "QUARANTINE" }));
+        cmbFilterBinType.setSelectedIndex(-1);
 
         jLabelFilterUtil.setText("Utilization");
 
-        cmbFilterUtilization.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- All --", "Empty (0%)", "Low (<30%)", "Medium (30%-80%)", "High (80%-99%)", "Full (100%)" }));
+        cmbFilterUtilization.setSelectedIndex(-1);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -234,11 +238,11 @@ public class BinManagementForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Capacity", "Current Stock"
+                "Bin Code", "Zone", "Aisle", "Rack", "Level", "Type", "Capacity", "Current Stock", "Status"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -342,6 +346,13 @@ public class BinManagementForm extends javax.swing.JFrame {
         lblBulkPreview.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblBulkPreview.setText("Preview: 0 bins to create");
 
+        btnGenerate.setText("Generate Bins");
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelBulkLayout = new javax.swing.GroupLayout(jPanelBulk);
         jPanelBulk.setLayout(jPanelBulkLayout);
         jPanelBulkLayout.setHorizontalGroup(
@@ -349,19 +360,21 @@ public class BinManagementForm extends javax.swing.JFrame {
             .addGroup(jPanelBulkLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelBulkLayout.createSequentialGroup()
-                        .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelBulkZone)
-                            .addComponent(jLabelBulkAisles)
-                            .addComponent(jLabelBulkRacks)
-                            .addComponent(jLabelBulkLevels))
-                        .addGap(30, 30, 30)
-                        .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtBulkZone, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                            .addComponent(spinBulkAisles, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                            .addComponent(spinBulkRacks, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                            .addComponent(spinBulkLevels, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)))
-                    .addComponent(lblBulkPreview))
+                    .addComponent(lblBulkPreview)
+                    .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(btnGenerate)
+                        .addGroup(jPanelBulkLayout.createSequentialGroup()
+                            .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabelBulkZone)
+                                .addComponent(jLabelBulkAisles)
+                                .addComponent(jLabelBulkRacks)
+                                .addComponent(jLabelBulkLevels))
+                            .addGap(30, 30, 30)
+                            .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtBulkZone, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                                .addComponent(spinBulkAisles, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                                .addComponent(spinBulkRacks, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                                .addComponent(spinBulkLevels, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)))))
                 .addContainerGap(120, Short.MAX_VALUE))
         );
         jPanelBulkLayout.setVerticalGroup(
@@ -385,7 +398,9 @@ public class BinManagementForm extends javax.swing.JFrame {
                     .addComponent(spinBulkLevels, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
                 .addComponent(lblBulkPreview)
-                .addContainerGap(75, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnGenerate)
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
@@ -409,13 +424,6 @@ public class BinManagementForm extends javax.swing.JFrame {
         btnDelete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDeleteActionPerformed(evt);
-            }
-        });
-
-        btnGenerate.setText("Generate Bins");
-        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnGenerateActionPerformed(evt);
             }
         });
 
@@ -456,12 +464,28 @@ public class BinManagementForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
+
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
+        btnPrint.setText("Print");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -474,15 +498,17 @@ public class BinManagementForm extends javax.swing.JFrame {
                 .addComponent(btnUpdate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnDelete)
-                .addGap(25, 25, 25)
-                .addComponent(btnGenerate)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(30, 30, 30)
+                .addComponent(btnClear)
+                .addGap(64, 64, 64)
                 .addComponent(btnViewStock)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrintLabel)
-                .addGap(25, 25, 25)
-                .addComponent(btnClear)
-                .addGap(150, 150, 150)
+                .addGap(18, 18, 18)
+                .addComponent(btnExport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addGap(37, 37, 37)
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -495,10 +521,12 @@ public class BinManagementForm extends javax.swing.JFrame {
                         .addComponent(btnAdd)
                         .addComponent(btnUpdate)
                         .addComponent(btnDelete)
-                        .addComponent(btnGenerate)
                         .addComponent(btnViewStock)
                         .addComponent(btnPrintLabel)
-                        .addComponent(btnClear))
+                        .addComponent(btnClear)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnExport)
+                            .addComponent(btnPrint)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -815,6 +843,203 @@ public class BinManagementForm extends javax.swing.JFrame {
         clearForm();
         updateButtonStates();
     }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
+        if (allBinsList == null || allBinsList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No bin data available to print.");
+            return;
+        }
+
+        if (selectedBin != null) {
+            Object[] options = {"Selected Bin (" + selectedBin.getBinCode() + ")", "All Displayed Bins (" + allBinsList.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to print / preview?",
+                    "Print Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice == 0) {
+                printSelectedBin(selectedBin);
+            } else if (choice == 1) {
+                printAllBins();
+            }
+        } else {
+            printAllBins();
+        }
+    }//GEN-LAST:event_btnPrintActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        if (popupExportBtn == null) {
+            setupExportMenu();
+        }
+        int width = Math.max(140, btnExport.getWidth());
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(width, 60));
+        popupExportBtn.show(btnExport, 0, btnExport.getHeight());
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void setupExportMenu() {
+        popupExportBtn = new javax.swing.JPopupMenu();
+        popupExportBtn.setPreferredSize(new java.awt.Dimension(140, 60));
+
+        menuitemPDF = new javax.swing.JMenuItem("  Export as PDF");
+        menuitemPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/pdf-14.png")));
+        menuitemPDF.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemPDF.addActionListener(e -> exportBins("PDF"));
+        popupExportBtn.add(menuitemPDF);
+
+        menuitemXLSX = new javax.swing.JMenuItem("  Export as XLSX");
+        menuitemXLSX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/excel-14.png")));
+        menuitemXLSX.setMaximumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.setMinimumSize(new java.awt.Dimension(140, 28));
+        menuitemXLSX.addActionListener(e -> exportBins("XLSX"));
+        popupExportBtn.add(menuitemXLSX);
+    }
+
+    private void exportBins(String format) {
+        if (allBinsList == null || allBinsList.isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "No bin data available to export.");
+            return;
+        }
+
+        List<StorageBinDTO> dataToExport = allBinsList;
+        if (selectedBin != null) {
+            Object[] options = {"Selected Bin (" + selectedBin.getBinCode() + ")", "All Displayed Bins (" + allBinsList.size() + ")", "Cancel"};
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this,
+                    "What would you like to export?",
+                    "Export Scope",
+                    javax.swing.JOptionPane.DEFAULT_OPTION,
+                    javax.swing.JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+            if (choice == 0) {
+                dataToExport = new ArrayList<>();
+                dataToExport.add(selectedBin);
+            } else if (choice == 1) {
+                dataToExport = allBinsList;
+            } else {
+                return;
+            }
+        }
+
+        final List<StorageBinDTO> finalExportList = dataToExport;
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Export Bins as " + format);
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        if ("XLSX".equalsIgnoreCase(format)) {
+            fileChooser.setSelectedFile(new java.io.File("Bin_Master_" + timestamp + ".xlsx"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Spreadsheet (*.xlsx)", "xlsx"));
+        } else {
+            fileChooser.setSelectedFile(new java.io.File("Bin_Master_" + timestamp + ".pdf"));
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Document (*.pdf)", "pdf"));
+        }
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            if ("XLSX".equalsIgnoreCase(format)) {
+                if (!fileToSave.getName().toLowerCase().endsWith(".xlsx")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".xlsx");
+                }
+            } else {
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".pdf");
+                }
+            }
+
+            final java.io.File targetFile = fileToSave;
+            BackgroundTask task = new BackgroundTask(this, "Exporting Bins as " + format) {
+                @Override
+                protected Boolean performTask() throws Exception {
+                    updateProgress("Writing " + format + " file...");
+                    if ("XLSX".equalsIgnoreCase(format)) {
+                        MasterDataExportUtils.exportBinsToXLSX(finalExportList, targetFile);
+                    } else {
+                        MasterDataExportUtils.exportBinsToPDF(finalExportList, targetFile);
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onSuccess() {
+                    StatusMessageHandler.showSuccess(txtStatus, format + " exported successfully: " + targetFile.getName());
+                }
+
+                @Override
+                protected void onFailure(Exception e) {
+                    Logger.errlog("Failed to export bins as " + format, e);
+                    StatusMessageHandler.showError(txtStatus, "Export failed: " + e.getMessage());
+                }
+            };
+            task.executeWithDialog();
+        }
+    }
+
+    private void printSelectedBin(StorageBinDTO b) {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Storage Bin Record (MAS03)")
+                .subtitle("Bin: " + b.getBinCode())
+                .addDetail("Bin Code", b.getBinCode())
+                .addDetail("Zone", safeString(b.getZoneCode()))
+                .addDetail("Aisle", safeString(b.getAisle()))
+                .addDetail("Rack / Shelf", safeString(b.getShelf()))
+                .addDetail("Level", safeString(b.getLevel()))
+                .addDetail("Bin Type", safeString(b.getBinType()))
+                .addDetail("Max Capacity", b.getMaxCapacity() != null ? String.valueOf(b.getMaxCapacity()) : "N/A")
+                .addDetail("Used Capacity", b.getUsedCapacity() != null ? String.valueOf(b.getUsedCapacity()) : "N/A")
+                .addDetail("Status", (b.getIsFrozen() != null && b.getIsFrozen()) ? "Frozen" : "Active")
+                .tableColumns(new String[]{"Attribute", "Specification Value"})
+                .addTableRow(new String[]{"Bin Code", b.getBinCode()})
+                .addTableRow(new String[]{"Zone", safeString(b.getZoneCode())})
+                .addTableRow(new String[]{"Aisle", safeString(b.getAisle())})
+                .addTableRow(new String[]{"Rack / Shelf", safeString(b.getShelf())})
+                .addTableRow(new String[]{"Level", safeString(b.getLevel())})
+                .addTableRow(new String[]{"Bin Type", safeString(b.getBinType())})
+                .addTableRow(new String[]{"Max Capacity", b.getMaxCapacity() != null ? String.valueOf(b.getMaxCapacity()) : "N/A"})
+                .addTableRow(new String[]{"Used Capacity", b.getUsedCapacity() != null ? String.valueOf(b.getUsedCapacity()) : "N/A"})
+                .addTableRow(new String[]{"Status", (b.getIsFrozen() != null && b.getIsFrozen()) ? "Frozen" : "Active"});
+
+        builder.showExportDialog(this);
+    }
+
+    private void printAllBins() {
+        FormSummaryPdfExporter.Builder builder = FormSummaryPdfExporter.builder()
+                .title("Storage Bin Master (MAS03)")
+                .subtitle("Total Bins: " + allBinsList.size())
+                .addDetail("Report Type", "Storage Bin Catalog")
+                .addDetail("Generated Date", java.time.LocalDate.now().toString())
+                .addDetail("Total Records", String.valueOf(allBinsList.size()))
+                .tableColumns(new String[]{"Bin Code", "Zone", "Aisle", "Rack", "Level", "Bin Type", "Max Cap", "Status"});
+
+        for (StorageBinDTO b : allBinsList) {
+            builder.addTableRow(new String[]{
+                safeString(b.getBinCode()),
+                safeString(b.getZoneCode()),
+                safeString(b.getAisle()),
+                safeString(b.getShelf()),
+                safeString(b.getLevel()),
+                safeString(b.getBinType()),
+                b.getMaxCapacity() != null ? String.valueOf(b.getMaxCapacity()) : "-",
+                (b.getIsFrozen() != null && b.getIsFrozen()) ? "Frozen" : "Active"
+            });
+        }
+
+        builder.showExportDialog(this);
+    }
+
+    private static String safeString(String str) {
+        return str != null ? str : "";
+    }
 
     // loads warehouses and initializes filter dropdowns
 
@@ -1166,6 +1391,20 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         };
 
+        Action printAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnPrint.isEnabled()) btnPrint.doClick();
+            }
+        };
+
+        Action exportAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (btnExport.isEnabled()) btnExport.doClick();
+            }
+        };
+
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK), "add");
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
         actionMap.put("add", addAction);
@@ -1185,6 +1424,12 @@ public class BinManagementForm extends javax.swing.JFrame {
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), "clearF8");
         actionMap.put("clear", clearAction);
         actionMap.put("clearF8", clearAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
+        actionMap.put("print", printAction);
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
+        actionMap.put("export", exportAction);
     }
 
     /**
@@ -1226,7 +1471,9 @@ public class BinManagementForm extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExport;
     private javax.swing.JButton btnGenerate;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnPrintLabel;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnViewStock;
