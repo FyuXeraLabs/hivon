@@ -161,6 +161,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jLabel5.setText("Task Type");
 
         btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
         btnGenerate.setText("Generate");
@@ -171,6 +172,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         });
 
         btnClear.setBackground(new java.awt.Color(214, 48, 49));
+        btnClear.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("Clear");
@@ -181,6 +183,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         });
 
         btnExport.setBackground(new java.awt.Color(41, 128, 232));
+        btnExport.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
@@ -255,6 +258,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel6.setText("Total Tasks Completed");
 
+        lblTotalTasksCompleted.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblTotalTasksCompleted.setText("[count]");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -263,10 +267,12 @@ public class PerformanceReportForm extends javax.swing.JFrame {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblTotalTasksCompleted)
-                    .addComponent(jLabel6))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGap(57, 57, 57)
+                        .addComponent(lblTotalTasksCompleted)))
+                .addContainerGap(93, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -283,6 +289,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel7.setText("Average Tasks per Hour");
 
+        lblAverageTasksPerHour.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblAverageTasksPerHour.setText("[rate]");
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -291,10 +298,12 @@ public class PerformanceReportForm extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblAverageTasksPerHour)
-                    .addComponent(jLabel7))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGap(63, 63, 63)
+                        .addComponent(lblAverageTasksPerHour)))
+                .addContainerGap(125, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -311,6 +320,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel8.setText("Overall Accuracy Rate");
 
+        lblOverallAccuracyRate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblOverallAccuracyRate.setText("[percentage]");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
@@ -319,10 +329,12 @@ public class PerformanceReportForm extends javax.swing.JFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblOverallAccuracyRate)
-                    .addComponent(jLabel8))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                        .addComponent(lblOverallAccuracyRate)
+                        .addGap(13, 13, 13)))
+                .addContainerGap(46, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -339,6 +351,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel9.setText("Average Time per Task");
 
+        lblAverageTimePerTask.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblAverageTimePerTask.setText("[duration]");
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
@@ -351,7 +364,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
                         .addGap(10, 10, 10)
                         .addComponent(jLabel9))
                     .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(91, 91, 91)
+                        .addGap(54, 54, 54)
                         .addComponent(lblAverageTimePerTask)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -360,7 +373,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblAverageTimePerTask)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -370,6 +383,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel10.setText("Error Rate");
 
+        lblErrorRate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblErrorRate.setText("[percentage]");
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
@@ -382,7 +396,7 @@ public class PerformanceReportForm extends javax.swing.JFrame {
                         .addGap(10, 10, 10)
                         .addComponent(jLabel10))
                     .addGroup(jPanel9Layout.createSequentialGroup()
-                        .addGap(60, 60, 60)
+                        .addGap(47, 47, 47)
                         .addComponent(lblErrorRate)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -401,8 +415,8 @@ public class PerformanceReportForm extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

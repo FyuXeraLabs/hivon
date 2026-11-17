@@ -150,6 +150,7 @@ public class InventoryValuationForm extends javax.swing.JFrame {
         jLabel3.setText("Valuation Method");
 
         btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
         btnGenerate.setText("Generate");
@@ -160,6 +161,7 @@ public class InventoryValuationForm extends javax.swing.JFrame {
         });
 
         btnClear.setBackground(new java.awt.Color(214, 48, 49));
+        btnClear.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("Clear");
@@ -170,6 +172,7 @@ public class InventoryValuationForm extends javax.swing.JFrame {
         });
 
         btnExport.setBackground(new java.awt.Color(41, 128, 232));
+        btnExport.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
@@ -297,12 +300,12 @@ public class InventoryValuationForm extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
+                        .addGap(15, 15, 15)
                         .addComponent(jLabel4))
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(78, 78, 78)
+                        .addGap(86, 86, 86)
                         .addComponent(lblTotalMaterialsInInventoryCount)))
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -345,15 +348,14 @@ public class InventoryValuationForm extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jLabel5)
-                        .addGap(21, 21, 21))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                        .addContainerGap()
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel5))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGap(68, 68, 68)
                         .addComponent(lblTotalQuantity)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addComponent(lblTotalQuantityUOM)
-                .addGap(64, 64, 64))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalQuantityUOM)))
+                .addGap(64, 88, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -396,16 +398,15 @@ public class InventoryValuationForm extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(ByWarehouseBreakdownBarchart, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel6))
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGap(58, 58, 58)
                         .addComponent(lblTotalInventoryValueCurrency)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblTotalInventoryValue)
-                        .addGap(25, 25, 25))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel6Layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jLabel6)))
+                        .addComponent(lblTotalInventoryValue)))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(

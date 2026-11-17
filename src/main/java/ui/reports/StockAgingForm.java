@@ -128,6 +128,7 @@ public class StockAgingForm extends javax.swing.JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
         btnGenerate.setText("Generate");
@@ -138,6 +139,7 @@ public class StockAgingForm extends javax.swing.JFrame {
         });
 
         btnClear.setBackground(new java.awt.Color(214, 48, 49));
+        btnClear.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("Clear");
@@ -148,6 +150,7 @@ public class StockAgingForm extends javax.swing.JFrame {
         });
 
         btnExport.setBackground(new java.awt.Color(41, 128, 232));
+        btnExport.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
@@ -184,7 +187,7 @@ public class StockAgingForm extends javax.swing.JFrame {
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmbStockAgeRange, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
                 .addComponent(btnGenerate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnClear)

@@ -244,8 +244,10 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
 
         cardSKU.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel1.setText("Active Inventory Skills");
 
+        lblActiveInventorySkills.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblActiveInventorySkills.setText("[num]");
 
         javax.swing.GroupLayout cardSKULayout = new javax.swing.GroupLayout(cardSKU);
@@ -274,8 +276,10 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel2.setText("Total Quantity in Bins");
 
+        jLabel3.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel3.setText("[num]");
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -283,14 +287,13 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addGap(19, 19, 19)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addGap(45, 45, 45)
+                        .addGap(36, 36, 36)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(73, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -321,10 +324,13 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
 
         cardValue.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel4.setText("Total Inventory Value");
 
+        jLabel5.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel5.setText("[num]");
 
+        jLabel6.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel6.setText("[cur]");
 
         javax.swing.GroupLayout cardValueLayout = new javax.swing.GroupLayout(cardValue);
@@ -332,14 +338,15 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
         cardValueLayout.setHorizontalGroup(
             cardValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(cardValueLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addGroup(cardValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(cardValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(cardValueLayout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(cardValueLayout.createSequentialGroup()
+                        .addGap(57, 57, 57)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel5)
-                        .addGap(21, 21, 21)))
+                        .addComponent(jLabel5)))
                 .addContainerGap(136, Short.MAX_VALUE))
         );
         cardValueLayout.setVerticalGroup(
@@ -347,17 +354,19 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
             .addGroup(cardValueLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(cardValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(jLabel5))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         cardExpiring.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel7.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel7.setText("Expiring / Expired");
 
+        jLabel8.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel8.setText("[num]");
 
         javax.swing.GroupLayout cardExpiringLayout = new javax.swing.GroupLayout(cardExpiring);
@@ -385,8 +394,10 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
 
         cardCapacity.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel9.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel9.setText("Avg bin capacity usage");
 
+        jLabel10.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         jLabel10.setText("[num]");
 
         javax.swing.GroupLayout cardCapacityLayout = new javax.swing.GroupLayout(cardCapacity);
