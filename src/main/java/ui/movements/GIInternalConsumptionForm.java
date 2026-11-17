@@ -121,6 +121,7 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
         jLabel4.setText("Material Code");
 
         btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText("Search");
@@ -223,8 +224,6 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
 
         jLabel10.setText("Source Bin");
 
-        cmbSourceBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         jLabel2.setText("Department");
 
         txtDepartment.addActionListener(new java.awt.event.ActionListener() {
@@ -235,11 +234,10 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
 
         jLabel1.setText("Consumption Type");
 
-        cmbConsumptionType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         jLabel3.setText("Project");
 
         btnAddToIssue.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddToIssue.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAddToIssue.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToIssue.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToIssue.setText("Add");
@@ -403,6 +401,7 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
         jScrollPane3.setViewportView(jPanel10);
 
         btnCompleteIssue.setBackground(new java.awt.Color(0, 184, 148));
+        btnCompleteIssue.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCompleteIssue.setForeground(new java.awt.Color(255, 255, 255));
         btnCompleteIssue.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnCompleteIssue.setText("Complete ");
@@ -413,6 +412,7 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText("Cancel");

@@ -300,7 +300,6 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
 
         jPanel3 = new javax.swing.JPanel();
         btnPost = new javax.swing.JButton();
-        btnSave = new javax.swing.JButton();
         btbCancel = new javax.swing.JButton();
         txtStatus = new javax.swing.JLabel();
         btnPrint = new javax.swing.JButton();
@@ -343,6 +342,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnPost.setText("Post");
@@ -352,16 +352,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
             }
         });
 
-        btnSave.setBackground(new java.awt.Color(120, 111, 166));
-        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
-        btnSave.setText("Save Draft ");
-        btnSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveActionPerformed(evt);
-            }
-        });
-
         btbCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btbCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btbCancel.setForeground(new java.awt.Color(255, 255, 255));
         btbCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btbCancel.setText(" Cancel");
@@ -375,6 +367,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
@@ -393,11 +386,9 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                 .addGap(16, 16, 16)
                 .addComponent(btnPost)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnSave)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btbCancel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnPrint)
+                .addGap(42, 42, 42)
+                .addComponent(btbCancel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -410,7 +401,6 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
                     .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnPost)
-                        .addComponent(btnSave)
                         .addComponent(btbCancel)
                         .addComponent(btnPrint)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -428,6 +418,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         });
 
         btnSearchMaterial.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearchMaterial.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearchMaterial.setForeground(new java.awt.Color(255, 255, 255));
         btnSearchMaterial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearchMaterial.setText("Search");
@@ -592,6 +583,8 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         cmbScrapReason.setNextFocusableComponent(txtPONumber6);
 
         btbAdd.setBackground(new java.awt.Color(0, 184, 148));
+        btbAdd.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btbAdd.setForeground(new java.awt.Color(255, 255, 255));
         btbAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btbAdd.setText("Add");
         btbAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -914,52 +907,6 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
         task.executeWithDialog();
     }//GEN-LAST:event_btnPostActionPerformed
 
-    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        if (pendingWriteoffs.isEmpty()) {
-            if (currentSelectedMaterial != null && !txtWriteoffQty.getText().trim().isEmpty()) {
-                int addFirst = JOptionPane.showConfirmDialog(this,
-                        "The currently edited material has not been added to the write-off list.\nWould you like to add it now and save as draft?",
-                        "Pending Item", JOptionPane.YES_NO_CANCEL_OPTION);
-                if (addFirst == JOptionPane.YES_OPTION) {
-                    btbAddActionPerformed(evt);
-                    if (pendingWriteoffs.isEmpty()) return;
-                } else if (addFirst != JOptionPane.NO_OPTION) {
-                    return;
-                }
-            } else {
-                StatusMessageHandler.showWarning(txtStatus, "Please add at least one item to save draft.");
-                return;
-            }
-        }
-
-        String reasonCode = pendingWriteoffs.get(0).getReasonCode();
-        String remarks = pendingWriteoffs.get(0).getRemarks();
-
-        BackgroundTask task = new BackgroundTask(this, "Saving Draft") {
-            private String movementNumber;
-
-            @Override
-            protected Boolean performTask() throws Exception {
-                updateProgress("Saving scrap write-off draft...");
-                movementNumber = controller.saveScrapWriteoff(pendingWriteoffs, reasonCode, remarks, false);
-                return movementNumber != null;
-            }
-
-            @Override
-            protected void onSuccess() {
-                StatusMessageHandler.showSuccess(txtStatus, "Draft saved: " + movementNumber);
-                clearAllForm();
-            }
-
-            @Override
-            protected void onFailure(Exception e) {
-                Logger.errlog("Failed to save draft", e);
-                StatusMessageHandler.showError(txtStatus, "Failed to save draft: " + e.getMessage());
-            }
-        };
-        task.executeWithDialog();
-    }//GEN-LAST:event_btnSaveActionPerformed
-
     private void btbCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btbCancelActionPerformed
         int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear all form entries?", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
@@ -1244,7 +1191,6 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     private javax.swing.JButton btnPost;
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRemoveSummaryItem;
-    private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSearchMaterial;
     private javax.swing.JButton btnUpdateSummaryItem;
     private javax.swing.JComboBox<String> cmbScrapReason;

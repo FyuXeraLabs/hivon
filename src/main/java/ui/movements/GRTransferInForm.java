@@ -102,6 +102,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         txtTONumber.setNextFocusableComponent(lblFromWarehouse);
 
         btnLoadTO.setBackground(new java.awt.Color(41, 128, 232));
+        btnLoadTO.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnLoadTO.setForeground(new java.awt.Color(255, 255, 255));
         btnLoadTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnLoadTO.setText(" Search");
@@ -236,6 +237,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         btnCompleteReceipt.setBackground(new java.awt.Color(0, 184, 148));
+        btnCompleteReceipt.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCompleteReceipt.setForeground(new java.awt.Color(255, 255, 255));
         btnCompleteReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnCompleteReceipt.setText(" Receive All");
@@ -246,6 +248,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText(" Cancel");
@@ -261,6 +264,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnReceiveGoods.setBackground(new java.awt.Color(0, 184, 148));
+        btnReceiveGoods.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnReceiveGoods.setForeground(new java.awt.Color(255, 255, 255));
         btnReceiveGoods.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnReceiveGoods.setText("Receive Goods");
@@ -271,6 +275,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
         });
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
@@ -294,7 +299,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(37, 37, 37)
                 .addComponent(btnPrint)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 208, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 213, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );

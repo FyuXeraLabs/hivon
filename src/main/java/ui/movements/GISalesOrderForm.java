@@ -892,12 +892,12 @@ public class GISalesOrderForm extends javax.swing.JFrame {
 
         txtSalesOrderNumber.setNextFocusableComponent(cmbCustomer);
 
-        cmbCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cmbCustomer.setNextFocusableComponent(txtSoNumber);
 
         jLabel2.setText("Customer");
 
         btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText("Search");
@@ -1092,6 +1092,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         txtRemarks.setNextFocusableComponent(txtSalesOrderNumber);
 
         btnAddToShipment.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddToShipment.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAddToShipment.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToShipment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToShipment.setText("Add ");
@@ -1160,7 +1161,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
                             .addComponent(txtRemarks, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(151, Short.MAX_VALUE))
+                        .addContainerGap(154, Short.MAX_VALUE))
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnAddToShipment)
@@ -1254,9 +1255,10 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         scrollShipmentSummary.setViewportView(jPanel2);
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
-        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/black-done.png"))); // NOI18N
-        btnPost.setText("Complete");
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText("POST");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPostActionPerformed(evt);
@@ -1264,6 +1266,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText("Cancel");
@@ -1279,6 +1282,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnGeneratePickingList.setBackground(new java.awt.Color(153, 153, 153));
+        btnGeneratePickingList.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnGeneratePickingList.setForeground(new java.awt.Color(255, 255, 255));
         btnGeneratePickingList.setText("Generate");
         btnGeneratePickingList.addActionListener(new java.awt.event.ActionListener() {
@@ -1288,6 +1292,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         });
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
