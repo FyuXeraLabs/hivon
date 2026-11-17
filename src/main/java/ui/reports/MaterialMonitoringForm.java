@@ -163,6 +163,8 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
             }
         });
 
+        btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
         btnGenerate.setText("Generate");
         btnGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -171,6 +173,8 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
             }
         });
 
+        btnClear.setBackground(new java.awt.Color(214, 48, 49));
+        btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
@@ -179,6 +183,8 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
             }
         });
 
+        btnExport.setBackground(new java.awt.Color(41, 128, 232));
+        btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
@@ -476,6 +482,8 @@ public class MaterialMonitoringForm extends javax.swing.JFrame {
 
         lblBin1.setText("Storage Bin");
 
+        btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {

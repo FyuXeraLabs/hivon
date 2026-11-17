@@ -424,19 +424,17 @@
                           <EmptySpace pref="14" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
                               <Component id="btnClearSummaryTbl" pref="31" max="32767" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="btnRemove" alignment="1" pref="31" max="32767" attributes="0"/>
-                                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
-                                      <Component id="txtSuggestedBins" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblSuggestedBins" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblSelectedBin" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="cmbSelectedBin" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblSequence" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="txtSequence" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="btnAddTo" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Component id="btnUpdate" alignment="1" max="32767" attributes="0"/>
+                              <Component id="btnRemove" alignment="1" pref="31" max="32767" attributes="0"/>
+                              <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                                  <Component id="txtSuggestedBins" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblSuggestedBins" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblSelectedBin" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="cmbSelectedBin" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblSequence" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtSequence" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnAddTo" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="btnUpdate" alignment="1" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace pref="25" max="32767" attributes="0"/>
                       </Group>
@@ -547,7 +545,7 @@
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                       <Image iconType="3" name="/btnicn/add-14.png"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Add to TO "/>
+                    <Property name="text" type="java.lang.String" value="Add  "/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAddToActionPerformed"/>

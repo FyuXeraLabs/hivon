@@ -605,7 +605,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         btnAddTo.setBackground(new java.awt.Color(0, 184, 148));
         btnAddTo.setForeground(new java.awt.Color(255, 255, 255));
         btnAddTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
-        btnAddTo.setText("Add to TO");
+        btnAddTo.setText("Add ");
         btnAddTo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddToActionPerformed(evt);

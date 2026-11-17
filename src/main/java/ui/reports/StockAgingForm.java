@@ -127,6 +127,8 @@ public class StockAgingForm extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
         btnGenerate.setText("Generate");
         btnGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -135,6 +137,8 @@ public class StockAgingForm extends javax.swing.JFrame {
             }
         });
 
+        btnClear.setBackground(new java.awt.Color(214, 48, 49));
+        btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
@@ -143,6 +147,8 @@ public class StockAgingForm extends javax.swing.JFrame {
             }
         });
 
+        btnExport.setBackground(new java.awt.Color(41, 128, 232));
+        btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
@@ -211,6 +217,7 @@ public class StockAgingForm extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel1.setText("Total materials analyzed");
 
         lblTotalMaterialsAnalyzed.setText("[count]");
@@ -240,6 +247,7 @@ public class StockAgingForm extends javax.swing.JFrame {
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel8.setText("High-value obsolete");
 
         lblHighValueObsoleteCurrency.setText("[cur]");
@@ -276,6 +284,7 @@ public class StockAgingForm extends javax.swing.JFrame {
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setText("Average age of inventory");
 
         lblAverageAgeOfInventory.setText("[days]");
@@ -312,6 +321,7 @@ public class StockAgingForm extends javax.swing.JFrame {
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel6.setText("Slow-moving materials");
 
         lblSlowMovingMaterialsCount.setText("[count]");
@@ -342,6 +352,7 @@ public class StockAgingForm extends javax.swing.JFrame {
 
         jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel7.setText("Potentially obsolete");
 
         lblPotentiallyObsoleteCounts.setText("[count]");

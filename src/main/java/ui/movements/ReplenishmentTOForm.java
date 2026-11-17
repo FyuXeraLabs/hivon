@@ -330,7 +330,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         btnAddtoTO.setBackground(new java.awt.Color(0, 184, 148));
         btnAddtoTO.setForeground(new java.awt.Color(255, 255, 255));
         btnAddtoTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
-        btnAddtoTO.setText("Add to TO");
+        btnAddtoTO.setText("Add ");
         btnAddtoTO.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddtoTOActionPerformed(evt);

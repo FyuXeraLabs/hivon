@@ -175,6 +175,8 @@ public class DailyActivityForm extends javax.swing.JFrame {
 
         jLabel3.setText("Activity Type");
 
+        btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/generate.png"))); // NOI18N
         btnGenerate.setText("Generate");
         btnGenerate.addActionListener(new java.awt.event.ActionListener() {
@@ -183,6 +185,8 @@ public class DailyActivityForm extends javax.swing.JFrame {
             }
         });
 
+        btnClear.setBackground(new java.awt.Color(214, 48, 49));
+        btnClear.setForeground(new java.awt.Color(255, 255, 255));
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
@@ -191,6 +195,8 @@ public class DailyActivityForm extends javax.swing.JFrame {
             }
         });
 
+        btnExport.setBackground(new java.awt.Color(41, 128, 232));
+        btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
@@ -216,11 +222,11 @@ public class DailyActivityForm extends javax.swing.JFrame {
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbActivity, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnGenerate)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnClear)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                .addComponent(btnGenerate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnClear)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -248,30 +254,36 @@ public class DailyActivityForm extends javax.swing.JFrame {
 
         pnlIssuesSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Issues Summary"));
 
+        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel10.setText("Total GI Count:");
 
         lblTotalGICount.setText("0000");
 
+        jLabel11.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel11.setText("Total Issue Qty:");
 
         lblTotalIssueQty.setText("0000");
 
         lblTotalIssueQtyUOM.setText("[UOM]");
 
+        jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel12.setText("Total Issue Value:");
 
         lblTotalIssueValue.setText("000,000.00");
 
         lblTotalIssueValueCurrency.setText("CUR");
 
+        jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel13.setText("Sales Order:");
 
         lblSalesOrder.setText("0000");
 
+        jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel14.setText("Internal Consumption:");
 
         lblInternalConsumption.setText("0000");
 
+        jLabel15.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel15.setText("Transfer Out:");
 
         lblTransferOut.setText("0000");
@@ -343,14 +355,17 @@ public class DailyActivityForm extends javax.swing.JFrame {
 
         pnlExceptionSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Exception Summary"));
 
+        jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel24.setText("Short Picks:");
 
         lblShortPicks.setText("0000");
 
+        jLabel25.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel25.setText("Damaged Items:");
 
         lblDamagedItems.setText("0000");
 
+        jLabel26.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel26.setText("Variances:");
 
         jLabel27.setText("0000");
@@ -470,7 +485,7 @@ public class DailyActivityForm extends javax.swing.JFrame {
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 558, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -486,30 +501,36 @@ public class DailyActivityForm extends javax.swing.JFrame {
 
         pnlReceiptsSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Receipts Summary"));
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setText("Total GR Count:");
 
         lblTotalGRCount.setText("0000");
 
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel5.setText("Total Receipt Qty:");
 
         lblTotalReceiptQty.setText("0000");
 
         lblTotalReceiptQtyUOM.setText("[UOM]");
 
+        jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel6.setText("Total Receipt Value:");
 
         lblTotalReceiptValue.setText("000,000.00");
 
         lblTotalReceiptValueCurrency.setText("CUR");
 
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel7.setText("PO:");
 
         lblReceiptPO.setText("000");
 
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel8.setText("Customer Returns:");
 
         lblReceiptCustomerReturns.setText("000");
 
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel9.setText("Transfer In:");
 
         lblReceiptTransferIn.setText("000");
@@ -581,14 +602,17 @@ public class DailyActivityForm extends javax.swing.JFrame {
 
         pnlTransfersSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfers Summary"));
 
+        jLabel16.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel16.setText("Bin-to-Bin Transfers:");
 
         lblBintoBinTransfers.setText("0000");
 
+        jLabel17.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel17.setText("Total Transfer Qty:");
 
         lblTotalTransferQty.setText("0000");
 
+        jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel18.setText("Total Transfer Value:");
 
         lblTotalTransferValueCurrency.setText("CUR");
@@ -639,14 +663,17 @@ public class DailyActivityForm extends javax.swing.JFrame {
 
         pnlAdjustmentsSummary.setBorder(javax.swing.BorderFactory.createTitledBorder("Adjustments Summary"));
 
+        jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel20.setText("Cycle Count Adjustments:");
 
         lblCycleCountAdjustments.setText("0000");
 
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel21.setText("Inventory Adjustments:");
 
         lblInventoryAdjustments.setText("0000");
 
+        jLabel22.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel22.setText("Net Adjustment Value:");
 
         lblNetAdjustmentValueCurrency.setText("CUR");

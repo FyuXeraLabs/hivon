@@ -696,7 +696,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                 .addContainerGap(10, Short.MAX_VALUE))
         );
 
-        jPanelSearch.setBackground(new java.awt.Color(204, 204, 204));
         jPanelSearch.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblPONumber.setText("PO Number");
