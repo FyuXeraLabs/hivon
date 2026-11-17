@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - main
+      - production
       - develop
     tags:
       - "v*"
@@ -12,6 +13,7 @@ on:
     branches:
       - master
       - main
+      - production
       - develop
   workflow_dispatch:
     inputs:
@@ -92,7 +94,7 @@ jobs:
             TARGET_ENV="${{ inputs.environment }}"
           elif [[ "$GITHUB_REF" =~ ^refs/tags/v.*-(rc|beta|alpha|dev).* ]]; then
             TARGET_ENV="staging"
-          elif [[ "$GITHUB_REF" =~ ^refs/tags/v ]]; then
+          elif [[ "$GITHUB_REF" =~ ^refs/tags/v ]] || [[ "$GITHUB_REF" == "refs/heads/production" ]]; then
             TARGET_ENV="production"
           elif [[ "$GITHUB_REF" == "refs/heads/master" || "$GITHUB_REF" == "refs/heads/main" ]]; then
             TARGET_ENV="staging"
@@ -120,7 +122,7 @@ jobs:
           fi
 
           SHOULD_BUILD=false
-          if [ "$IS_RELEASE" = "true" ] || [ "${{ inputs.build_installers }}" = "true" ]; then
+          if [ "$IS_RELEASE" = "true" ] || [ "${{ inputs.build_installers }}" = "true" ] || [[ "$GITHUB_REF" == "refs/heads/production" ]]; then
             SHOULD_BUILD=true
           fi
 
@@ -190,6 +192,7 @@ jobs:
             --runtime-image customjre `
             --name "${{ env.PROJECT_NAME }}" `
             --app-version "${{ needs.resolve-metadata.outputs.app_version }}" `
+            --icon "icons/app-icon.ico" `
             --win-shortcut `
             --win-menu `
             --win-dir-chooser `
@@ -207,11 +210,12 @@ jobs:
           if ($exe) {
             $args = @(
               "`"$($exe.FullName)`"",
+              '--set-icon', 'icons/app-icon.ico',
               '--set-requested-execution-level', 'requireAdministrator',
               '--set-subsystem', 'windows'
             )
             $process = Start-Process -FilePath ".\\$rceditPath" -ArgumentList $args -NoNewWindow -Wait -PassThru
-            Write-Host "Updated EXE manifest for $($exe.Name)"
+            Write-Host "Updated EXE manifest and icon for $($exe.Name)"
           } else {
             throw "EXE artifact not found in dist/"
           }
@@ -303,6 +307,7 @@ jobs:
             --runtime-image customjre \
             --name "${{ env.PROJECT_NAME }}" \
             --app-version "${{ needs.resolve-metadata.outputs.app_version }}" \
+            --icon "icons/app-icon.png" \
             --linux-shortcut \
             --linux-deb-maintainer "info@fyuxera.com" \
             --linux-app-category "Office" \
@@ -400,6 +405,7 @@ jobs:
             --runtime-image customjre \
             --name "${{ env.PROJECT_NAME }}" \
             --app-version "${{ needs.resolve-metadata.outputs.app_version }}" \
+            --icon "icons/app-icon.icns" \
             --mac-package-name "${{ env.PROJECT_NAME }}" \
             --dest dist
 
