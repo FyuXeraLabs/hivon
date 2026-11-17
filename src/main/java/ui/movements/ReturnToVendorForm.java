@@ -101,13 +101,13 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
 
     private void initReturnReasons() {
         cmbReturnReason.removeAllItems();
-        cmbReturnReason.addItem("-- Select Reason --");
         cmbReturnReason.addItem("Defective / Damaged");
         cmbReturnReason.addItem("Expired");
         cmbReturnReason.addItem("Overstock");
         cmbReturnReason.addItem("Incorrect Item Sent");
         cmbReturnReason.addItem("Quality Failure");
         cmbReturnReason.addItem("Other");
+        cmbReturnReason.setSelectedItem(null);
     }
 
     private void initTableSelectionListener() {
@@ -151,19 +151,18 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
             protected void onSuccess() {
                 vendorList = vendors != null ? vendors : new ArrayList<>();
                 cmbVendor.removeAllItems();
-                cmbVendor.addItem("-- Select Vendor --");
                 for (VendorDTO vendor : vendorList) {
                     if (vendor.getVendorCode() != null && vendor.getVendorName() != null) {
                         cmbVendor.addItem(vendor.getVendorCode() + " - " + vendor.getVendorName());
                     }
                 }
+                cmbVendor.setSelectedItem(null);
                 StatusMessageHandler.showSuccess(txtStatus, "Vendors loaded successfully.");
             }
 
             @Override
             protected void onFailure(Exception e) {
                 cmbVendor.removeAllItems();
-                cmbVendor.addItem("-- Select Vendor --");
                 StatusMessageHandler.showError(txtStatus, "Failed to load vendors: " + e.getMessage());
             }
         };
@@ -211,10 +210,10 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         clearMaterialSelectionInputs();
         txtMaterialSearch.setText("");
         if (cmbVendor.getItemCount() > 0) {
-            cmbVendor.setSelectedIndex(0);
+            cmbVendor.setSelectedItem(null);
         }
         if (cmbReturnReason.getItemCount() > 0) {
-            cmbReturnReason.setSelectedIndex(0);
+            cmbReturnReason.setSelectedItem(null);
         }
         returnItemList.clear();
         refreshSummaryTable();
@@ -838,7 +837,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
                 return;
             }
 
-            if (cmbReturnReason.getSelectedIndex() <= 0) {
+            if (cmbReturnReason.getSelectedIndex() < 0) {
                 StatusMessageHandler.showWarning(txtStatus, "Please select a Return Reason.");
                 return;
             }
@@ -876,12 +875,12 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
             return;
         }
 
-        if (cmbVendor.getSelectedIndex() <= 0) {
+        if (cmbVendor.getSelectedIndex() < 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select a Vendor first.");
             return;
         }
 
-        if (cmbReturnReason.getSelectedIndex() <= 0) {
+        if (cmbReturnReason.getSelectedIndex() < 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select a Return Reason.");
             return;
         }
@@ -935,7 +934,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
     }
 
     private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {
-        if (cmbVendor.getSelectedIndex() <= 0) {
+        if (cmbVendor.getSelectedIndex() < 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select a Vendor to return to.");
             return;
         }
