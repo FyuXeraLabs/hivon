@@ -730,17 +730,20 @@
                 <Component class="javax.swing.JComboBox" name="cmbQuality">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                      <StringArray count="4">
-                        <StringItem index="0" value="-- Select Quality --"/>
-                        <StringItem index="1" value="Accepted"/>
-                        <StringItem index="2" value="Partial Damage"/>
-                        <StringItem index="3" value="Rejected"/>
+                      <StringArray count="3">
+                        <StringItem index="0" value="Accepted"/>
+                        <StringItem index="1" value="Partial Damage"/>
+                        <StringItem index="2" value="Rejected"/>
                       </StringArray>
                     </Property>
+                    <Property name="selectedIndex" type="int" value="-1"/>
                     <Property name="nextFocusableComponent" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                       <ComponentRef name="lblRemarks"/>
                     </Property>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbQualityActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblRemarks">
                   <Properties>
