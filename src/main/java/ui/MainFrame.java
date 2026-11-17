@@ -611,6 +611,11 @@ public class MainFrame extends javax.swing.JFrame {
         jMenu2.setText("   Help       ");
 
         jMenuItem2.setText("User Manual");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
         jMenu2.add(jMenuItem2);
 
         jMenuItem3.setText("Keyboard Shortcuts");
@@ -996,6 +1001,29 @@ public class MainFrame extends javax.swing.JFrame {
         lastPanelOpenTime = now;
         SystemTrayPanel.showInDialog();
     }//GEN-LAST:event_btnSyncPanelActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        // TODO add your handling code here:
+        try {
+            String urlString = "https://raw.githubusercontent.com/FyuXeraLabs/hivon/566980405a10c8b6c7d6b40bc5752611662d7bcd/docs/Hivon_User_Manual.pdf";
+
+            if (java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
+
+                if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
+                    java.net.URI uri = new java.net.URI(urlString);
+                    desktop.browse(uri);
+                } else {
+                    StatusMessageHandler.showWarning(txtStatus, "Browser action is not supported on this system.");
+                }
+            } else {
+                StatusMessageHandler.showWarning(txtStatus, "Desktop actions are not supported on this system.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            StatusMessageHandler.showWarning(txtStatus, "Could not open User Manual: " + e.getMessage());
+        }
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
      * @param args the command line arguments

@@ -64,6 +64,9 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="User Manual"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem2ActionPerformed"/>
+                  </Events>
                 </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="jMenuItem3">
                   <Properties>
@@ -246,7 +249,6 @@
             <StringItem index="31" value="REP64 - Performance Report"/>
             <StringItem index="32" value="REP65 - Utilization Report"/>
             <StringItem index="33" value="REP66 - Financial Report"/>
-            <StringItem index="34" value="REP67 - Material Monitoring"/>
           </StringArray>
         </Property>
         <Property name="selectedIndex" type="int" value="-1"/>
