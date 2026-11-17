@@ -19,6 +19,7 @@ import core.api.dao.GISalesOrderDAO.GISalesOrderItem;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 
 /**
  * Goods Issue for Sales Orders (OUT14)
@@ -81,6 +82,7 @@ public class GISalesOrderForm extends javax.swing.JFrame {
      */
     public GISalesOrderForm() {
         initComponents();
+        setupKeyBindings();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new GISalesOrderController();
@@ -1434,6 +1436,18 @@ public class GISalesOrderForm extends javax.swing.JFrame {
     private void cmbMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbMaterialActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbMaterialActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToShipment),
+                FormShortcuts.save(btnEdit),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnDelete),
+                FormShortcuts.clear(btnClear),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

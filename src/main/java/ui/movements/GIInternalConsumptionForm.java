@@ -15,6 +15,7 @@ import movements.controllers.GIInternalConsumptionController;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import core.logging.Logger;
 import core.security.UserSession;
 
@@ -36,6 +37,7 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
      */
     public GIInternalConsumptionForm() {
         initComponents();
+        setupKeyBindings();
         this.setTitle("Goods Issue - Internal Consumption (OUT16)");
         try {
             this.setIconImage(new javax.swing.ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
@@ -993,6 +995,17 @@ public class GIInternalConsumptionForm extends javax.swing.JFrame {
         loadInitialBins();
         refreshIssueSummaryTable();
         StatusMessageHandler.showInfo(txtStatus, "Form reset. Ready for next transaction.");
+    }
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToIssue),
+                FormShortcuts.save(btnSearch3),
+                FormShortcuts.update(btnCompleteIssue),
+                FormShortcuts.delete(btnSearch2),
+                FormShortcuts.clear(btnSearch1),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.signOut());
     }
 
     /**

@@ -17,6 +17,7 @@ import movements.controllers.GRCustomerReturnsController;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import core.logging.Logger;
 import core.security.UserSession;
 import javax.swing.ImageIcon;
@@ -42,6 +43,7 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
      */
     public GRCustomerReturnsForm() {
         initComponents();
+        setupKeyBindings();
         btnUpdateRecieptItem.setEnabled(false); // Disable update button initially
         tblReturnSummary.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         this.setLocationRelativeTo(null);
@@ -1530,6 +1532,18 @@ public class GRCustomerReturnsForm extends javax.swing.JFrame {
 
         StatusMessageHandler.showSuccess(txtStatus, "Return summary cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToReturn),
+                FormShortcuts.save(btnUpdateRecieptItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveRecieptItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

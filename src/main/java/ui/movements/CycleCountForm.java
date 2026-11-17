@@ -5,6 +5,7 @@
 package ui.movements;
 
 import core.workers.BackgroundTask;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
 import core.security.UserSession;
@@ -48,6 +49,7 @@ public class CycleCountForm extends javax.swing.JFrame {
      */
     public CycleCountForm() {
         initComponents();
+        setupKeyBindings();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new CycleCountController();
@@ -1823,6 +1825,17 @@ public class CycleCountForm extends javax.swing.JFrame {
     private void cmbZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbZoneActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbZoneActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToSummary),
+                FormShortcuts.save(btnUpdateSummaryItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveSummaryItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

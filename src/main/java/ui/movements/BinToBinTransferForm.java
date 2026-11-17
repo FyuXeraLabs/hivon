@@ -14,6 +14,7 @@ import models.dto.WarehouseDTO;
 import movements.controllers.BinToBinTransferController;
 import core.security.UserSession;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 
 import javax.swing.*;
@@ -55,6 +56,7 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
      */
     public BinToBinTransferForm() {
         initComponents();
+        setupKeyBindings();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new BinToBinTransferController();
@@ -1870,6 +1872,18 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
         }
         cmbTransferReason.setSelectedIndex(-1);
         this.dispose();
+    }
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToTransfer),
+                FormShortcuts.save(btnUpdateSummaryItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveSummaryItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearchMaterial),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
     }
 
     /**

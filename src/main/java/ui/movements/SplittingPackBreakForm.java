@@ -13,6 +13,7 @@ import models.dto.SplittingMaterialDTO;
 import models.dto.SplittingSourceBinDTO;
 import movements.controllers.SplittingPackBreakController;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 
 import javax.swing.*;
@@ -47,6 +48,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
      */
     public SplittingPackBreakForm() {
         initComponents();
+        setupKeyBindings();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new SplittingPackBreakController();
@@ -1384,6 +1386,18 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         } else {
             this.dispose();
         }
+    }
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToTransfer),
+                FormShortcuts.save(btnUpdateSummaryItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveSummaryItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearchMaterial),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
     }
 
     /**

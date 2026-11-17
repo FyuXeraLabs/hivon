@@ -14,6 +14,7 @@ import movements.controllers.GRTransferInController;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import core.logging.Logger;
 import javax.swing.ImageIcon;
 
@@ -33,6 +34,7 @@ public class GRTransferInForm extends javax.swing.JFrame {
      */
     public GRTransferInForm() {
         initComponents();
+        setupKeyBindings();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new GRTransferInController();
@@ -640,6 +642,16 @@ public class GRTransferInForm extends javax.swing.JFrame {
             }
         };
         task.executeWithDialog();
+    }
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnReceiveGoods),
+                FormShortcuts.save(btnCompleteReceipt),
+                FormShortcuts.update(btnCompleteReceipt),
+                FormShortcuts.search(btnLoadTO),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
     }
 
     /**

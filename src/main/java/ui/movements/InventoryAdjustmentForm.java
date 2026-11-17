@@ -11,6 +11,7 @@ import models.entity.AdjustmentReason;
 import core.workers.BackgroundTask;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import core.logging.Logger;
 import core.security.UserSession;
 
@@ -48,6 +49,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
      */
     public InventoryAdjustmentForm() {
         initComponents();
+        setupKeyBindings();
         customInit();
     }
 
@@ -1170,6 +1172,18 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         performSearch();
     }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnadd),
+                FormShortcuts.save(btnUpdateSummaryItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveSummaryItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

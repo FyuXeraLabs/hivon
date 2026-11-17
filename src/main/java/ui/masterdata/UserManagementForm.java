@@ -10,14 +10,6 @@ import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.Set;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
 
 import models.entity.User;
 import masterdata.controllers.UserManagementController;
@@ -29,6 +21,7 @@ import core.logging.Logger;
 import java.util.HashSet;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 import ui.dialogs.PasswordEntryForm;
 import core.utils.export.FormSummaryPdfExporter;
@@ -464,196 +457,19 @@ public class UserManagementForm extends javax.swing.JFrame {
     }
     
     private void setupKeyBindings() {
-        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = getRootPane().getActionMap();
-
-        Action actDeactAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnActDeact.doClick();
-            }
-        };
-
-        Action addAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnAdd.doClick();
-            }
-        };
-
-        Action addPermissionAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnAddPermission.doClick();
-            }
-        };
-
-        Action assignDefaultAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnAssignDefault.doClick();
-            }
-        };
-
-        Action clearAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnClear.doClick();
-            }
-        };
-
-        Action deleteAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnDelete.doClick();
-            }
-        };
-
-        Action pwdResetAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnPwdReset.doClick();
-            }
-        };
-
-        Action refreshAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnRefresh.doClick();
-            }
-        };
-
-        Action removePermissionAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnRemovePermission.doClick();
-            }
-        };
-
-        Action saveAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnSave.doClick();
-            }
-        };
-
-        Action searchAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnSearch.doClick();
-            }
-        };
-
-        Action updateAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnUpdate.doClick();
-            }
-        };
-
-        Action printAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnPrint.isEnabled()) btnPrint.doClick();
-            }
-        };
-
-        Action exportAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnExport.isEnabled()) btnExport.doClick();
-            }
-        };
-
-        // btnActDeact
-        KeyStroke altA = KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f11 = KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0);
-
-        // btnAdd
-        KeyStroke altN = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
-
-        // btnClear
-        KeyStroke altC = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f8 = KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0);
-
-        // btnDelete
-        KeyStroke altD = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f10 = KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0);
-
-        // btnPwdReset
-        KeyStroke altP = KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f12 = KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0);
-
-        // btnRefresh
-        KeyStroke altR = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK);
-
-        // btnSave
-        KeyStroke altS = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
-
-        // btnSearch
-        KeyStroke altQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.ALT_DOWN_MASK);
-
-        // btnUpdate
-        KeyStroke altU = KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f9 = KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0);
-
-        // btnActDeact
-        inputMap.put(altA, "actDeact");
-        actionMap.put("actDeact", actDeactAction);
-        inputMap.put(f11, "actDeactF11");
-        actionMap.put("actDeactF11", actDeactAction);
-
-        // btnAdd
-        inputMap.put(altN, "add");
-        actionMap.put("add", addAction);
-        inputMap.put(f6, "addF6");
-        actionMap.put("addF6", addAction);
-
-        // btnClear
-        inputMap.put(altC, "clear");
-        actionMap.put("clear", clearAction);
-        inputMap.put(f8, "clearF8");
-        actionMap.put("clearF8", clearAction);
-
-        // btnDelete
-        inputMap.put(altD, "delete");
-        actionMap.put("delete", deleteAction);
-        inputMap.put(f10, "deleteF10");
-        actionMap.put("deleteF10", deleteAction);
-
-        // btnPwdReset
-        inputMap.put(altP, "pwdReset");
-        actionMap.put("pwdReset", pwdResetAction);
-        inputMap.put(f12, "pwdResetF12");
-        actionMap.put("pwdResetF12", pwdResetAction);
-
-        // btnRefresh
-        inputMap.put(altR, "refresh");
-        actionMap.put("refresh", refreshAction);
-
-        // btnSave
-        inputMap.put(altS, "save");
-        actionMap.put("save", saveAction);
-        inputMap.put(f7, "saveF7");
-        actionMap.put("saveF7", saveAction);
-
-        // btnSearch
-        inputMap.put(altQ, "search");
-        actionMap.put("search", searchAction);
-
-        // btnUpdate
-        inputMap.put(altU, "update");
-        actionMap.put("update", updateAction);
-        inputMap.put(f9, "updateF9");
-        actionMap.put("updateF9", updateAction);
-
-        // btnPrint & btnExport
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
-        actionMap.put("print", printAction);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
-        actionMap.put("export", exportAction);
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAdd),
+                FormShortcuts.save(btnSave),
+                FormShortcuts.clear(btnClear),
+                FormShortcuts.update(btnUpdate),
+                FormShortcuts.delete(btnDelete),
+                FormShortcuts.refresh(btnRefresh),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.export(btnExport),
+                FormShortcuts.activateDeactivate(btnActDeact),
+                FormShortcuts.passwordReset(btnPwdReset),
+                FormShortcuts.signOut());
     }
 
     /**

@@ -15,6 +15,7 @@ import movements.controllers.ReturnToVendorController;
 import core.api.dao.ReturnToVendorDAO;
 import core.workers.BackgroundTask;
 import core.logging.Logger;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
 
@@ -42,6 +43,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
      */
     public ReturnToVendorForm() {
         initComponents();
+        setupKeyBindings();
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
         this.controller = new ReturnToVendorController();
@@ -1120,6 +1122,18 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
     private void cmbVendorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbVendorActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbVendorActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnadd),
+                FormShortcuts.save(btnedit),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btndelete),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearchMaterial),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

@@ -20,6 +20,7 @@ import core.logging.Logger;
 import core.security.UserSession;
 import com.google.gson.JsonObject;
 import ui.components.StatusMessageHandler;
+import ui.components.FormShortcuts;
 
 /**
  * Putaway Transfer Order Form (TR22)
@@ -43,6 +44,7 @@ public class PutawayTOForm extends javax.swing.JFrame {
      */
     public PutawayTOForm() {
         initComponents();
+        setupKeyBindings();
         initCustomLogic();
     }
 
@@ -1179,6 +1181,18 @@ public class PutawayTOForm extends javax.swing.JFrame {
 
         StatusMessageHandler.showSuccess(txtStatus, "Putaway summary cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddTo),
+                FormShortcuts.save(btnUpdate),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemove),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

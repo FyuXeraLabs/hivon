@@ -12,6 +12,7 @@ import models.dto.ScrapItemDTO;
 import models.entity.ScrapReason;
 import movements.controllers.ScrapWriteoffController;
 import ui.components.AutoSuggestTextField;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 
 import javax.swing.JOptionPane;
@@ -45,6 +46,7 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
      */
     public ScrapWriteoffForm() {
         initComponents();
+        setupKeyBindings();
         customInit();
     }
 
@@ -1146,6 +1148,18 @@ public class ScrapWriteoffForm extends javax.swing.JFrame {
     private void btnSearchMaterialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchMaterialActionPerformed
         performSearch();
     }//GEN-LAST:event_btnSearchMaterialActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btbAdd),
+                FormShortcuts.save(btnUpdateSummaryItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveSummaryItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearchMaterial),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments

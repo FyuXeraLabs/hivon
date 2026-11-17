@@ -24,16 +24,8 @@ import ui.reports.*;
 import ui.inventory.*;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-import java.awt.event.InputEvent;
 import models.entity.User;
 import ui.dialogs.SettingsForm;
 import ui.dialogs.SystemTrayPanel;
@@ -80,31 +72,7 @@ public class MainFrame extends javax.swing.JFrame {
     }
     
     private void setupKeyBindings() {
-        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = getRootPane().getActionMap();
-
-        Action altSAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnConfirm.doClick();
-            }
-        };
-
-        Action f10Action = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                btnConfirm.doClick();
-            }
-        };
-
-        KeyStroke altS = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK);
-        KeyStroke f10 = KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0);
-
-        inputMap.put(altS, "altSConfirm");
-        actionMap.put("altSConfirm", altSAction);
-
-        inputMap.put(f10, "f10Confirm");
-        actionMap.put("f10Confirm", f10Action);
+        FormShortcuts.install(getRootPane(), FormShortcuts.confirm(btnConfirm));
     }
 
     /**

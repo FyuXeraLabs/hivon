@@ -9,18 +9,12 @@ import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
 
 import masterdata.controllers.MaterialController;
 import models.dto.MaterialDTO;
 import core.workers.BackgroundTask;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 import core.logging.Logger;
 import core.utils.export.FormSummaryPdfExporter;
@@ -1038,108 +1032,17 @@ public class MaterialMasterForm extends javax.swing.JFrame {
     }
 
     private void setupKeyBindings() {
-        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = getRootPane().getActionMap();
-
-        Action addAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnAdd.isEnabled()) btnAdd.doClick();
-            }
-        };
-
-        Action saveAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnSave.isEnabled()) btnSave.doClick();
-            }
-        };
-
-        Action clearAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnClear.isEnabled()) btnClear.doClick();
-            }
-        };
-
-        Action updateAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnUpdate.isEnabled()) btnUpdate.doClick();
-            }
-        };
-
-        Action deleteAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnDelete.isEnabled()) btnDelete.doClick();
-            }
-        };
-
-        Action refreshAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnRefresh.isEnabled()) btnRefresh.doClick();
-            }
-        };
-
-        Action searchAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnSearch.isEnabled()) btnSearch.doClick();
-            }
-        };
-
-        Action printAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnPrint.isEnabled()) btnPrint.doClick();
-            }
-        };
-
-        Action exportAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (btnExport.isEnabled()) btnExport.doClick();
-            }
-        };
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK), "add");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), "addF6");
-        actionMap.put("add", addAction);
-        actionMap.put("addF6", addAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK), "save");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), "saveF7");
-        actionMap.put("save", saveAction);
-        actionMap.put("saveF7", saveAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK), "clear");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0), "clearF8");
-        actionMap.put("clear", clearAction);
-        actionMap.put("clearF8", clearAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_U, ActionEvent.ALT_MASK), "update");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0), "updateF9");
-        actionMap.put("update", updateAction);
-        actionMap.put("updateF9", updateAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.ALT_MASK), "delete");
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0), "deleteF10");
-        actionMap.put("delete", deleteAction);
-        actionMap.put("deleteF10", deleteAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK), "refresh");
-        actionMap.put("refresh", refreshAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.ALT_MASK), "search");
-        actionMap.put("search", searchAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK), "print");
-        actionMap.put("print", printAction);
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK), "export");
-        actionMap.put("export", exportAction);
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAdd),
+                FormShortcuts.save(btnSave),
+                FormShortcuts.clear(btnClear),
+                FormShortcuts.update(btnUpdate),
+                FormShortcuts.delete(btnDelete),
+                FormShortcuts.refresh(btnRefresh),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrint),
+                FormShortcuts.export(btnExport),
+                FormShortcuts.signOut());
     }
 
     // loads and populates material data into the table

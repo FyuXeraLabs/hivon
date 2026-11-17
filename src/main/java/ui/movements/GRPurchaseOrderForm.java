@@ -16,6 +16,7 @@ import core.api.dao.GRPurchaseOrderDAO;
 import core.api.dao.GRPurchaseOrderDAO.POReceiptItem;
 import movements.controllers.GRPurchaseOrderController;
 import core.workers.BackgroundTask;
+import ui.components.FormShortcuts;
 import ui.components.StatusMessageHandler;
 import ui.components.AutoSuggestTextField;
 import core.logging.Logger;
@@ -40,6 +41,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
      */
     public GRPurchaseOrderForm() {
         initComponents();
+        setupKeyBindings();
         btnUpdateSummaryItem.setEnabled(false); // Disable update button initially
         tblReceiptSummary.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         this.setLocationRelativeTo(null);
@@ -1470,6 +1472,18 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
     private void cmbQualityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbQualityActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbQualityActionPerformed
+
+    private void setupKeyBindings() {
+        FormShortcuts.install(getRootPane(),
+                FormShortcuts.add(btnAddToReceipt),
+                FormShortcuts.save(btnUpdateSummaryItem),
+                FormShortcuts.update(btnPost),
+                FormShortcuts.delete(btnRemoveSummaryItem),
+                FormShortcuts.clear(btnClearSummaryTbl),
+                FormShortcuts.search(btnSearch),
+                FormShortcuts.print(btnPrintGR),
+                FormShortcuts.signOut());
+    }
 
     /**
      * @param args the command line arguments
