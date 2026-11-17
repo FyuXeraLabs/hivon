@@ -38,23 +38,82 @@ public final class OfflineDatabaseManager {
 
     /**
      * Opens and authenticates with a SQLCipher encrypted database.
+     * If opening fails (corrupted file, wrong key, "not a database", etc.),
+     * it automatically resets and recreates a fresh database without throwing errors.
      *
      * @param dbPath Path to the SQLite database file
      * @param password Encryption key (hex encoded or escaped)
      * @return Open, authenticated JDBC Connection
-     * @throws Exception if opening or authenticating fails
+     * @throws Exception if opening or authenticating fails and recreation fails
      */
     public synchronized Connection openDatabase(Path dbPath, String password) throws Exception {
+        return openDatabase(dbPath, password, true);
+    }
+
+    /**
+     * Opens a SQLCipher database with an option to auto-recreate on failure.
+     *
+     * @param dbPath Path to the SQLite database file
+     * @param password Encryption key
+     * @param recreateOnFailure If true, deletes and recreates fresh database on corruption/key mismatch
+     * @return Open JDBC Connection
+     * @throws Exception if opening fails
+     */
+    public synchronized Connection openDatabase(Path dbPath, String password, boolean recreateOnFailure) throws Exception {
         if (activeConnection != null && !activeConnection.isClosed() && dbPath.equals(activeDbPath)) {
             return activeConnection;
         }
 
         closeDatabase();
 
+        if (password == null || password.trim().isEmpty()) {
+            Logger.log("OfflineDatabaseManager", "Password is not found or empty. Generating new secure password.");
+            password = OfflinePasswordManager.getInstance().generateSecurePassword();
+            OfflinePasswordManager.getInstance().setCurrentPassword(password);
+            deleteDatabaseFile(dbPath);
+        }
+
         if (dbPath.getParent() != null) {
             Files.createDirectories(dbPath.getParent());
         }
 
+        try {
+            return initializeConnection(dbPath, password);
+        } catch (Exception e) {
+            Logger.log("OfflineDatabaseManager", "Database open failed (" + e.getMessage() + ")");
+            closeDatabase();
+
+            if (recreateOnFailure) {
+                Logger.log("OfflineDatabaseManager", "Recreating fresh offline database at: " + dbPath);
+                deleteDatabaseFile(dbPath);
+                return initializeConnection(dbPath, password);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Attempts to open an existing encrypted database file without recreating it if it fails.
+     *
+     * @param dbPath Path to SQLite database file
+     * @param password Encryption key
+     * @return true if opened successfully, false if key invalid, corrupted, or not a database
+     */
+    public synchronized boolean tryOpenExistingDatabase(Path dbPath, String password) {
+        if (password == null || password.trim().isEmpty() || !databaseExists(dbPath)) {
+            return false;
+        }
+        try {
+            openDatabase(dbPath, password, false);
+            return true;
+        } catch (Exception e) {
+            Logger.log("OfflineDatabaseManager", "Existing database could not be opened: " + e.getMessage());
+            closeDatabase();
+            return false;
+        }
+    }
+
+    private Connection initializeConnection(Path dbPath, String password) throws Exception {
         String normalizedPath = dbPath.toAbsolutePath().toString().replace('\\', '/');
         String url = "jdbc:sqlcipher:" + normalizedPath;
 
@@ -96,6 +155,12 @@ public final class OfflineDatabaseManager {
 
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_pending_status ON "
                     + OfflineDbConfig.TABLE_PENDING_REQUESTS + "(status)");
+        } catch (Exception e) {
+            try {
+                conn.close();
+            } catch (SQLException ignored) {
+            }
+            throw e;
         }
 
         this.activeConnection = conn;
@@ -114,18 +179,34 @@ public final class OfflineDatabaseManager {
 
     /**
      * Gets the currently active connection, opening it if necessary using the in-memory password.
+     * If errors occur (missing password, corrupted file, not a database), resets with a fresh database.
      */
     public synchronized Connection getConnection() throws Exception {
         if (activeConnection != null && !activeConnection.isClosed()) {
             return activeConnection;
         }
 
-        // Auto-reopen if session and password are present in memory
+        // Auto-reopen if session is present
         core.security.UserSession session = core.security.UserSession.getInstance();
         String pwd = OfflinePasswordManager.getInstance().getCurrentPassword();
-        if (session.isValid() && session.getUserId() != null && pwd != null && !pwd.isEmpty()) {
+        if (session.isValid() && session.getUserId() != null) {
             Path dbPath = OfflineDbConfig.getDatabasePath(session.getUserId());
-            return openDatabase(dbPath, pwd);
+            if (pwd == null || pwd.trim().isEmpty()) {
+                Logger.log("OfflineDatabaseManager", "Password is not found in memory. Generating new key and resetting offline DB.");
+                pwd = OfflinePasswordManager.getInstance().generateSecurePassword();
+                OfflinePasswordManager.getInstance().setCurrentPassword(pwd);
+                deleteDatabaseFile(dbPath);
+            }
+            return openDatabase(dbPath, pwd, true);
+        }
+
+        if (activeDbPath != null) {
+            if (pwd == null || pwd.trim().isEmpty()) {
+                pwd = OfflinePasswordManager.getInstance().generateSecurePassword();
+                OfflinePasswordManager.getInstance().setCurrentPassword(pwd);
+                deleteDatabaseFile(activeDbPath);
+            }
+            return openDatabase(activeDbPath, pwd, true);
         }
 
         throw new IllegalStateException("Offline database is not opened. Call openDatabase first.");
@@ -188,8 +269,18 @@ public final class OfflineDatabaseManager {
             Files.deleteIfExists(wal);
             Files.deleteIfExists(shm);
         } catch (IOException e) {
-            Logger.errlog("Failed to delete offline database file: " + dbPath, e);
-            return false;
+            System.gc();
+            try {
+                Thread.sleep(50);
+                if (Files.exists(dbPath)) {
+                    deleted = Files.deleteIfExists(dbPath);
+                }
+                Files.deleteIfExists(Path.of(dbPath.toString() + "-wal"));
+                Files.deleteIfExists(Path.of(dbPath.toString() + "-shm"));
+            } catch (Exception ex) {
+                Logger.errlog("Failed to delete offline database file: " + dbPath, ex);
+                return false;
+            }
         }
         return deleted;
     }

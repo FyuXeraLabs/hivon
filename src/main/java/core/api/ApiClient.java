@@ -426,7 +426,8 @@ public class ApiClient {
                 }
             }
         } catch (Exception e) {
-            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("not found")) {
+            String msg = (e.getMessage() != null) ? e.getMessage().toLowerCase() : "";
+            if (msg.contains("not found") || msg.contains("404") || msg.contains("password")) {
                 return null;
             }
             throw e;

@@ -311,24 +311,38 @@ public class LoginFrame extends javax.swing.JFrame {
                 // 1. Process previous offline database if one exists
                 if (dbMgr.databaseExists(dbPath)) {
                     updateProgress("Checking for pending offline data...");
-                    String oldPassword = api.getOfflineDbKey(deviceId);
+                    String oldPassword = null;
+                    try {
+                        oldPassword = api.getOfflineDbKey(deviceId);
+                    } catch (Exception e) {
+                        core.logging.Logger.log("LoginFrame", "Could not retrieve offline DB key (resetting DB): " + e.getMessage());
+                    }
 
-                    if (oldPassword != null && !oldPassword.isEmpty()) {
+                    if (oldPassword != null && !oldPassword.trim().isEmpty()) {
                         updateProgress("Opening encrypted offline database...");
-                        dbMgr.openDatabase(dbPath, oldPassword);
-
-                        int pendingCount = OfflineQueueDAO.getInstance().getPendingCount();
-                        if (pendingCount > 0) {
-                            updateProgress("Syncing " + pendingCount + " pending offline requests...");
-                            SyncManager.getInstance().syncAll((current, total, id) -> {
-                                updateProgress("Syncing offline data (" + current + "/" + total + "): " + id);
-                            });
+                        if (dbMgr.tryOpenExistingDatabase(dbPath, oldPassword)) {
+                            try {
+                                int pendingCount = OfflineQueueDAO.getInstance().getPendingCount();
+                                if (pendingCount > 0) {
+                                    updateProgress("Syncing " + pendingCount + " pending offline requests...");
+                                    SyncManager.getInstance().syncAll((current, total, id) -> {
+                                        updateProgress("Syncing offline data (" + current + "/" + total + "): " + id);
+                                    });
+                                }
+                            } catch (Exception e) {
+                                core.logging.Logger.log("LoginFrame", "Failed to sync pending offline requests (continuing): " + e.getMessage());
+                            } finally {
+                                dbMgr.closeDatabase();
+                                dbMgr.deleteDatabaseFile(dbPath);
+                            }
+                        } else {
+                            // Password invalid, corrupt, or not a database -> delete offline db
+                            core.logging.Logger.log("LoginFrame", "Existing offline DB could not be opened. Deleting offline DB.");
+                            dbMgr.deleteDatabaseFile(dbPath);
                         }
-
-                        dbMgr.closeDatabase();
-                        dbMgr.deleteDatabaseFile(dbPath);
                     } else {
-                        // Key missing or previously rotated out
+                        // Key missing or not found on server -> delete offline db
+                        core.logging.Logger.log("LoginFrame", "Offline DB key not found on server. Deleting offline DB.");
                         dbMgr.deleteDatabaseFile(dbPath);
                     }
                 }
@@ -337,10 +351,20 @@ public class LoginFrame extends javax.swing.JFrame {
                 updateProgress("Configuring secure offline database...");
                 OfflinePasswordManager pwdMgr = OfflinePasswordManager.getInstance();
                 String newPassword = pwdMgr.generateSecurePassword();
-                api.saveOfflineDbKey(deviceId, newPassword);
+                try {
+                    api.saveOfflineDbKey(deviceId, newPassword);
+                } catch (Exception e) {
+                    core.logging.Logger.log("LoginFrame", "Failed to save offline DB key to server (continuing): " + e.getMessage());
+                }
                 pwdMgr.setCurrentPassword(newPassword);
 
-                dbMgr.openDatabase(dbPath, newPassword);
+                try {
+                    dbMgr.openDatabase(dbPath, newPassword);
+                } catch (Exception e) {
+                    core.logging.Logger.log("LoginFrame", "Could not initialize offline database: " + e.getMessage() + ". Recreating fresh database.");
+                    dbMgr.deleteDatabaseFile(dbPath);
+                    dbMgr.openDatabase(dbPath, newPassword, true);
+                }
 
                 return true;
             }
