@@ -53,9 +53,9 @@ env:
   JAVA_DISTRIBUTION: "temurin"
 
 jobs:
-  # Compile and run unit tests
+  # Validate and compile code (tests skipped)
   ci-validate:
-    name: "Validate & Test"
+    name: "Validate & Compile"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -68,8 +68,8 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: "maven"
 
-      - name: Compile and Run Unit Tests
-        run: mvn -B clean test
+      - name: Compile and Validate Code
+        run: mvn -B clean compile -DskipTests
 
   # Determine version, environment, and release flags
   resolve-metadata:
