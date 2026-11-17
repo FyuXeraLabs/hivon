@@ -110,12 +110,12 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 cmbReceivingBin.removeAllItems();
-                cmbReceivingBin.addItem("-- Select Bin --");
                 if (bins != null) {
                     for (StorageBinDTO bin : bins) {
                         cmbReceivingBin.addItem(bin);
                     }
                 }
+                cmbReceivingBin.setSelectedItem(null);
             }
 
             @Override
@@ -302,11 +302,11 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             if (remaining > 0) {
                 boolean isBatch = item.getIsBatchManaged() != null && item.getIsBatchManaged();
                 if (!isBatch) {
-                    cmbBatch.setSelectedIndex(0);
+                    cmbBatch.setSelectedItem("");
                     txtExpiryDate.setText("");
                 }
             } else {
-                cmbBatch.setSelectedIndex(0);
+                cmbBatch.setSelectedItem("");
                 txtExpiryDate.setText("");
             }
         } else {
@@ -317,7 +317,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             
             updateInputsEnabledState(false, null);
             btnAddToReceipt.setEnabled(false);
-            cmbBatch.setSelectedIndex(0);
+            cmbBatch.setSelectedItem("");
             txtExpiryDate.setText("");
         }
     }
@@ -389,7 +389,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                                 cmbBatch.setSelectedItem(batchVal);
                                 txtExpiryDate.setText(item.getExpiryDate() != null ? item.getExpiryDate() : "");
                             } else {
-                                cmbBatch.setSelectedIndex(0);
+                                cmbBatch.setSelectedItem("");
                                 txtExpiryDate.setText("");
                             }
                             
@@ -406,7 +406,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                             }
                             
                             // Set receiving bin
-                            for (int i = 1; i < cmbReceivingBin.getItemCount(); i++) {
+                            for (int i = 0; i < cmbReceivingBin.getItemCount(); i++) {
                                 Object o = cmbReceivingBin.getItemAt(i);
                                 if (o instanceof StorageBinDTO) {
                                     StorageBinDTO b = (StorageBinDTO) o;
@@ -436,10 +436,10 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
                         updateSpinnerColor();
                         cmbBatch.setEnabled(false);
                         txtExpiryDate.setEnabled(false);
-                        cmbBatch.setSelectedIndex(0);
+                        cmbBatch.setSelectedItem("");
                         txtExpiryDate.setText("");
                         cmbQuality.setSelectedIndex(0);
-                        cmbReceivingBin.setSelectedIndex(0);
+                        cmbReceivingBin.setSelectedItem(null);
                         txtRemarks.setText("");
                         updateInputsEnabledState(false, null);
                     }
@@ -532,7 +532,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
             
             // Find bin code
             String binCodeStr = "Unknown Bin";
-            for (int i = 1; i < cmbReceivingBin.getItemCount(); i++) {
+            for (int i = 0; i < cmbReceivingBin.getItemCount(); i++) {
                 Object o = cmbReceivingBin.getItemAt(i);
                 if (o instanceof StorageBinDTO) {
                     StorageBinDTO b = (StorageBinDTO) o;
@@ -887,7 +887,6 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         lblBatchNumber.setText("Batch Number");
 
-        cmbBatch.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Batch --" }));
         cmbBatch.setNextFocusableComponent(txtExpiryDate);
 
         lblExpiryDate.setText("Expiry Date");
@@ -1144,7 +1143,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
         
         // Read bin selection
-        if (cmbReceivingBin.getSelectedIndex() <= 0) {
+        if (cmbReceivingBin.getSelectedIndex() < 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select a destination receiving bin.");
             return;
         }
@@ -1155,7 +1154,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         String expiry = "";
         if (poItem.getIsBatchManaged() != null && poItem.getIsBatchManaged()) {
             Object batchObj = cmbBatch.getSelectedItem();
-            if (batchObj == null || batchObj.toString().trim().isEmpty() || batchObj.toString().equals("-- Select Batch --")) {
+            if (batchObj == null || batchObj.toString().trim().isEmpty()) {
                 StatusMessageHandler.showWarning(txtStatus, "Batch number is required for batch-managed material.");
                 return;
             }
@@ -1196,7 +1195,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         
         // Reset inputs
         spinReceivedQty.setValue(0.0);
-        cmbBatch.setSelectedIndex(0);
+        cmbBatch.setSelectedItem("");
         txtExpiryDate.setText("");
         txtRemarks.setText("");
         
@@ -1348,7 +1347,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         }
         
         // Read bin selection
-        if (cmbReceivingBin.getSelectedIndex() <= 0) {
+        if (cmbReceivingBin.getSelectedIndex() < 0) {
             StatusMessageHandler.showWarning(txtStatus, "Please select a destination receiving bin.");
             return;
         }
@@ -1359,7 +1358,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         String expiry = "";
         if (poItem.getIsBatchManaged() != null && poItem.getIsBatchManaged()) {
             Object batchObj = cmbBatch.getSelectedItem();
-            if (batchObj == null || batchObj.toString().trim().isEmpty() || batchObj.toString().equals("-- Select Batch --")) {
+            if (batchObj == null || batchObj.toString().trim().isEmpty()) {
                 StatusMessageHandler.showWarning(txtStatus, "Batch number is required for batch-managed material.");
                 return;
             }
@@ -1399,7 +1398,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         
         // Reset inputs
         spinReceivedQty.setValue(0.0);
-        cmbBatch.setSelectedIndex(0);
+        cmbBatch.setSelectedItem("");
         txtExpiryDate.setText("");
         txtRemarks.setText("");
         
