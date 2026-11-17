@@ -778,6 +778,15 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
             return;
         }
 
+        // Prevent duplicate materials in adjustment summary table
+        for (AdjustmentItemDTO pending : pendingAdjustments) {
+            if ((currentSelectedMaterial.getMaterialId() != null && currentSelectedMaterial.getMaterialId().equals(pending.getMaterialId()))
+                    || (currentSelectedMaterial.getMaterialCode() != null && currentSelectedMaterial.getMaterialCode().equalsIgnoreCase(pending.getMaterialCode()))) {
+                StatusMessageHandler.showWarning(txtStatus, "Material '" + currentSelectedMaterial.getMaterialCode() + "' is already in the adjustment list. Update or remove it instead.");
+                return;
+            }
+        }
+
         String countedText = txtCountedQty.getText().trim();
         if (countedText.isEmpty()) {
             StatusMessageHandler.showWarning(txtStatus, "Please enter a counted quantity.");
@@ -820,8 +829,12 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         }
 
         String binCode = txtSourceBin.getText().trim();
-        if (binCode.isEmpty() && currentSelectedMaterial.getPrimaryBinCode() != null) {
+        Integer binId = null;
+        if (binCode.isEmpty()) {
             binCode = currentSelectedMaterial.getPrimaryBinCode();
+            binId = currentSelectedMaterial.getPrimaryBinId();
+        } else if (currentSelectedMaterial.getPrimaryBinCode() != null && binCode.equalsIgnoreCase(currentSelectedMaterial.getPrimaryBinCode())) {
+            binId = currentSelectedMaterial.getPrimaryBinId();
         }
 
         AdjustmentItemDTO item = new AdjustmentItemDTO();
@@ -830,7 +843,8 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         item.setMaterialName(currentSelectedMaterial.getMaterialDescription());
         item.setBaseUom(currentSelectedMaterial.getBaseUom());
         item.setBinCode(binCode);
-        item.setBinId(currentSelectedMaterial.getPrimaryBinId());
+        item.setBinId(binId);
+        item.setBatchId(currentSelectedMaterial.getBatchId());
         item.setSystemQty(sysQty);
         item.setCountedQty(countedQty);
         item.setVarianceQty(variance);
@@ -855,10 +869,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnaddActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to clear the form and pending adjustments?", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            clearAllForm();
-        }
+        this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnPostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPostActionPerformed
@@ -1100,11 +1111,17 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         }
 
         String binCode = txtSourceBin.getText().trim();
-        if (binCode.isEmpty() && item.getBinCode() != null) {
+        Integer binId = item.getBinId();
+        if (!binCode.isEmpty()) {
+            if (item.getBinCode() == null || !binCode.equalsIgnoreCase(item.getBinCode())) {
+                binId = null; // reset so backend resolves by binCode
+            }
+        } else {
             binCode = item.getBinCode();
         }
 
         item.setBinCode(binCode);
+        item.setBinId(binId);
         item.setCountedQty(countedQty);
         item.setVarianceQty(variance);
         item.setVariancePercent(sysQty != 0 ? (variance / sysQty) * 100.0 : 0.0);

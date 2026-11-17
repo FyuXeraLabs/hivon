@@ -130,6 +130,12 @@ public class InventoryAdjustmentDAO {
                 if (obj.has("primary_bin_id") && !obj.get("primary_bin_id").isJsonNull()) {
                     dto.setPrimaryBinId(obj.get("primary_bin_id").getAsInt());
                 }
+                if (obj.has("batch_id") && !obj.get("batch_id").isJsonNull()) {
+                    dto.setBatchId(obj.get("batch_id").getAsInt());
+                }
+                if (obj.has("batch_number") && !obj.get("batch_number").isJsonNull()) {
+                    dto.setBatchNumber(obj.get("batch_number").getAsString());
+                }
                 list.add(dto);
             }
         }
