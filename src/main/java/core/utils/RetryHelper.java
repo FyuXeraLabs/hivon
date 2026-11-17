@@ -12,6 +12,12 @@ public class RetryHelper {
 
     private static final ThreadLocal<Boolean> SILENT_MODE = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
+    private static final class RetryResult<T> {
+        volatile boolean succeeded;
+        volatile Exception error;
+        volatile T value;
+    }
+
     /**
      * Enables or disables silent execution on the current thread.
      * When silent, executeWithRetry executes operations directly without opening ProgressDialog.
@@ -50,68 +56,158 @@ public class RetryHelper {
      */
     public static <T> T executeWithRetry(java.awt.Component parent, String taskName,
             Callable<T> operation, String errorMessage) throws Exception {
-        // A headless JVM or a silent background operation (such as AutoSuggest)
-        // runs the operation directly instead of showing a modal ProgressDialog.
-        if (java.awt.GraphicsEnvironment.isHeadless() || isSilent()) {
+        // If headless, silent (e.g. AutoSuggest), or already running on a background worker
+        // thread (non-EDT), execute directly without spawning a nested or non-EDT modal ProgressDialog.
+        if (java.awt.GraphicsEnvironment.isHeadless() || isSilent() || !javax.swing.SwingUtilities.isEventDispatchThread()) {
             return operation.call();
         }
 
-        final Object[] result = new Object[1];
-        final Exception[] error = new Exception[1];
-        final boolean[] succeeded = new boolean[1];
+        RetryResult<T> result = new RetryResult<>();
 
-        core.workers.BackgroundTask task = createRetryTask(parent, taskName, operation, errorMessage, result, error, succeeded);
+        core.workers.BackgroundTask task = createRetryTask(parent, taskName, operation, errorMessage, result);
         task.executeWithRetry();
 
-        if (succeeded[0]) {
-            @SuppressWarnings("unchecked")
-            T typedResult = (T) result[0];
-            return typedResult;
-        } else if (error[0] != null) {
-            throw error[0];
+        if (result.succeeded) {
+            return result.value;
+        } else if (result.error != null) {
+            throw result.error;
         } else {
             throw new Exception("Operation cancelled");
         }
     }
 
     /**
-     * Legacy overload â€” executes with retry using a frameless progress dialog.
+     * Legacy overload — executes with retry using a frameless progress dialog.
      * Prefer the overload with parent component.
      */
     public static <T> T executeWithRetry(Callable<T> operation, String errorMessage) throws Exception {
         return executeWithRetry(null, errorMessage, operation, errorMessage);
     }
 
+    /**
+     * Formats an error phrase (e.g. "failed to fetch receiving bins")
+     * into a clean title (e.g. "Fetch receiving bins").
+     */
+    public static String formatTaskTitle(String msg) {
+        if (msg == null || msg.trim().isEmpty()) {
+            return "Please wait";
+        }
+        String s = msg.trim();
+        String lower = s.toLowerCase();
+        if (lower.startsWith("failed to ")) {
+            s = s.substring(10).trim();
+        } else if (lower.startsWith("failed ")) {
+            s = s.substring(7).trim();
+        } else if (lower.startsWith("error ")) {
+            s = s.substring(6).trim();
+        }
+        if (!s.isEmpty()) {
+            s = Character.toUpperCase(s.charAt(0)) + s.substring(1);
+        }
+        return s;
+    }
+
+    /**
+     * Formats an error phrase (e.g. "failed to fetch receiving bins")
+     * into a positive in-progress message (e.g. "Fetching receiving bins...").
+     */
+    public static String formatProgressMessage(String msg) {
+        if (msg == null || msg.trim().isEmpty()) {
+            return "Processing...";
+        }
+        String s = msg.trim();
+        String lower = s.toLowerCase();
+        if (lower.startsWith("failed to ")) {
+            s = s.substring(10).trim();
+        } else if (lower.startsWith("failed ")) {
+            s = s.substring(7).trim();
+        } else if (lower.startsWith("error ")) {
+            s = s.substring(6).trim();
+        }
+
+        s = convertToPresentParticiple(s);
+
+        if (!s.isEmpty()) {
+            s = Character.toUpperCase(s.charAt(0)) + s.substring(1);
+        }
+        if (!s.endsWith("...")) {
+            s += "...";
+        }
+        return s;
+    }
+
+    private static String convertToPresentParticiple(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        String[] parts = text.split("\\s+", 2);
+        String verb = parts[0].toLowerCase();
+        String rest = parts.length > 1 ? " " + parts[1] : "";
+
+        String participle;
+        switch (verb) {
+            case "fetch": participle = "Fetching"; break;
+            case "load": participle = "Loading"; break;
+            case "search": participle = "Searching"; break;
+            case "process": participle = "Processing"; break;
+            case "complete": participle = "Completing"; break;
+            case "create": participle = "Creating"; break;
+            case "update": participle = "Updating"; break;
+            case "delete": participle = "Deleting"; break;
+            case "save": participle = "Saving"; break;
+            case "post": participle = "Posting"; break;
+            case "get": participle = "Getting"; break;
+            case "submit": participle = "Submitting"; break;
+            case "start": participle = "Starting"; break;
+            case "suggest": participle = "Suggesting"; break;
+            default:
+                if (verb.endsWith("e") && !verb.endsWith("ee")) {
+                    participle = verb.substring(0, verb.length() - 1) + "ing";
+                } else if (!verb.endsWith("ing")) {
+                    participle = verb + "ing";
+                } else {
+                    participle = verb;
+                }
+                participle = Character.toUpperCase(participle.charAt(0)) + participle.substring(1);
+                break;
+        }
+        return participle + rest;
+    }
+
     private static <T> core.workers.BackgroundTask createRetryTask(
             java.awt.Component parent, String taskName,
             Callable<T> operation, String errorMessage,
-            Object[] result, Exception[] error, boolean[] succeeded) {
-        return new core.workers.BackgroundTask((java.awt.Component) parent, taskName) {
+            RetryResult<T> result) {
+        String cleanTitle = formatTaskTitle(taskName);
+        String cleanProgress = formatProgressMessage(taskName);
+
+        return new core.workers.BackgroundTask((java.awt.Component) parent, cleanTitle) {
             @Override
             protected Boolean performTask() throws Exception {
-                updateProgress(errorMessage + "...");
-                result[0] = operation.call();
+                updateProgress(cleanProgress);
+                T value = operation.call();
+                result.value = value;
+                result.succeeded = true;
                 return true;
             }
 
             @Override
             protected void onSuccess() {
-                succeeded[0] = true;
             }
 
             @Override
             protected void onFailure(Exception e) {
-                // handled by retry/cancel on progress dialog
+                result.error = e;
             }
 
             @Override
             protected void onCancel() {
-                error[0] = new Exception("Operation cancelled by user");
+                result.error = new Exception("Operation cancelled by user");
             }
 
             @Override
             protected core.workers.BackgroundTask createRetryTask() {
-                return RetryHelper.createRetryTask(parent, taskName, operation, errorMessage, result, error, succeeded);
+                return RetryHelper.createRetryTask(parent, taskName, operation, errorMessage, result);
             }
         };
     }
