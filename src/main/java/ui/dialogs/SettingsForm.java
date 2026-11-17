@@ -271,6 +271,9 @@ public class SettingsForm extends javax.swing.JFrame {
             try {
                 javax.swing.UIManager.setLookAndFeel(themeClass);
                 com.formdev.flatlaf.FlatLaf.updateUI();
+                // the new theme reinstalls its own defaults, so the header
+                // colours have to be put back
+                ui.components.TableHeaderStyler.applyGlobally();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(
                     this,
@@ -321,6 +324,9 @@ public class SettingsForm extends javax.swing.JFrame {
         try {
             javax.swing.UIManager.setLookAndFeel(currentTheme);
             com.formdev.flatlaf.FlatLaf.updateUI();
+            // the new theme reinstalls its own defaults, so the header
+            // colours have to be put back
+            ui.components.TableHeaderStyler.applyGlobally();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                 this,

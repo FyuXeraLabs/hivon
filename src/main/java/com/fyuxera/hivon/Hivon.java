@@ -54,6 +54,9 @@ public class Hivon {
         // Initialize system tray
         core.workers.SystemTray.init();
 
+        // colour the column headers of every table in the application
+        ui.components.TableHeaderStyler.applyGlobally();
+
         /*
         // Check internet connection with retry support
         while (!internetCheckPassed) {
