@@ -6,9 +6,15 @@ package ui;
 
 import core.security.*;
 import core.logging.Logger;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Image;
 import javax.swing.ImageIcon;
+import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 import java.util.Map;
 
 import ui.components.*;
@@ -67,6 +73,7 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         setupKeyBindings();
+        setupMovementTree();
 
         // hide What's New content by default (accordion collapsed)
         pnlWhatsNewContent.setVisible(false);
@@ -680,6 +687,137 @@ public class MainFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // movement permission mapping
+    private static final Map<String, String> MOVEMENT_TO_PERMISSION = Map.ofEntries(
+            Map.entry("md31", "VIEW_MATERIALS"),
+            Map.entry("md32", "VIEW_MATERIALS"),
+            Map.entry("md33", "VIEW_BINS"),
+            Map.entry("md34", "VIEW_ZONES"),
+            Map.entry("md35", "VIEW_VENDORS"),
+            Map.entry("md36", "VIEW_CUSTOMERS"),
+            Map.entry("md37", "VIEW_MATERIALS"),
+            Map.entry("md38", "VIEW_USERS"),
+            Map.entry("in11", "PROCESS_GR"),
+            Map.entry("in12", "PROCESS_GR_RETURNS"),
+            Map.entry("in13", "PROCESS_TRANSFER_IN"),
+            Map.entry("out14", "PROCESS_GI"),
+            Map.entry("out15", "PROCESS_GI"),
+            Map.entry("out16", "PROCESS_GI_CONSUMPTION"),
+            Map.entry("int17", "PROCESS_TRANSFER"),
+            Map.entry("int18", "PROCESS_SPLITTING"),
+            Map.entry("int19", "PROCESS_CYCLE_COUNT"),
+            Map.entry("adj20", "PROCESS_ADJUSTMENT"),
+            Map.entry("adj21", "PROCESS_SCRAP"),
+            Map.entry("tr22", "PROCESS_PUTAWAY"),
+            Map.entry("tr23", "PROCESS_PICKING"),
+            Map.entry("tr24", "PROCESS_REPLENISHMENT"),
+            Map.entry("inv51", "QUERY_INVENTORY"),
+            Map.entry("inv52", "VIEW_STOCK_OVERVIEW"),
+            Map.entry("inv53", "VIEW_BATCH_TRACKING"),
+            Map.entry("inv54", "VIEW_STOCK_LEVEL"),
+            Map.entry("inv55", "VIEW_EXPIRY_MONITOR"),
+            Map.entry("inv56", "VIEW_INVENTORY_ALERTS"),
+            Map.entry("rep61", "VIEW_DAILY_ACTIVITY_REPORT"),
+            Map.entry("rep62", "VIEW_INVENTORY_VALUATION_REPORT"),
+            Map.entry("rep63", "VIEW_STOCK_AGING_REPORT"),
+            Map.entry("rep64", "VIEW_PERFORMANCE_REPORT"),
+            Map.entry("rep65", "VIEW_UTILIZATION_REPORT"),
+            Map.entry("rep66", "VIEW_FINANCIAL_REPORT"),
+            Map.entry("rep67", "VIEW_MATERIALS")
+    );
+
+    private String getRequiredPermissionForMovement(String value) {
+        if (value == null) {
+            return null;
+        }
+        String code = value.trim().toLowerCase();
+        for (Map.Entry<String, String> entry : MOVEMENT_TO_PERMISSION.entrySet()) {
+            if (code.contains(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private boolean isMovementPermitted(String value) {
+        if (userSession == null || !userSession.isValid()) {
+            return false;
+        }
+        if (userSession.getUserRole() == User.UserRole.ADMIN) {
+            return true;
+        }
+        String requiredPermission = getRequiredPermissionForMovement(value);
+        if (requiredPermission == null) {
+            return true;
+        }
+        return userSession.hasPermission(requiredPermission);
+    }
+
+    private void setupMovementTree() {
+        ToolTipManager.sharedInstance().registerComponent(treeMovement);
+        treeMovement.setCellRenderer(new MovementTreeCellRenderer());
+
+        // Deselect disabled leaf node when clicked and show feedback
+        treeMovement.addTreeSelectionListener(e -> {
+            TreePath path = treeMovement.getSelectionPath();
+            if (path != null) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                if (node != null && node.isLeaf()) {
+                    String value = node.getUserObject() != null ? node.getUserObject().toString() : "";
+                    if (!isMovementPermitted(value)) {
+                        treeMovement.clearSelection();
+                        String perm = getRequiredPermissionForMovement(value);
+                        StatusMessageHandler.showWarning(txtStatus, "Access Denied: Requires " + (perm != null ? perm : "permission") + " to open " + value);
+                    }
+                }
+            }
+        });
+    }
+
+    private class MovementTreeCellRenderer extends DefaultTreeCellRenderer {
+        private final Color disabledForeground = new Color(160, 160, 160);
+        private Color defaultForeground;
+
+        @Override
+        public Component getTreeCellRendererComponent(
+                JTree tree, Object value, boolean sel, boolean expanded,
+                boolean leaf, int row, boolean hasFocus) {
+
+            Component c = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+            if (defaultForeground == null) {
+                defaultForeground = getTextNonSelectionColor();
+            }
+
+            if (leaf && value instanceof DefaultMutableTreeNode) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+                Object userObj = node.getUserObject();
+                if (userObj != null) {
+                    String nodeText = userObj.toString();
+                    boolean permitted = isMovementPermitted(nodeText);
+
+                    if (!permitted) {
+                        setEnabled(false);
+                        setForeground(disabledForeground);
+                        String reqPerm = getRequiredPermissionForMovement(nodeText);
+                        setToolTipText("Access Denied - Permission required: " + (reqPerm != null ? reqPerm : "Unknown"));
+                    } else {
+                        setEnabled(true);
+                        if (!sel) {
+                            setForeground(defaultForeground);
+                        }
+                        setToolTipText(null);
+                    }
+                }
+            } else {
+                setEnabled(true);
+                setToolTipText(null);
+            }
+
+            return c;
+        }
+    }
+
     private void handleMovementSelection(String value) {
 
         if (!userSession.isValid()) {
@@ -687,45 +825,6 @@ public class MainFrame extends javax.swing.JFrame {
             // JOptionPane.showMessageDialog(this, "Session expired. Please login again.", "Session Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // movement permission mapping
-        Map<String, String> movementToPermission = Map.ofEntries(
-                Map.entry("md31", "VIEW_MATERIALS"),
-                Map.entry("md32", "VIEW_MATERIALS"),
-                Map.entry("md33", "VIEW_BINS"),
-                Map.entry("md34", "VIEW_ZONES"),
-                Map.entry("md35", "VIEW_VENDORS"),
-                Map.entry("md36", "VIEW_CUSTOMERS"),
-                Map.entry("md37", "VIEW_MATERIALS"),
-                Map.entry("md38", "VIEW_USERS"),
-                Map.entry("in11", "PROCESS_GR"),
-                Map.entry("in12", "PROCESS_TRANSFER_IN"),
-                Map.entry("in13", "PROCESS_GR_RETURNS"),
-                Map.entry("out14", "PROCESS_GI"),
-                Map.entry("out15", "PROCESS_GI"),
-                Map.entry("out16", "PROCESS_GI_CONSUMPTION"),
-                Map.entry("int17", "PROCESS_TRANSFER"),
-                Map.entry("int18", "PROCESS_SPLITTING"),
-                Map.entry("int19", "PROCESS_CYCLE_COUNT"),
-                Map.entry("adj20", "PROCESS_ADJUSTMENT"),
-                Map.entry("adj21", "PROCESS_SCRAP"),
-                Map.entry("tr22", "PROCESS_PUTAWAY"),
-                Map.entry("tr23", "PROCESS_PICKING"),
-                Map.entry("tr24", "PROCESS_REPLENISHMENT"),
-                Map.entry("inv51", "QUERY_INVENTORY"),
-                Map.entry("inv52", "VIEW_STOCK_OVERVIEW"),
-                Map.entry("inv53", "VIEW_BATCH_TRACKING"),
-                Map.entry("inv54", "VIEW_STOCK_LEVEL"),
-                Map.entry("inv55", "VIEW_EXPIRY_MONITOR"),
-                Map.entry("inv56", "VIEW_INVENTORY_ALERTS"),
-                Map.entry("rep61", "VIEW_DAILY_ACTIVITY_REPORT"),
-                Map.entry("rep62", "VIEW_INVENTORY_VALUATION_REPORT"),
-                Map.entry("rep63", "VIEW_STOCK_AGING_REPORT"),
-                Map.entry("rep64", "VIEW_PERFORMANCE_REPORT"),
-                Map.entry("rep65", "VIEW_UTILIZATION_REPORT"),
-                Map.entry("rep66", "VIEW_FINANCIAL_REPORT"),
-                Map.entry("rep67", "VIEW_MATERIALS")
-        );
 
         // movement form mapping
         Map<String, Runnable> forms;
@@ -776,9 +875,7 @@ public class MainFrame extends javax.swing.JFrame {
         for (String key : forms.keySet()) {
             if (code.contains(key)) {
 
-                String requiredPermission = movementToPermission.get(key);
-
-                if (requiredPermission != null && !userSession.hasPermission(requiredPermission)) {
+                if (!isMovementPermitted(key)) {
                     StatusMessageHandler.showWarning(txtStatus, "You do not have permission to access this feature!");
                     // JOptionPane.showMessageDialog(this, "You do not have permission to access this feature.", "Access Denied", JOptionPane.WARNING_MESSAGE);
                     return;
@@ -812,6 +909,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             if (node.isLeaf()) {
                 String value = node.getUserObject().toString();
+                if (!isMovementPermitted(value)) {
+                    String perm = getRequiredPermissionForMovement(value);
+                    StatusMessageHandler.showWarning(txtStatus, "Access Denied: Requires " + (perm != null ? perm : "permission") + " to open " + value);
+                    return;
+                }
                 handleMovementSelection(value);
             }
 
