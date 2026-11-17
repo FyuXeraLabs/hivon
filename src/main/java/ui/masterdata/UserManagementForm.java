@@ -721,6 +721,9 @@ public class UserManagementForm extends javax.swing.JFrame {
 
         txtSearch.setNextFocusableComponent(btnSearch);
 
+        btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setMnemonic('S');
         btnSearch.setText("  Search");
@@ -731,6 +734,7 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnRefresh.setBackground(new java.awt.Color(204, 204, 204));
         btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/sinchronize-14.png"))); // NOI18N
         btnRefresh.setMnemonic('R');
         btnRefresh.setNextFocusableComponent(txtUsername);
@@ -809,6 +813,9 @@ public class UserManagementForm extends javax.swing.JFrame {
             tblUsers.getColumnModel().getColumn(5).setPreferredWidth(20);
         }
 
+        btnAdd.setBackground(new java.awt.Color(0, 184, 148));
+        btnAdd.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnAdd.setForeground(new java.awt.Color(255, 255, 255));
         btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-user-2-14.png"))); // NOI18N
         btnAdd.setText("Add User");
         btnAdd.setNextFocusableComponent(btnSave);
@@ -818,6 +825,8 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdate.setBackground(new java.awt.Color(204, 204, 204));
+        btnUpdate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-user-14.png"))); // NOI18N
         btnUpdate.setText("  Update");
         btnUpdate.setNextFocusableComponent(btnDelete);
@@ -827,6 +836,9 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnDelete.setBackground(new java.awt.Color(214, 48, 49));
+        btnDelete.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnDelete.setForeground(new java.awt.Color(255, 255, 255));
         btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/remove-user-14.png"))); // NOI18N
         btnDelete.setText("  Delete");
         btnDelete.setNextFocusableComponent(btnActDeact);
@@ -836,6 +848,9 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnActDeact.setBackground(new java.awt.Color(0, 184, 148));
+        btnActDeact.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnActDeact.setForeground(new java.awt.Color(255, 255, 255));
         btnActDeact.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/unlock-14.png"))); // NOI18N
         btnActDeact.setText("  Activate");
         btnActDeact.setNextFocusableComponent(btnPwdReset);
@@ -845,6 +860,9 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnPwdReset.setBackground(new java.awt.Color(41, 128, 232));
+        btnPwdReset.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnPwdReset.setForeground(new java.awt.Color(255, 255, 255));
         btnPwdReset.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/refresh-2-14.png"))); // NOI18N
         btnPwdReset.setText("  Reset Password");
         btnPwdReset.addActionListener(new java.awt.event.ActionListener() {
@@ -853,6 +871,8 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnClear.setBackground(new java.awt.Color(204, 204, 204));
+        btnClear.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("  Clear");
         btnClear.setNextFocusableComponent(btnUpdate);
@@ -862,6 +882,9 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnSave.setBackground(new java.awt.Color(120, 111, 166));
+        btnSave.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/save-14.png"))); // NOI18N
         btnSave.setText("  Save");
         btnSave.setNextFocusableComponent(btnClear);
@@ -884,13 +907,16 @@ public class UserManagementForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
         );
 
+        btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
         btnPrint.addActionListener(new java.awt.event.ActionListener() {
@@ -899,6 +925,9 @@ public class UserManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnExport.setBackground(new java.awt.Color(0, 184, 148));
+        btnExport.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
@@ -930,8 +959,8 @@ public class UserManagementForm extends javax.swing.JFrame {
                 .addComponent(btnExport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrint)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -939,17 +968,18 @@ public class UserManagementForm extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnAdd)
-                        .addComponent(btnUpdate)
-                        .addComponent(btnDelete)
-                        .addComponent(btnActDeact)
-                        .addComponent(btnPwdReset)
-                        .addComponent(btnClear)
-                        .addComponent(btnSave)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnExport)
-                            .addComponent(btnPrint)))
+                            .addComponent(btnPrint))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnAdd)
+                            .addComponent(btnUpdate)
+                            .addComponent(btnDelete)
+                            .addComponent(btnActDeact)
+                            .addComponent(btnPwdReset)
+                            .addComponent(btnClear)
+                            .addComponent(btnSave)))
                     .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -1006,7 +1036,7 @@ public class UserManagementForm extends javax.swing.JFrame {
                                 .addComponent(chkIsActive))
                             .addComponent(txtFullName)
                             .addComponent(txtEmail))))
-                .addContainerGap(771, Short.MAX_VALUE))
+                .addContainerGap(960, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1078,11 +1108,11 @@ public class UserManagementForm extends javax.swing.JFrame {
                             .addComponent(btnAddPermission)
                             .addComponent(btnRemovePermission)
                             .addComponent(btnAssignDefault))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 168, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 263, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(384, Short.MAX_VALUE))
+                .addContainerGap(478, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

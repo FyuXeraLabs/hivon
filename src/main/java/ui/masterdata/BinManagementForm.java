@@ -164,10 +164,9 @@ public class BinManagementForm extends javax.swing.JFrame {
         btnViewStock = new javax.swing.JButton();
         btnPrintLabel = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
-        jPanel5 = new javax.swing.JPanel();
-        txtStatus = new javax.swing.JLabel();
         btnPrint = new javax.swing.JButton();
         btnExport = new javax.swing.JButton();
+        txtStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Bin Management");
@@ -338,6 +337,9 @@ public class BinManagementForm extends javax.swing.JFrame {
         lblBulkPreview.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblBulkPreview.setText("Preview: 0 bins to create");
 
+        btnGenerate.setBackground(new java.awt.Color(0, 184, 148));
+        btnGenerate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnGenerate.setForeground(new java.awt.Color(255, 255, 255));
         btnGenerate.setText("Generate Bins");
         btnGenerate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -363,11 +365,11 @@ public class BinManagementForm extends javax.swing.JFrame {
                                 .addComponent(jLabelBulkLevels))
                             .addGap(30, 30, 30)
                             .addGroup(jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(spinBulkAisles, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                                .addComponent(spinBulkRacks, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                                .addComponent(spinBulkLevels, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                                .addComponent(cmbBulkZone, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
-                .addContainerGap(122, Short.MAX_VALUE))
+                                .addComponent(spinBulkAisles)
+                                .addComponent(spinBulkRacks)
+                                .addComponent(spinBulkLevels)
+                                .addComponent(cmbBulkZone, 0, 220, Short.MAX_VALUE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelBulkLayout.setVerticalGroup(
             jPanelBulkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -395,6 +397,9 @@ public class BinManagementForm extends javax.swing.JFrame {
                 .addContainerGap(34, Short.MAX_VALUE))
         );
 
+        btnAdd.setBackground(new java.awt.Color(0, 184, 148));
+        btnAdd.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnAdd.setForeground(new java.awt.Color(255, 255, 255));
         btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAdd.setText("Add Bin");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -403,6 +408,8 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnUpdate.setBackground(new java.awt.Color(204, 204, 204));
+        btnUpdate.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnUpdate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/edit-14.png"))); // NOI18N
         btnUpdate.setText("Update Bin");
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
@@ -411,6 +418,9 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnDelete.setBackground(new java.awt.Color(214, 48, 49));
+        btnDelete.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnDelete.setForeground(new java.awt.Color(255, 255, 255));
         btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/delete-14.png"))); // NOI18N
         btnDelete.setText("Delete Bin");
         btnDelete.addActionListener(new java.awt.event.ActionListener() {
@@ -419,6 +429,9 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnViewStock.setBackground(new java.awt.Color(120, 111, 166));
+        btnViewStock.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnViewStock.setForeground(new java.awt.Color(255, 255, 255));
         btnViewStock.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/show-14.png"))); // NOI18N
         btnViewStock.setText("View Stock");
         btnViewStock.addActionListener(new java.awt.event.ActionListener() {
@@ -427,14 +440,19 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrintLabel.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrintLabel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnPrintLabel.setForeground(new java.awt.Color(255, 255, 255));
         btnPrintLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
-        btnPrintLabel.setText("Print Label");
+        btnPrintLabel.setText("Print ");
         btnPrintLabel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPrintLabelActionPerformed(evt);
             }
         });
 
+        btnClear.setBackground(new java.awt.Color(204, 204, 204));
+        btnClear.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/clear_menu-14.png"))); // NOI18N
         btnClear.setText("  Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
@@ -443,26 +461,9 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         });
 
-        jPanel5.setMaximumSize(new java.awt.Dimension(200, 22));
-        jPanel5.setMinimumSize(new java.awt.Dimension(50, 22));
-        jPanel5.setPreferredSize(new java.awt.Dimension(47, 22));
-
-        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
-        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
-        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(txtStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
-        );
-
+        btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
         btnPrint.addActionListener(new java.awt.event.ActionListener() {
@@ -471,6 +472,9 @@ public class BinManagementForm extends javax.swing.JFrame {
             }
         });
 
+        btnExport.setBackground(new java.awt.Color(0, 184, 148));
+        btnExport.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/export-14.png"))); // NOI18N
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
@@ -478,6 +482,11 @@ public class BinManagementForm extends javax.swing.JFrame {
                 btnExportActionPerformed(evt);
             }
         });
+
+        txtStatus.setBackground(new java.awt.Color(255, 255, 255));
+        txtStatus.setFont(new java.awt.Font("Segoe UI Semibold", 0, 11)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -500,27 +509,29 @@ public class BinManagementForm extends javax.swing.JFrame {
                 .addComponent(btnExport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrint)
-                .addGap(37, 37, 37)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnExport)
-                            .addComponent(btnPrint))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnAdd)
-                            .addComponent(btnUpdate)
-                            .addComponent(btnDelete)
-                            .addComponent(btnViewStock)
-                            .addComponent(btnPrintLabel)
-                            .addComponent(btnClear)))
-                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(btnExport)
+                                .addComponent(btnPrint))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(btnAdd)
+                                .addComponent(btnUpdate)
+                                .addComponent(btnDelete)
+                                .addComponent(btnViewStock)
+                                .addComponent(btnPrintLabel)
+                                .addComponent(btnClear)))))
                 .addContainerGap())
         );
 
@@ -1610,7 +1621,6 @@ public class BinManagementForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanelBulk;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblBulkPreview;
