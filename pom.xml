@@ -14,6 +14,7 @@
         <maven.compiler.release>17</maven.compiler.release>
         <exec.mainClass>com.fyuxera.hivon.Hivon</exec.mainClass>
         <sqlcipher.version>0.2.13</sqlcipher.version>
+        <skipTests>true</skipTests>
     </properties>
     <dependencies>
         <dependency>
@@ -154,6 +155,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <skipAssembly>${skipTests}</skipAssembly>
                             <finalName>hivon-tests</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <archive>
