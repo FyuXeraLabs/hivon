@@ -10,6 +10,33 @@ import ui.dialogs.ProgressDialog;
  */
 public class RetryHelper {
 
+    private static final ThreadLocal<Boolean> SILENT_MODE = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
+    /**
+     * Enables or disables silent execution on the current thread.
+     * When silent, executeWithRetry executes operations directly without opening ProgressDialog.
+     */
+    public static void setSilent(boolean silent) {
+        SILENT_MODE.set(silent);
+    }
+
+    public static boolean isSilent() {
+        return Boolean.TRUE.equals(SILENT_MODE.get());
+    }
+
+    /**
+     * Executes an operation silently without showing modal ProgressDialog.
+     */
+    public static <T> T executeSilently(Callable<T> operation) throws Exception {
+        boolean prev = isSilent();
+        try {
+            setSilent(true);
+            return operation.call();
+        } finally {
+            setSilent(prev);
+        }
+    }
+
     /**
      * Execute an operation with retry support using the ProgressDialog.
      * On failure, shows Retry/Cancel buttons on the progress dialog.
@@ -23,9 +50,9 @@ public class RetryHelper {
      */
     public static <T> T executeWithRetry(java.awt.Component parent, String taskName,
             Callable<T> operation, String errorMessage) throws Exception {
-        // A headless JVM cannot construct the modal ProgressDialog (JDialog throws
-        // HeadlessException), so run the operation directly instead of failing.
-        if (java.awt.GraphicsEnvironment.isHeadless()) {
+        // A headless JVM or a silent background operation (such as AutoSuggest)
+        // runs the operation directly instead of showing a modal ProgressDialog.
+        if (java.awt.GraphicsEnvironment.isHeadless() || isSilent()) {
             return operation.call();
         }
 
