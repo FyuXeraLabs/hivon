@@ -116,6 +116,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         cmbSourceBin.setNextFocusableComponent(txtMaterialName);
 
         btnSearchMaterial.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearchMaterial.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearchMaterial.setForeground(new java.awt.Color(255, 255, 255));
         btnSearchMaterial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearchMaterial.setText("Search");
@@ -140,7 +141,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
                 .addComponent(cmbSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnSearchMaterial)
-                .addContainerGap(484, Short.MAX_VALUE))
+                .addContainerGap(483, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -282,6 +283,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         });
 
         btnAddToTransfer.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddToTransfer.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAddToTransfer.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToTransfer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToTransfer.setText("Add");
@@ -343,8 +345,10 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
-        btnPost.setText("POST");
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText(" POST");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPostActionPerformed(evt);
@@ -352,7 +356,9 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
+        btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -361,6 +367,7 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
         });
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");
@@ -378,10 +385,10 @@ public class SplittingPackBreakForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addComponent(btnPost)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnPrint)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancel)
-                .addGap(18, 18, 18)
-                .addComponent(btnPrint)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(txtStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())

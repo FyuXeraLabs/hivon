@@ -371,6 +371,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         });
 
         btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText(" Search");
@@ -578,6 +579,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         });
 
         btnadd.setBackground(new java.awt.Color(0, 184, 148));
+        btnadd.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnadd.setForeground(new java.awt.Color(255, 255, 255));
         btnadd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnadd.setText("Add");
@@ -690,6 +692,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jPanel2);
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnPost.setText("POST");
@@ -700,6 +703,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText("Cancel");
@@ -713,6 +717,7 @@ public class InventoryAdjustmentForm extends javax.swing.JFrame {
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText(" Print");

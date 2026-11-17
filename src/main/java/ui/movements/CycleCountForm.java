@@ -161,6 +161,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         jLabel5.setText("Count Reason");
 
         btnStartCount.setBackground(new java.awt.Color(0, 184, 148));
+        btnStartCount.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnStartCount.setForeground(new java.awt.Color(255, 255, 255));
         btnStartCount.setText("Start Count");
         btnStartCount.addActionListener(new java.awt.event.ActionListener() {
@@ -233,6 +234,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         );
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnPost.setText("POST");
@@ -243,6 +245,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         });
 
         btnFreeze.setBackground(new java.awt.Color(108, 91, 123));
+        btnFreeze.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnFreeze.setForeground(new java.awt.Color(255, 255, 255));
         btnFreeze.setText("Freeze");
         btnFreeze.addActionListener(new java.awt.event.ActionListener() {
@@ -252,6 +255,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         });
 
         btnUnfreeze.setBackground(new java.awt.Color(108, 91, 123));
+        btnUnfreeze.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnUnfreeze.setForeground(new java.awt.Color(255, 255, 255));
         btnUnfreeze.setText("Unfreeze");
         btnUnfreeze.addActionListener(new java.awt.event.ActionListener() {
@@ -261,6 +265,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         });
 
         jButton3.setBackground(new java.awt.Color(214, 48, 49));
+        jButton3.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
         jButton3.setText("Cancel");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -273,6 +278,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         txtStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
@@ -513,6 +519,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         });
 
         btnAddToSummary.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddToSummary.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnAddToSummary.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToSummary.setText("Record Count");
         btnAddToSummary.addActionListener(new java.awt.event.ActionListener() {
@@ -522,6 +529,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         });
 
         btnSkip.setBackground(new java.awt.Color(41, 128, 232));
+        btnSkip.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnSkip.setForeground(new java.awt.Color(255, 255, 255));
         btnSkip.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/hide-14.png"))); // NOI18N
         btnSkip.setText("Skip");
@@ -532,6 +540,7 @@ public class CycleCountForm extends javax.swing.JFrame {
         });
 
         btnRecount.setBackground(new java.awt.Color(0, 102, 102));
+        btnRecount.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnRecount.setForeground(new java.awt.Color(255, 255, 255));
         btnRecount.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/sinchronize-14.png"))); // NOI18N
         btnRecount.setText("Recount");
@@ -709,7 +718,7 @@ public class CycleCountForm extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(listMaterials);
 
-        btnNextMaterial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/load-14.png"))); // NOI18N
+        btnNextMaterial.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnNextMaterial.setText("Next");
         btnNextMaterial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -717,6 +726,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             }
         });
 
+        btnPrevMaterial.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnPrevMaterial.setText("Prev");
         btnPrevMaterial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -732,7 +742,7 @@ public class CycleCountForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnPrevMaterial)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 67, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                 .addComponent(btnNextMaterial)
                 .addContainerGap())
         );

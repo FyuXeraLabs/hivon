@@ -631,7 +631,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         jPanelActions.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
-        btnPost.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
         btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
         btnPost.setText(" Post");
@@ -643,7 +643,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         });
 
         btnPrintGR.setBackground(new java.awt.Color(41, 128, 232));
-        btnPrintGR.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        btnPrintGR.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnPrintGR.setForeground(new java.awt.Color(255, 255, 255));
         btnPrintGR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrintGR.setText(" Print");
@@ -655,7 +655,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
-        btnCancel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText(" Cancel");
@@ -911,7 +911,7 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
         lblRemarks.setText("Remarks");
 
         btnAddToReceipt.setBackground(new java.awt.Color(0, 184, 148));
-        btnAddToReceipt.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnAddToReceipt.setFont(new java.awt.Font("Segoe UI Semibold", 1, 12)); // NOI18N
         btnAddToReceipt.setForeground(new java.awt.Color(255, 255, 255));
         btnAddToReceipt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddToReceipt.setText("Add");

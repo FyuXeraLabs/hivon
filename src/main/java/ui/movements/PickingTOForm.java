@@ -384,8 +384,10 @@ public class PickingTOForm extends javax.swing.JFrame {
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
-        btnPost.setText("Create TO");
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText("POST");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPostActionPerformed(evt);
@@ -393,6 +395,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnAutoSequence.setBackground(new java.awt.Color(153, 153, 153));
+        btnAutoSequence.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAutoSequence.setForeground(new java.awt.Color(255, 255, 255));
         btnAutoSequence.setText("Auto-Sequence");
         btnAutoSequence.addActionListener(new java.awt.event.ActionListener() {
@@ -402,6 +405,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
@@ -412,6 +416,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnCancle.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancle.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancle.setForeground(new java.awt.Color(255, 255, 255));
         btnCancle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancle.setText(" Cancel");
@@ -459,14 +464,13 @@ public class PickingTOForm extends javax.swing.JFrame {
 
         lblSearch.setText("Sales Order");
 
-        cmbSalesOrder.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select Sales Order--", " " }));
         cmbSalesOrder.setNextFocusableComponent(cmbGiDocument);
 
         lblGiDocument.setText("GI Document");
 
-        cmbGiDocument.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select  GI Document--" }));
         cmbGiDocument.setNextFocusableComponent(chkbxShowCompletedTos);
 
+        chkbxShowCompletedTos.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         chkbxShowCompletedTos.setText("Show Completed TOs");
         chkbxShowCompletedTos.setNextFocusableComponent(txtMaterials);
         chkbxShowCompletedTos.addActionListener(new java.awt.event.ActionListener() {
@@ -476,6 +480,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText(" Search");
@@ -583,7 +588,6 @@ public class PickingTOForm extends javax.swing.JFrame {
 
         lblPickQty.setText("Pick Qty");
 
-        cmbSelectedBin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "--Select Bin--" }));
         cmbSelectedBin.setNextFocusableComponent(lblPickQty);
         cmbSelectedBin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -603,6 +607,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         });
 
         btnAddTo.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddTo.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAddTo.setForeground(new java.awt.Color(255, 255, 255));
         btnAddTo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddTo.setText("Add ");
