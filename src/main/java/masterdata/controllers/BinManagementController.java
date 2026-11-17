@@ -119,6 +119,22 @@ public class BinManagementController {
         }
     }
 
+    // bulk generates bins for warehouse, zone, aisles, racks, levels
+    public int bulkGenerateBins(int warehouseId, String zoneCode, String binType,
+                                int aisles, int racks, int levels,
+                                double maxCapacity, double maxWeight) {
+        try {
+            int count = RetryHelper.executeWithRetry(
+                () -> BinDAO.getInstance().bulkGenerateBins(warehouseId, zoneCode, binType, aisles, racks, levels, maxCapacity, maxWeight),
+                "bulk generate bins failed"
+            );
+            Logger.log(username, "bulk generated " + count + " bins for warehouse " + warehouseId + " zone " + zoneCode);
+            return count;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     // generates a range of storage bins for a given warehouse and zone
     public List<StorageBinDTO> generateBins(int warehouseId, String zone, String prefix,
                                               int startNum, int endNum, int digits) {

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  */
 public class ZoneDTO {
 
+    private Integer zoneId;
     private String zoneCode;
     private String zoneName;
     private String zoneType;
@@ -36,6 +37,14 @@ public class ZoneDTO {
         this.warehouseId = warehouseId;
         this.warehouseCode = warehouseCode;
         this.warehouseName = warehouseName;
+    }
+
+    public Integer getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(Integer zoneId) {
+        this.zoneId = zoneId;
     }
 
     public String getZoneCode() {

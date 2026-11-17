@@ -39,6 +39,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     private ZoneManagementController controller;
     private ZoneDTO selectedZone;
     private boolean isInitializing = true;
+    private boolean isAddMode = false;
     private List<ZoneDTO> allZones = new ArrayList<>();
     private List<WarehouseDTO> allWarehouses = new ArrayList<>();
     private javax.swing.JPopupMenu popupExportBtn;
@@ -56,11 +57,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         setupTttFieldNavigation();
         setupKeyBindings();
         setupExportMenu();
-        cmbWarehouse.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadZones();
-            }
-        });
+        updateButtonStates();
         loadWarehouses();
         isInitializing = false;
     }
@@ -79,8 +76,6 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         txtSearch = new javax.swing.JTextField();
         btnSearch = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
-        jLabel8 = new javax.swing.JLabel();
-        cmbWarehouse = new ui.components.CheckedComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblZones = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
@@ -133,18 +128,12 @@ public class ZoneManagementForm extends javax.swing.JFrame {
             }
         });
 
-        jLabel8.setText("Warehouse");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -163,9 +152,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel1)
                         .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnSearch)
-                        .addComponent(jLabel8)
-                        .addComponent(cmbWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnSearch)))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
@@ -452,37 +439,184 @@ public class ZoneManagementForm extends javax.swing.JFrame {
             String code = (String) tblZones.getValueAt(selectedRow, 0);
             selectedZone = findZoneByCode(code);
             if (selectedZone != null) {
+                isAddMode = false;
                 txtCode.setText(selectedZone.getZoneCode());
                 txtName.setText(selectedZone.getZoneName());
                 txtDescription.setText(selectedZone.getDescription());
                 if (selectedZone.getZoneType() != null) {
                     cmbZoneType.setSelectedItem(selectedZone.getZoneType());
+                } else {
+                    cmbZoneType.setSelectedIndex(-1);
                 }
-                lblTotalBins.setText(String.valueOf(selectedZone.getTotalBins()));
-                lblTotalCapacity.setText(selectedZone.getTotalCapacity() != null ? selectedZone.getTotalCapacity().toString() : "0");
+                lblTotalBins.setText(String.valueOf(selectedZone.getTotalBins() != null ? selectedZone.getTotalBins() : 0));
+                lblTotalCapacity.setText(selectedZone.getTotalCapacity() != null ? selectedZone.getTotalCapacity().toString() : "0.00");
                 lblUtilization.setText(String.format("%.1f%%", selectedZone.getUtilizationPercent()));
+                updateButtonStates();
             }
         }
     }//GEN-LAST:event_tblZonesMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        StatusMessageHandler.showInfo(txtStatus, "Add/Edit zones through the Bin Management form");
+        if (isAddMode) {
+            isAddMode = false;
+            clearForm();
+            updateButtonStates();
+            StatusMessageHandler.showInfo(txtStatus, "Add mode cancelled.");
+        } else {
+            clearForm();
+            isAddMode = true;
+            updateButtonStates();
+            txtCode.requestFocusInWindow();
+            StatusMessageHandler.showInfo(txtStatus, "Enter zone details and click 'Save' to commit.");
+        }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        StatusMessageHandler.showInfo(txtStatus, "Zones are managed through Bin Management");
+        if (!validateForm()) {
+            return;
+        }
+
+        int targetWarehouseId = getTargetWarehouseId();
+        if (targetWarehouseId <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a warehouse first!");
+            return;
+        }
+
+        ZoneDTO zone = new ZoneDTO();
+        zone.setWarehouseId(targetWarehouseId);
+        zone.setZoneCode(txtCode.getText().trim());
+        String name = txtName.getText().trim();
+        zone.setZoneName(name.isEmpty() ? txtCode.getText().trim() : name);
+        if (cmbZoneType.getSelectedItem() != null) {
+            zone.setZoneType(cmbZoneType.getSelectedItem().toString());
+        }
+        zone.setDescription(txtDescription.getText().trim());
+
+        BackgroundTask task = new BackgroundTask(this, "Creating Zone") {
+            private int newZoneId;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Saving new zone...");
+                newZoneId = controller.createZone(zone);
+                return newZoneId > 0;
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Zone " + zone.getZoneCode() + " created successfully!");
+                isAddMode = false;
+                clearForm();
+                updateButtonStates();
+                loadZones();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to create zone: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        isAddMode = false;
         clearForm();
+        updateButtonStates();
+        StatusMessageHandler.showInfo(txtStatus, "Form cleared.");
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        StatusMessageHandler.showInfo(txtStatus, "Zones are managed through Bin Management");
+        if (selectedZone == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a zone to update first!");
+            return;
+        }
+
+        if (txtCode.getText().trim().isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Zone Code cannot be empty!");
+            txtCode.requestFocusInWindow();
+            return;
+        }
+
+        if (txtName.getText().trim().isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Zone Name cannot be empty!");
+            txtName.requestFocusInWindow();
+            return;
+        }
+
+        selectedZone.setZoneCode(txtCode.getText().trim());
+        selectedZone.setZoneName(txtName.getText().trim());
+        if (cmbZoneType.getSelectedItem() != null) {
+            selectedZone.setZoneType(cmbZoneType.getSelectedItem().toString());
+        } else {
+            selectedZone.setZoneType(null);
+        }
+        selectedZone.setDescription(txtDescription.getText().trim());
+
+        BackgroundTask task = new BackgroundTask(this, "Updating Zone") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Updating zone details...");
+                return controller.updateZone(selectedZone);
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Zone " + selectedZone.getZoneCode() + " updated successfully!");
+                clearForm();
+                updateButtonStates();
+                loadZones();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to update zone: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        StatusMessageHandler.showInfo(txtStatus, "Zones are managed through Bin Management");
+        if (selectedZone == null) {
+            StatusMessageHandler.showWarning(txtStatus, "Please select a zone to delete!");
+            return;
+        }
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to delete zone '" + selectedZone.getZoneCode() + "'?\n" +
+            "Any empty bins assigned to this zone will have their zone unassigned.",
+            "Confirm Delete Zone",
+            javax.swing.JOptionPane.YES_NO_OPTION,
+            javax.swing.JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirm != javax.swing.JOptionPane.YES_OPTION) return;
+
+        final int zoneIdToDelete = selectedZone.getZoneId() != null ? selectedZone.getZoneId() : 0;
+        final String zoneCodeToDelete = selectedZone.getZoneCode();
+
+        BackgroundTask task = new BackgroundTask(this, "Deleting Zone") {
+            @Override
+            protected Boolean performTask() throws Exception {
+                updateProgress("Deleting zone...");
+                return controller.deleteZone(zoneIdToDelete);
+            }
+
+            @Override
+            protected void onSuccess() {
+                StatusMessageHandler.showSuccess(txtStatus, "Zone " + zoneCodeToDelete + " deleted successfully!");
+                clearForm();
+                updateButtonStates();
+                loadZones();
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                StatusMessageHandler.showError(txtStatus, "Failed to delete zone: " + e.getMessage());
+            }
+        };
+        task.executeWithDialog();
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
@@ -716,34 +850,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 allWarehouses = warehouses;
-                cmbWarehouse.removeAllItems();
-                cmbWarehouse.setSelectAllLabel("All");
-                cmbWarehouse.addItem("All");
-                if (warehouses != null) {
-                    for (WarehouseDTO wh : warehouses) {
-                        cmbWarehouse.addItem(wh.toString());
-                    }
-                }
-
-                Integer userWhId = null;
-                try {
-                    if (UserSession.getInstance().getCurrentUser() != null) {
-                        userWhId = UserSession.getInstance().getCurrentUser().getWarehouseId();
-                    }
-                } catch (Exception e) {
-                    Logger.errlog("Could not read warehouse ID from session", e);
-                }
-
-                if (userWhId != null && warehouses != null) {
-                    for (WarehouseDTO wh : warehouses) {
-                        if (wh.getWarehouseId().equals(userWhId)) {
-                            java.util.Set<String> selected = new java.util.HashSet<>();
-                            selected.add(wh.toString());
-                            cmbWarehouse.setSelectedItems(selected);
-                            break;
-                        }
-                    }
-                }
+                loadZones();
             }
 
             @Override
@@ -769,58 +876,31 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     }
 
     private void loadZones() {
-        java.util.Set<String> selectedWhSet = cmbWarehouse.getSelectedItems();
-        if (selectedWhSet.isEmpty()) {
-            DefaultTableModel model = (DefaultTableModel) tblZones.getModel();
-            model.setRowCount(0);
-            return;
-        }
-
+        int userWhId = getUserWarehouseId();
         String searchTerm = txtSearch.getText().trim();
-
-        createLoadZonesTask(selectedWhSet, searchTerm).executeWithRetry();
+        createLoadZonesTask(userWhId, searchTerm).executeWithRetry();
     }
 
-    private BackgroundTask createLoadZonesTask(java.util.Set<String> selectedWhSet, String searchTerm) {
+    private BackgroundTask createLoadZonesTask(int warehouseId, String searchTerm) {
         return new BackgroundTask(this, "Loading Zones") {
-            private List<ZoneDTO> allZonesResult = new ArrayList<>();
+            private List<ZoneDTO> zonesResult = new ArrayList<>();
 
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Fetching zones...");
-                java.util.Set<String> seenCodes = new java.util.HashSet<>();
-                for (String whStr : selectedWhSet) {
-                    WarehouseDTO wh = null;
-                    for (WarehouseDTO w : allWarehouses) {
-                        if (w.toString().equals(whStr)) {
-                            wh = w;
-                            break;
-                        }
-                    }
-                    if (wh == null) continue;
-                    int wid = wh.getWarehouseId();
-                    List<ZoneDTO> zones;
-                    if (!searchTerm.isEmpty()) {
-                        zones = controller.searchZonesByWarehouse(wid, searchTerm);
-                    } else {
-                        zones = controller.getZonesByWarehouse(wid);
-                    }
-                    if (zones != null) {
-                        for (ZoneDTO z : zones) {
-                            if (seenCodes.add(z.getZoneCode())) {
-                                allZonesResult.add(z);
-                            }
-                        }
-                    }
+                if (!searchTerm.isEmpty()) {
+                    zonesResult = controller.searchZonesByWarehouse(warehouseId, searchTerm);
+                } else {
+                    zonesResult = controller.getZonesByWarehouse(warehouseId);
                 }
-                return true;
+                return zonesResult != null;
             }
 
             @Override
             protected void onSuccess() {
-                populateZoneTable(allZonesResult);
+                populateZoneTable(zonesResult);
                 if (!searchTerm.isEmpty()) {
-                    StatusMessageHandler.showInfo(txtStatus, "Found " + allZonesResult.size() + " zone(s) matching '" + searchTerm + "'");
+                    StatusMessageHandler.showInfo(txtStatus, "Found " + zonesResult.size() + " zone(s) matching '" + searchTerm + "'");
                 }
             }
 
@@ -841,7 +921,7 @@ public class ZoneManagementForm extends javax.swing.JFrame {
 
             @Override
             protected BackgroundTask createRetryTask() {
-                return createLoadZonesTask(selectedWhSet, searchTerm);
+                return createLoadZonesTask(warehouseId, searchTerm);
             }
         };
     }
@@ -1014,6 +1094,85 @@ public class ZoneManagementForm extends javax.swing.JFrame {
         tblZones.clearSelection();
     }
 
+    private void updateButtonStates() {
+        if (isAddMode) {
+            btnAdd.setText("Cancel");
+            btnSave.setEnabled(true);
+            btnUpdate.setEnabled(false);
+            btnDelete.setEnabled(false);
+            btnClear.setEnabled(true);
+            btnViewBins.setEnabled(false);
+            txtCode.setEditable(true);
+        } else {
+            btnAdd.setText("  Add");
+            btnSave.setEnabled(false);
+            btnUpdate.setEnabled(selectedZone != null);
+            btnDelete.setEnabled(selectedZone != null);
+            btnClear.setEnabled(selectedZone != null);
+            btnViewBins.setEnabled(selectedZone != null);
+            txtCode.setEditable(selectedZone == null);
+        }
+    }
+
+    private boolean validateForm() {
+        if (txtCode.getText().trim().isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a Zone Code!");
+            txtCode.requestFocusInWindow();
+            return false;
+        }
+        if (txtName.getText().trim().isEmpty()) {
+            StatusMessageHandler.showWarning(txtStatus, "Please enter a Zone Name!");
+            txtName.requestFocusInWindow();
+            return false;
+        }
+        if (getTargetWarehouseId() <= 0) {
+            StatusMessageHandler.showWarning(txtStatus, "No warehouse available for current session!");
+            return false;
+        }
+        return true;
+    }
+
+    private int getUserWarehouseId() {
+        try {
+            if (UserSession.getInstance().getCurrentUser() != null) {
+                Integer whId = UserSession.getInstance().getCurrentUser().getWarehouseId();
+                if (whId != null && whId > 0) return whId;
+            }
+        } catch (Exception e) {
+            Logger.errlog("Could not read warehouse ID from session", e);
+        }
+        if (allWarehouses != null && !allWarehouses.isEmpty()) {
+            return allWarehouses.get(0).getWarehouseId();
+        }
+        return 1;
+    }
+
+    private WarehouseDTO getUserWarehouse() {
+        int whId = getUserWarehouseId();
+        if (allWarehouses != null) {
+            for (WarehouseDTO wh : allWarehouses) {
+                if (wh.getWarehouseId().equals(whId)) {
+                    return wh;
+                }
+            }
+            if (!allWarehouses.isEmpty()) {
+                return allWarehouses.get(0);
+            }
+        }
+        WarehouseDTO fallback = new WarehouseDTO();
+        fallback.setWarehouseId(whId);
+        fallback.setWarehouseCode("WH" + whId);
+        fallback.setWarehouseName("Warehouse " + whId);
+        return fallback;
+    }
+
+    private int getTargetWarehouseId() {
+        if (selectedZone != null && selectedZone.getWarehouseId() != null && selectedZone.getWarehouseId() > 0) {
+            return selectedZone.getWarehouseId();
+        }
+        return getUserWarehouseId();
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnClear;
@@ -1025,7 +1184,6 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnViewBins;
-    private ui.components.CheckedComboBox<String> cmbWarehouse;
     private javax.swing.JComboBox<String> cmbZoneType;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -1034,7 +1192,6 @@ public class ZoneManagementForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

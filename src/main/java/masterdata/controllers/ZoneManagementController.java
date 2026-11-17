@@ -46,4 +46,37 @@ public class ZoneManagementController {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    public int createZone(ZoneDTO zone) {
+        try {
+            return RetryHelper.executeWithRetry(
+                () -> ZoneDAO.getInstance().createZone(zone),
+                "failed to create zone " + zone.getZoneCode()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public boolean updateZone(ZoneDTO zone) {
+        try {
+            return RetryHelper.executeWithRetry(
+                () -> ZoneDAO.getInstance().updateZone(zone),
+                "failed to update zone " + zone.getZoneCode()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public boolean deleteZone(int zoneId) {
+        try {
+            return RetryHelper.executeWithRetry(
+                () -> ZoneDAO.getInstance().deleteZone(zoneId),
+                "failed to delete zone with ID " + zoneId
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }

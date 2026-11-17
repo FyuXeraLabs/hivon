@@ -101,6 +101,10 @@ public class BinDAO {
         payload.addProperty("warehouse_id", binDto.getWarehouseId());
         if (binDto.getZone() != null) {
             payload.addProperty("zone", binDto.getZone());
+            payload.addProperty("zone_code", binDto.getZone());
+        }
+        if (binDto.getBinType() != null) {
+            payload.addProperty("bin_type", binDto.getBinType());
         }
         payload.addProperty("max_capacity", binDto.getMaxCapacity());
         payload.addProperty("used_capacity", binDto.getUsedCapacity());
@@ -120,6 +124,10 @@ public class BinDAO {
         payload.addProperty("warehouse_id", binDto.getWarehouseId());
         if (binDto.getZone() != null) {
             payload.addProperty("zone", binDto.getZone());
+            payload.addProperty("zone_code", binDto.getZone());
+        }
+        if (binDto.getBinType() != null) {
+            payload.addProperty("bin_type", binDto.getBinType());
         }
         payload.addProperty("max_capacity", binDto.getMaxCapacity());
         payload.addProperty("used_capacity", binDto.getUsedCapacity());
@@ -157,11 +165,37 @@ public class BinDAO {
         return "success".equals(body.get("status").getAsString());
     }
 
+    public int bulkGenerateBins(int warehouseId, String zoneCode, String binType,
+                                int aisles, int racks, int levels,
+                                double maxCapacity, double maxWeight) throws Exception {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("warehouse_id", warehouseId);
+        payload.addProperty("zone_code", zoneCode);
+        payload.addProperty("bin_type", binType != null && !binType.isEmpty() ? binType : "STORAGE");
+        payload.addProperty("aisles", aisles);
+        payload.addProperty("racks", racks);
+        payload.addProperty("levels", levels);
+        payload.addProperty("max_capacity", maxCapacity);
+        payload.addProperty("max_weight", maxWeight);
+
+        HttpRequest request = apiClient.authRequest(ApiConfig.BINS_GENERATE)
+                .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                .build();
+
+        JsonObject body = apiClient.executeWithAuth(request);
+        if (body.has("count") && !body.get("count").isJsonNull()) {
+            return body.get("count").getAsInt();
+        }
+        return 0;
+    }
+
     public List<StorageBinDTO> generateBins(int warehouseId, String zone, String prefix,
                                               int startNum, int endNum, int digits) throws Exception {
         JsonObject payload = new JsonObject();
         payload.addProperty("warehouse_id", warehouseId);
+        payload.addProperty("zone_code", zone);
         payload.addProperty("zone", zone);
+        payload.addProperty("bin_type", "STORAGE");
         payload.addProperty("prefix", prefix);
         payload.addProperty("start_num", startNum);
         payload.addProperty("end_num", endNum);
@@ -172,7 +206,7 @@ public class BinDAO {
                 .build();
 
         JsonObject body = apiClient.executeWithAuth(request);
-        JsonArray dataArray = body.getAsJsonArray("data");
+        JsonArray dataArray = body.has("data") && !body.get("data").isJsonNull() ? body.getAsJsonArray("data") : null;
 
         List<StorageBinDTO> bins = new ArrayList<>();
         if (dataArray != null) {
@@ -197,6 +231,9 @@ public class BinDAO {
         }
         if (json.has("warehouse_id") && !json.get("warehouse_id").isJsonNull()) {
             dto.setWarehouseId(json.get("warehouse_id").getAsInt());
+        }
+        if (json.has("zone_id") && !json.get("zone_id").isJsonNull()) {
+            dto.setZoneId(json.get("zone_id").getAsInt());
         }
         if (json.has("warehouse_code") && !json.get("warehouse_code").isJsonNull()) {
             dto.setWarehouseCode(json.get("warehouse_code").getAsString());
@@ -227,7 +264,9 @@ public class BinDAO {
         if (json.has("max_weight") && !json.get("max_weight").isJsonNull()) {
             dto.setMaxWeight(json.get("max_weight").getAsDouble());
         }
-        if (json.has("used_capacity") && !json.get("used_capacity").isJsonNull()) {
+        if (json.has("current_stock") && !json.get("current_stock").isJsonNull()) {
+            dto.setUsedCapacity(json.get("current_stock").getAsDouble());
+        } else if (json.has("used_capacity") && !json.get("used_capacity").isJsonNull()) {
             dto.setUsedCapacity(json.get("used_capacity").getAsDouble());
         } else if (json.has("current_capacity") && !json.get("current_capacity").isJsonNull()) {
             dto.setUsedCapacity(json.get("current_capacity").getAsDouble());

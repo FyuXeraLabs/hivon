@@ -11,6 +11,7 @@ public class StorageBinDTO {
 
     private Integer binId;
     private Integer warehouseId;
+    private Integer zoneId;
     private String binCode;
     private String binDescription;
     private String zoneCode;
@@ -44,6 +45,14 @@ public class StorageBinDTO {
 
     public void setWarehouseId(Integer warehouseId) {
         this.warehouseId = warehouseId;
+    }
+
+    public Integer getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(Integer zoneId) {
+        this.zoneId = zoneId;
     }
 
     public String getBinCode() {
@@ -157,6 +166,14 @@ public class StorageBinDTO {
 
     public void setUsedCapacity(Double usedCapacity) {
         this.usedCapacity = usedCapacity;
+    }
+
+    public Double getCurrentStock() {
+        return usedCapacity;
+    }
+
+    public void setCurrentStock(Double currentStock) {
+        this.usedCapacity = currentStock;
     }
 
     public LocalDateTime getCreatedDate() {

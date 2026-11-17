@@ -92,10 +92,70 @@ public class ZoneDAO {
         return zones;
     }
 
+    public int createZone(ZoneDTO zone) throws Exception {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("warehouse_id", zone.getWarehouseId());
+        payload.addProperty("zone_code", zone.getZoneCode());
+        payload.addProperty("zone_name", zone.getZoneName() != null ? zone.getZoneName() : zone.getZoneCode());
+        if (zone.getZoneType() != null) {
+            payload.addProperty("zone_type", zone.getZoneType());
+        }
+        if (zone.getDescription() != null) {
+            payload.addProperty("description", zone.getDescription());
+        }
+
+        HttpRequest request = apiClient.authRequest(ApiConfig.ZONES)
+                .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                .build();
+
+        JsonObject body = apiClient.executeWithAuth(request);
+        if (body.has("data") && body.get("data").isJsonObject()) {
+            JsonObject data = body.getAsJsonObject("data");
+            if (data.has("zone_id") && !data.get("zone_id").isJsonNull()) {
+                return data.get("zone_id").getAsInt();
+            }
+        }
+        return 1;
+    }
+
+    public boolean updateZone(ZoneDTO zone) throws Exception {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("warehouse_id", zone.getWarehouseId());
+        payload.addProperty("zone_code", zone.getZoneCode());
+        payload.addProperty("zone_name", zone.getZoneName() != null ? zone.getZoneName() : zone.getZoneCode());
+        if (zone.getZoneType() != null) {
+            payload.addProperty("zone_type", zone.getZoneType());
+        }
+        if (zone.getDescription() != null) {
+            payload.addProperty("description", zone.getDescription());
+        }
+
+        String endpoint = ApiConfig.ZONES + "/" + (zone.getZoneId() != null ? zone.getZoneId() : 0);
+        HttpRequest request = apiClient.authRequest(endpoint)
+                .PUT(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                .build();
+
+        JsonObject body = apiClient.executeWithAuth(request);
+        return "success".equals(body.get("status").getAsString());
+    }
+
+    public boolean deleteZone(int zoneId) throws Exception {
+        String endpoint = ApiConfig.ZONES + "/" + zoneId;
+        HttpRequest request = apiClient.authRequest(endpoint)
+                .DELETE()
+                .build();
+
+        JsonObject body = apiClient.executeWithAuth(request);
+        return "success".equals(body.get("status").getAsString());
+    }
+
     // converts a JSON object from the API response into a ZoneDTO
     private ZoneDTO jsonToZoneDTO(JsonObject json) {
         ZoneDTO dto = new ZoneDTO();
 
+        if (json.has("zone_id") && !json.get("zone_id").isJsonNull()) {
+            dto.setZoneId(json.get("zone_id").getAsInt());
+        }
         if (json.has("zone_code") && !json.get("zone_code").isJsonNull()) {
             dto.setZoneCode(json.get("zone_code").getAsString());
         }
