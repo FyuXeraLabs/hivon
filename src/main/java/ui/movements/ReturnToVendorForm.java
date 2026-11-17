@@ -14,7 +14,9 @@ import models.dto.MaterialDTO;
 import movements.controllers.ReturnToVendorController;
 import core.api.dao.ReturnToVendorDAO;
 import core.workers.BackgroundTask;
+import core.logging.Logger;
 import ui.components.StatusMessageHandler;
+import ui.components.AutoSuggestTextField;
 
 /**
  * Return to Vendor Form (IN15)
@@ -49,6 +51,18 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         }
 
         txtMaterialSearch.setEditable(true);
+
+        // Suggest material codes while typing and search when a suggestion is picked
+        AutoSuggestTextField.attach(txtMaterialSearch, query -> {
+            try {
+                return controller.searchMaterialCodes(query);
+            } catch (Exception e) {
+                Logger.errlog("Failed to load material suggestions", e);
+                return new ArrayList<>();
+            }
+        });
+        txtMaterialSearch.addActionListener(e -> btnSearchMaterialActionPerformed(null));
+
         dateReturnDate.setEditable(false);
         dateReturnDate.setText(java.time.LocalDate.now().toString());
 
@@ -523,7 +537,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
 
         jLabel4.setText("Return Date");
 
-        txtMaterialSearch.setEditable(false);
+        txtMaterialSearch.setEditable(true);
         txtMaterialSearch.setBackground(new java.awt.Color(255, 255, 255));
         txtMaterialSearch.setNextFocusableComponent(cmbVendor);
 
