@@ -362,7 +362,7 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         btnPrint = new javax.swing.JButton();
         btncancel = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Goods Issue - Return to Vendor (OUT15)");
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Material Selection"));
@@ -536,8 +536,6 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
 
         jLabel4.setText("Return Date");
 
-        txtMaterialSearch.setEditable(true);
-        txtMaterialSearch.setBackground(new java.awt.Color(255, 255, 255));
         txtMaterialSearch.setNextFocusableComponent(cmbVendor);
 
         dateReturnDate.setEditable(false);
