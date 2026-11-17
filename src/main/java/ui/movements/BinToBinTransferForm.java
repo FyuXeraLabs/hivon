@@ -1308,9 +1308,8 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
 
         if (targetIdx >= 0) {
             cmbSourceBin.setSelectedIndex(targetIdx);
-        } else if (!visibleSourceBins.isEmpty()) {
-            cmbSourceBin.setSelectedIndex(0);
         } else {
+            // Leave the combo blank - do not auto-select the first bin
             cmbSourceBin.setSelectedIndex(-1);
         }
     }
@@ -1343,9 +1342,8 @@ public class BinToBinTransferForm extends javax.swing.JFrame {
 
         if (targetIdx >= 0) {
             cmbDestinationWarehouse.setSelectedIndex(targetIdx);
-        } else if (!visibleDestBins.isEmpty()) {
-            cmbDestinationWarehouse.setSelectedIndex(0);
         } else {
+            // Leave the combo blank - do not auto-select the first bin
             cmbDestinationWarehouse.setSelectedIndex(-1);
         }
     }
