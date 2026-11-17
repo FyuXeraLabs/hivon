@@ -8,10 +8,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import movements.controllers.ReplenishmentTOController;
 import core.api.dao.ReplenishmentTODAO.ReplenishmentRequirement;
 import core.api.dao.ReplenishmentTODAO.ReplenishSource;
+import core.api.dao.PutawayTODAO.PutawayMaterialDTO;
 import models.dto.StorageBinDTO;
 import models.dto.MaterialDTO;
 import core.workers.BackgroundTask;
@@ -28,10 +31,21 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
 
     private ReplenishmentTOController controller;
     private List<ReplenishmentRequirement> loadedRequirements = new ArrayList<>();
+    // the requirements currently shown in the requirements table (after the filters)
+    private List<ReplenishmentRequirement> displayedRequirements = new ArrayList<>();
     private List<ReplenishmentSummaryItem> summaryList = new ArrayList<>();
     private int selectedRequirementIndex = -1;
     private int editingSummaryIndex = -1;
     private String lastCreatedToNumber;
+
+    // picking bin code -> bin of the bins listed in cmbPickingBin
+    private final Map<String, StorageBinDTO> pickingBinsByCode = new LinkedHashMap<>();
+    // "code - name" label shown in cmbMaterial -> material code
+    private final Map<String, String> materialCodeByLabel = new LinkedHashMap<>();
+    // full material master list, used while no picking bin is selected
+    private List<MaterialDTO> allMaterials = new ArrayList<>();
+    // materials currently stocked in the selected picking bin
+    private List<PutawayMaterialDTO> currentBinMaterials = new ArrayList<>();
 
     public static class ReplenishmentSummaryItem {
         private int materialId;
@@ -151,9 +165,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
         btnPost.setBackground(new java.awt.Color(0, 184, 148));
+        btnPost.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPost.setForeground(new java.awt.Color(255, 255, 255));
-        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/create-14.png"))); // NOI18N
-        btnPost.setText("Create TO");
+        btnPost.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/done-14.png"))); // NOI18N
+        btnPost.setText(" POST");
         btnPost.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPostActionPerformed(evt);
@@ -161,6 +176,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         });
 
         btnAutoPlan.setBackground(new java.awt.Color(153, 153, 153));
+        btnAutoPlan.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAutoPlan.setForeground(new java.awt.Color(255, 255, 255));
         btnAutoPlan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/auto-14.png"))); // NOI18N
         btnAutoPlan.setText("Auto-Plan");
@@ -171,6 +187,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         });
 
         btnCancel.setBackground(new java.awt.Color(214, 48, 49));
+        btnCancel.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnCancel.setForeground(new java.awt.Color(255, 255, 255));
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/cancel-14.png"))); // NOI18N
         btnCancel.setText("Cancel");
@@ -181,6 +198,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         });
 
         btnPrint.setBackground(new java.awt.Color(41, 128, 232));
+        btnPrint.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnPrint.setForeground(new java.awt.Color(255, 255, 255));
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/printer-14.png"))); // NOI18N
         btnPrint.setText("Print");
@@ -234,12 +252,19 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         cmbMaterial.setNextFocusableComponent(txtMaterial);
 
         btnSearch.setBackground(new java.awt.Color(41, 128, 232));
+        btnSearch.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnSearch.setForeground(new java.awt.Color(255, 255, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/search-2-14.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchActionPerformed(evt);
+            }
+        });
+
+        cmbPickingBin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbPickingBinActionPerformed(evt);
             }
         });
 
@@ -325,6 +350,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         txtSequence.setNextFocusableComponent(cmbPickingBin);
 
         btnAddtoTO.setBackground(new java.awt.Color(0, 184, 148));
+        btnAddtoTO.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         btnAddtoTO.setForeground(new java.awt.Color(255, 255, 255));
         btnAddtoTO.setIcon(new javax.swing.ImageIcon(getClass().getResource("/btnicn/add-14.png"))); // NOI18N
         btnAddtoTO.setText("Add ");
@@ -404,7 +430,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtSourceBin, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 97, Short.MAX_VALUE)))
+                        .addGap(0, 99, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -563,54 +589,222 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         ui.components.StatusMessageHandler.showSuccess(txtStatus, "Replenishment summary cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
 
+    private void cmbPickingBinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPickingBinActionPerformed
+        String binCode = getSelectedPickingBinCode();
+
+        if (binCode.isEmpty()) {
+            currentBinMaterials = new ArrayList<>();
+            populateAllMaterials();
+            return;
+        }
+
+        Integer binId = pickingBinsByCode.get(binCode) != null ? pickingBinsByCode.get(binCode).getBinId() : null;
+        if (binId == null) {
+            ui.components.StatusMessageHandler.showWarning(txtStatus, "Picking bin " + binCode + " is not available.");
+            return;
+        }
+
+        loadMaterialsForPickingBin(binId, binCode);
+    }//GEN-LAST:event_cmbPickingBinActionPerformed
+
     private void loadFilters() {
-        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Filters") {
-            private List<models.dto.StorageBinDTO> bins;
-            private List<models.dto.MaterialDTO> materials;
+        loadPickingBins();
+        loadMaterialList();
+    }
+
+    // loads the picking bins of the warehouse the signed in user belongs to
+    private void loadPickingBins() {
+        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Picking Bins") {
+            private List<StorageBinDTO> bins;
 
             @Override
             protected Boolean performTask() throws Exception {
                 bins = core.api.dao.BinDAO.getInstance().getBins("");
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                populatePickingBins(bins);
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                core.logging.Logger.errlog("Failed to load picking bins", e);
+                ui.components.StatusMessageHandler.showError(txtStatus, "Failed to load picking bins: " + e.getMessage());
+            }
+        };
+        task.execute();
+    }
+
+    // fills cmbPickingBin with the picking bins and keeps every bin of the list
+    private void populatePickingBins(List<StorageBinDTO> bins) {
+        pickingBinsByCode.clear();
+        cmbPickingBin.removeAllItems();
+
+        if (bins != null) {
+            for (StorageBinDTO bin : bins) {
+                if (bin.getBinCode() == null || bin.getBinCode().trim().isEmpty()) {
+                    continue;
+                }
+                if (bin.getBinType() != null && "PICKING".equalsIgnoreCase(bin.getBinType().trim())) {
+                    pickingBinsByCode.put(bin.getBinCode(), bin);
+                    cmbPickingBin.addItem(bin.getBinCode());
+                }
+            }
+        }
+        cmbPickingBin.setSelectedItem(null);
+
+        if (pickingBinsByCode.isEmpty()) {
+            ui.components.StatusMessageHandler.showWarning(txtStatus, "No picking bins found for this warehouse.");
+        }
+    }
+
+    // loads the material master list used while no picking bin is selected
+    private void loadMaterialList() {
+        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Materials") {
+            private List<MaterialDTO> materials;
+
+            @Override
+            protected Boolean performTask() throws Exception {
                 materials = core.api.dao.MaterialDAO.getInstance().getMaterials("");
                 return true;
             }
 
             @Override
             protected void onSuccess() {
-                cmbPickingBin.removeAllItems();
-                if (bins != null) {
-                    for (models.dto.StorageBinDTO bin : bins) {
-                        if ("PICKING".equals(bin.getBinType())) {
-                            cmbPickingBin.addItem(bin.getBinCode());
-                        }
-                    }
+                allMaterials = materials != null ? materials : new ArrayList<>();
+                if (getSelectedPickingBinCode().isEmpty()) {
+                    populateAllMaterials();
                 }
-                cmbPickingBin.setSelectedItem(null);
-
-                cmbMaterial.removeAllItems();
-                if (materials != null) {
-                    for (models.dto.MaterialDTO mat : materials) {
-                        cmbMaterial.addItem(mat.getMaterialCode());
-                    }
-                }
-                cmbMaterial.setSelectedItem(null);
             }
 
             @Override
             protected void onFailure(Exception e) {
-                core.logging.Logger.errlog("Failed to load search filters", e);
+                core.logging.Logger.errlog("Failed to load materials", e);
+                ui.components.StatusMessageHandler.showError(txtStatus, "Failed to load materials: " + e.getMessage());
             }
         };
         task.execute();
+    }
+
+    // fills cmbMaterial with every material of the master list
+    private void populateAllMaterials() {
+        Map<String, String> codeToName = new LinkedHashMap<>();
+        for (MaterialDTO mat : allMaterials) {
+            if (mat.getMaterialCode() != null) {
+                codeToName.put(mat.getMaterialCode(), mat.getMaterialDescription());
+            }
+        }
+        applyMaterialItems(codeToName);
+    }
+
+    // loads the materials stocked in the selected picking bin
+    private void loadMaterialsForPickingBin(int binId, String binCode) {
+        core.workers.BackgroundTask task = new core.workers.BackgroundTask(this, "Loading Materials in Bin") {
+            private List<PutawayMaterialDTO> binMaterials;
+
+            @Override
+            protected Boolean performTask() throws Exception {
+                binMaterials = core.api.dao.PutawayTODAO.getInstance().getMaterialsInBin(binId);
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                if (!binCode.equals(getSelectedPickingBinCode())) {
+                    return; // another bin was selected while loading
+                }
+                currentBinMaterials = binMaterials != null ? binMaterials : new ArrayList<>();
+                populateMaterialsForBin(binCode, currentBinMaterials);
+                ui.components.StatusMessageHandler.showInfo(txtStatus,
+                        "Loaded " + cmbMaterial.getItemCount() + " material(s) for picking bin " + binCode + ".");
+            }
+
+            @Override
+            protected void onFailure(Exception e) {
+                core.logging.Logger.errlog("Failed to load materials of picking bin " + binCode, e);
+                if (!binCode.equals(getSelectedPickingBinCode())) {
+                    return; // another bin was selected while loading
+                }
+                currentBinMaterials = new ArrayList<>();
+                populateMaterialsForBin(binCode, currentBinMaterials);
+                ui.components.StatusMessageHandler.showError(txtStatus,
+                        "Failed to load materials of picking bin " + binCode + ": " + e.getMessage());
+            }
+        };
+        task.execute();
+    }
+
+    // fills cmbMaterial with the materials belonging to the given picking bin: the low
+    // stock materials waiting to be replenished into it and the materials stocked in it
+    private void populateMaterialsForBin(String binCode, List<PutawayMaterialDTO> binMaterials) {
+        Map<String, String> codeToName = new LinkedHashMap<>();
+
+        for (ReplenishmentRequirement req : loadedRequirements) {
+            if (req.getMaterialCode() != null && binCode.equalsIgnoreCase(req.getToBinCode())) {
+                codeToName.put(req.getMaterialCode(), req.getMaterialName());
+            }
+        }
+        if (binMaterials != null) {
+            for (PutawayMaterialDTO mat : binMaterials) {
+                if (mat.getMaterialCode() != null && !codeToName.containsKey(mat.getMaterialCode())) {
+                    codeToName.put(mat.getMaterialCode(), mat.getMaterialName());
+                }
+            }
+        }
+        applyMaterialItems(codeToName);
+    }
+
+    // writes the given materials into cmbMaterial using "code - name" labels
+    private void applyMaterialItems(Map<String, String> codeToName) {
+        Object previous = cmbMaterial.getSelectedItem();
+        String previousLabel = previous != null ? previous.toString() : null;
+
+        materialCodeByLabel.clear();
+        cmbMaterial.removeAllItems();
+        for (Map.Entry<String, String> entry : codeToName.entrySet()) {
+            String code = entry.getKey();
+            String name = entry.getValue();
+            String label = (name != null && !name.trim().isEmpty()) ? code + " - " + name.trim() : code;
+            materialCodeByLabel.put(label, code);
+            cmbMaterial.addItem(label);
+        }
+
+        if (previousLabel != null && materialCodeByLabel.containsKey(previousLabel)) {
+            cmbMaterial.setSelectedItem(previousLabel);
+        } else {
+            cmbMaterial.setSelectedItem(null);
+        }
+    }
+
+    // returns the code of the picking bin selected in cmbPickingBin
+    private String getSelectedPickingBinCode() {
+        Object selected = cmbPickingBin.getSelectedItem();
+        return selected != null ? selected.toString().trim() : "";
+    }
+
+    // returns the material code of the selection made in cmbMaterial
+    private String getSelectedMaterialCode() {
+        Object selected = cmbMaterial.getSelectedItem();
+        if (selected == null) {
+            return "";
+        }
+        String label = selected.toString().trim();
+        if (label.isEmpty()) {
+            return "";
+        }
+        String code = materialCodeByLabel.get(label);
+        return code != null ? code : label;
     }
 
     private void initTableSelectionListener() {
         tblReplenishmentRequirements.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = tblReplenishmentRequirements.getSelectedRow();
-                if (selectedRow >= 0 && selectedRow < loadedRequirements.size()) {
+                if (selectedRow >= 0 && selectedRow < displayedRequirements.size()) {
                     selectedRequirementIndex = selectedRow;
-                    ReplenishmentRequirement req = loadedRequirements.get(selectedRow);
+                    ReplenishmentRequirement req = displayedRequirements.get(selectedRow);
 
                     txtMaterial.setText(req.getMaterialCode() + " - " + req.getMaterialName());
                     txtCurrentQty.setText(String.valueOf(req.getCurrentPickingQty()));
@@ -733,6 +927,20 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     }
 
     private void performSearch() {
+        // the replenishment plan always targets the picking bin selected by the user
+        String binCode = getSelectedPickingBinCode();
+        if (binCode.isEmpty()) {
+            ui.components.StatusMessageHandler.showWarning(txtStatus, "Please select a picking bin to replenish.");
+            return;
+        }
+        StorageBinDTO pickingBin = pickingBinsByCode.get(binCode);
+        final Integer toBinId = pickingBin != null ? pickingBin.getBinId() : null;
+        if (toBinId == null) {
+            ui.components.StatusMessageHandler.showWarning(txtStatus, "Picking bin " + binCode + " is not available.");
+            return;
+        }
+        final boolean binFrozen = Boolean.TRUE.equals(pickingBin.getIsFrozen());
+
         Integer warehouseId = null;
         try {
             if (core.security.UserSession.getInstance().getCurrentUser() != null) {
@@ -752,7 +960,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             @Override
             protected Boolean performTask() throws Exception {
                 updateProgress("Fetching replenishment requirements...");
-                reqs = controller.getLowStockReplenishments(whId);
+                reqs = controller.getLowStockReplenishments(whId, toBinId);
                 return reqs != null;
             }
 
@@ -763,7 +971,15 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                     loadedRequirements.addAll(reqs);
                 }
                 refreshRequirementsTable();
-                if (loadedRequirements.isEmpty()) {
+
+                // the low stock materials of the selected picking bin are now known,
+                // add them to the material dropdown
+                populateMaterialsForBin(binCode, currentBinMaterials);
+
+                if (binFrozen) {
+                    ui.components.StatusMessageHandler.showWarning(txtStatus,
+                            "Picking bin " + binCode + " is frozen for cycle counting. A transfer order cannot be created until the count is closed.");
+                } else if (loadedRequirements.isEmpty()) {
                     ui.components.StatusMessageHandler.showInfo(txtStatus, "No low-stock items requiring replenishment found.");
                 } else {
                     ui.components.StatusMessageHandler.showInfo(txtStatus, "Found " + loadedRequirements.size() + " low-stock item(s).");
@@ -781,15 +997,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
     private void refreshRequirementsTable() {
         DefaultTableModel model = (DefaultTableModel) tblReplenishmentRequirements.getModel();
         model.setRowCount(0);
+        displayedRequirements.clear();
 
-        String binFilter = "";
-        if (cmbPickingBin.getSelectedItem() != null) {
-            binFilter = cmbPickingBin.getSelectedItem().toString().trim();
-        }
-        String materialFilter = "";
-        if (cmbMaterial.getSelectedItem() != null) {
-            materialFilter = cmbMaterial.getSelectedItem().toString().trim();
-        }
+        String binFilter = getSelectedPickingBinCode();
+        String materialFilter = getSelectedMaterialCode();
 
         for (ReplenishmentRequirement req : loadedRequirements) {
             if (!binFilter.isEmpty() && !req.getToBinCode().toLowerCase().contains(binFilter.toLowerCase())) {
@@ -799,6 +1010,7 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                 continue;
             }
 
+            displayedRequirements.add(req);
             model.addRow(new Object[]{
                 req.getMaterialCode() + " - " + req.getMaterialName(),
                 req.getCurrentPickingQty(),
@@ -815,7 +1027,11 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Please select a requirement item first.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-        ReplenishmentRequirement req = loadedRequirements.get(selectedRow);
+        if (selectedRow >= displayedRequirements.size()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a requirement item first.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        ReplenishmentRequirement req = displayedRequirements.get(selectedRow);
         double qty = (Double) txtReplenishQty.getValue();
         if (qty <= 0) {
             javax.swing.JOptionPane.showMessageDialog(this, "Please enter a valid quantity greater than 0.", "Warning", javax.swing.JOptionPane.WARNING_MESSAGE);

@@ -26,8 +26,13 @@ public class ReplenishmentTOController {
 
     // loads all low-stock replenishment requirements for a given warehouse ID
     public List<ReplenishmentRequirement> getLowStockReplenishments(int warehouseId) throws Exception {
+        return getLowStockReplenishments(warehouseId, null);
+    }
+
+    // loads the low-stock replenishment requirements of a warehouse for a given target picking bin
+    public List<ReplenishmentRequirement> getLowStockReplenishments(int warehouseId, Integer toBinId) throws Exception {
         return RetryHelper.executeWithRetry(
-            () -> ReplenishmentTODAO.getInstance().getLowStockReplenishments(warehouseId),
+            () -> ReplenishmentTODAO.getInstance().getLowStockReplenishments(warehouseId, toBinId),
             "failed to load low-stock replenishment requirements"
         );
     }

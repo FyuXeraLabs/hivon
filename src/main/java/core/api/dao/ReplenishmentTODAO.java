@@ -112,7 +112,16 @@ public class ReplenishmentTODAO {
 
     // GET /api/transfer-orders/replenishment/low-stock?warehouse_id={warehouseId}
     public List<ReplenishmentRequirement> getLowStockReplenishments(int warehouseId) throws Exception {
+        return getLowStockReplenishments(warehouseId, null);
+    }
+
+    // GET /api/transfer-orders/replenishment/low-stock?warehouse_id={warehouseId}&to_bin_id={toBinId}
+    // toBinId is the picking bin the stock has to be replenished into
+    public List<ReplenishmentRequirement> getLowStockReplenishments(int warehouseId, Integer toBinId) throws Exception {
         String endpoint = "/transfer-orders/replenishment/low-stock?warehouse_id=" + warehouseId;
+        if (toBinId != null && toBinId > 0) {
+            endpoint += "&to_bin_id=" + toBinId;
+        }
         HttpRequest request = apiClient.authRequest(endpoint).GET().build();
         JsonObject response = apiClient.executeWithAuth(request);
 
