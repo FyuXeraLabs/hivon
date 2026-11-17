@@ -900,8 +900,14 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         lblQuality.setText("Quality");
 
-        cmbQuality.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Select Quality --", "Accepted", "Partial Damage", "Rejected" }));
+        cmbQuality.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Accepted", "Partial Damage", "Rejected" }));
+        cmbQuality.setSelectedIndex(-1);
         cmbQuality.setNextFocusableComponent(lblRemarks);
+        cmbQuality.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbQualityActionPerformed(evt);
+            }
+        });
 
         lblRemarks.setText("Remarks");
 
@@ -1461,6 +1467,10 @@ public class GRPurchaseOrderForm extends javax.swing.JFrame {
 
         StatusMessageHandler.showSuccess(txtStatus, "Receipt summary cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
+    private void cmbQualityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbQualityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbQualityActionPerformed
 
     /**
      * @param args the command line arguments

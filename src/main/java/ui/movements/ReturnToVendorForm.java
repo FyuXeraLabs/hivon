@@ -510,6 +510,11 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
         });
 
         cmbVendor.setNextFocusableComponent(cmbReturnReason);
+        cmbVendor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbVendorActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText(" Return Reason");
 
@@ -1100,6 +1105,10 @@ public class ReturnToVendorForm extends javax.swing.JFrame {
 
         StatusMessageHandler.showSuccess(txtStatus, "Return summary cleared.");
     }//GEN-LAST:event_btnClearSummaryTblActionPerformed
+
+    private void cmbVendorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbVendorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbVendorActionPerformed
 
     /**
      * @param args the command line arguments
