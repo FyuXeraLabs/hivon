@@ -883,7 +883,8 @@ public class GISalesOrderForm extends javax.swing.JFrame {
         btnGeneratePickingList = new javax.swing.JButton();
         btnPrint = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Goods Issue - Sales Order (OUT14)");
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Search Sales Order"));
 

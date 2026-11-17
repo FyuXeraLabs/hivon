@@ -379,7 +379,7 @@ public class PickingTOForm extends javax.swing.JFrame {
         jScrollPanePickingSummary = new javax.swing.JScrollPane();
         tblPickingSummary = new javax.swing.JTable();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Picking Transfer Order (TR23)");
         setIconImage(new ImageIcon(getClass().getResource("/icons/app-icon.png")).getImage());
 
