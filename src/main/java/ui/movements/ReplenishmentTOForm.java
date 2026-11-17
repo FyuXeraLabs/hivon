@@ -581,7 +581,6 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
             @Override
             protected void onSuccess() {
                 cmbPickingBin.removeAllItems();
-                cmbPickingBin.addItem("-- All Bins --");
                 if (bins != null) {
                     for (models.dto.StorageBinDTO bin : bins) {
                         if ("PICKING".equals(bin.getBinType())) {
@@ -589,14 +588,15 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
                         }
                     }
                 }
+                cmbPickingBin.setSelectedItem(null);
 
                 cmbMaterial.removeAllItems();
-                cmbMaterial.addItem("-- All Materials --");
                 if (materials != null) {
                     for (models.dto.MaterialDTO mat : materials) {
                         cmbMaterial.addItem(mat.getMaterialCode());
                     }
                 }
+                cmbMaterial.setSelectedItem(null);
             }
 
             @Override
@@ -795,10 +795,10 @@ public class ReplenishmentTOForm extends javax.swing.JFrame {
         }
 
         for (ReplenishmentRequirement req : loadedRequirements) {
-            if (!binFilter.isEmpty() && !binFilter.equals("-- All Bins --") && !req.getToBinCode().toLowerCase().contains(binFilter.toLowerCase())) {
+            if (!binFilter.isEmpty() && !req.getToBinCode().toLowerCase().contains(binFilter.toLowerCase())) {
                 continue;
             }
-            if (!materialFilter.isEmpty() && !materialFilter.equals("-- All Materials --") && !req.getMaterialCode().toLowerCase().contains(materialFilter.toLowerCase()) && !req.getMaterialName().toLowerCase().contains(materialFilter.toLowerCase())) {
+            if (!materialFilter.isEmpty() && !req.getMaterialCode().toLowerCase().contains(materialFilter.toLowerCase()) && !req.getMaterialName().toLowerCase().contains(materialFilter.toLowerCase())) {
                 continue;
             }
 
