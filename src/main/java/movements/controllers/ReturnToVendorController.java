@@ -11,6 +11,7 @@ import core.utils.RetryHelper;
 import models.dto.MaterialDTO;
 import models.dto.VendorDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +34,27 @@ public class ReturnToVendorController {
             () -> MaterialDAO.getInstance().getMaterials(query),
             "failed to search materials"
         );
+    }
+
+    /**
+     * Searches material codes for the AutoSuggest text field.
+     * Calls the DAO directly so no retry/progress dialog is shown while typing.
+     */
+    public List<String> searchMaterialCodes(String query) {
+        List<String> suggestions = new ArrayList<>();
+        try {
+            List<MaterialDTO> materials = MaterialDAO.getInstance().getMaterials(query);
+            if (materials != null) {
+                for (MaterialDTO m : materials) {
+                    if (m.getMaterialCode() != null) {
+                        suggestions.add(m.getMaterialCode());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Logger.errlog("Failed to load material suggestions", e);
+        }
+        return suggestions;
     }
 
     // Searches active vendors
